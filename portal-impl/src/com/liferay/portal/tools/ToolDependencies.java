@@ -14,10 +14,10 @@
 
 package com.liferay.portal.tools;
 
+import com.liferay.portal.cache.DummyPortalCacheManager;
 import com.liferay.portal.cache.MultiVMPoolImpl;
 import com.liferay.portal.cache.SingleVMPoolImpl;
 import com.liferay.portal.cache.key.SimpleCacheKeyGenerator;
-import com.liferay.portal.cache.memory.MemoryPortalCacheManager;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.cache.MultiVMPoolUtil;
 import com.liferay.portal.kernel.cache.PortalCacheManager;
@@ -175,8 +175,7 @@ public class ToolDependencies {
 
 		registry.registerService(
 			PortalCacheManager.class,
-			MemoryPortalCacheManager.createMemoryPortalCacheManager(
-				PortalCacheManagerNames.SINGLE_VM),
+			new DummyPortalCacheManager<>(PortalCacheManagerNames.SINGLE_VM),
 			properties);
 
 		SingleVMPoolUtil singleVMPoolUtil = new SingleVMPoolUtil();
@@ -193,8 +192,7 @@ public class ToolDependencies {
 
 		registry.registerService(
 			PortalCacheManager.class,
-			MemoryPortalCacheManager.createMemoryPortalCacheManager(
-				PortalCacheManagerNames.MULTI_VM),
+			new DummyPortalCacheManager<>(PortalCacheManagerNames.MULTI_VM),
 			properties);
 
 		MultiVMPoolUtil multiVMPoolUtil = new MultiVMPoolUtil();

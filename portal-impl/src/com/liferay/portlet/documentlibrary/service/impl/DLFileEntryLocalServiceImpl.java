@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.increment.BufferedIncrement;
 import com.liferay.portal.kernel.increment.NumberIncrement;
 import com.liferay.portal.kernel.interval.IntervalActionProcessor;
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.lar.ExportImportThreadLocal;
 import com.liferay.portal.kernel.lock.ExpiredLockException;
 import com.liferay.portal.kernel.lock.InvalidLockException;
 import com.liferay.portal.kernel.lock.Lock;
@@ -112,6 +111,7 @@ import com.liferay.portlet.expando.model.ExpandoRow;
 import com.liferay.portlet.expando.model.ExpandoTable;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 import com.liferay.portlet.expando.util.ExpandoBridgeUtil;
+import com.liferay.portlet.exportimport.lar.ExportImportThreadLocal;
 
 import java.awt.image.RenderedImage;
 
@@ -913,8 +913,12 @@ public class DLFileEntryLocalServiceImpl
 						dlFileVersionLocalService.getLatestFileVersion(
 							dlFileEntry.getFileEntryId(), true);
 
-					dlFileEntry.setModifiedDate(
-						dlLatestFileVersion.getCreateDate());
+					dlLatestFileVersion.setModifiedDate(new Date());
+					dlLatestFileVersion.setStatusDate(new Date());
+
+					dlFileVersionPersistence.update(dlLatestFileVersion);
+
+					dlFileEntry.setModifiedDate(new Date());
 					dlFileEntry.setFileName(dlLatestFileVersion.getFileName());
 					dlFileEntry.setExtension(
 						dlLatestFileVersion.getExtension());

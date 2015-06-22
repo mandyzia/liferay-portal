@@ -108,7 +108,7 @@ public class StagingLocalServiceUtil {
 		return getService().getBeanIdentifier();
 	}
 
-	public static com.liferay.portal.kernel.lar.MissingReferences publishStagingRequest(
+	public static com.liferay.portlet.exportimport.lar.MissingReferences publishStagingRequest(
 		long userId, long stagingRequestId,
 		com.liferay.portlet.exportimport.model.ExportImportConfiguration exportImportConfiguration)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -118,11 +118,10 @@ public class StagingLocalServiceUtil {
 	}
 
 	/**
-	* @throws PortalException
 	* @deprecated As of 7.0.0, with no direct replacement
 	*/
 	@Deprecated
-	public static com.liferay.portal.kernel.lar.MissingReferences publishStagingRequest(
+	public static com.liferay.portlet.exportimport.lar.MissingReferences publishStagingRequest(
 		long userId, long stagingRequestId, boolean privateLayout,
 		java.util.Map<java.lang.String, java.lang.String[]> parameterMap)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -152,7 +151,7 @@ public class StagingLocalServiceUtil {
 	long, boolean, java.util.Map)}
 	*/
 	@Deprecated
-	public static com.liferay.portal.kernel.lar.MissingReferences validateStagingRequest(
+	public static com.liferay.portlet.exportimport.lar.MissingReferences validateStagingRequest(
 		long userId, long stagingRequestId, boolean privateLayout,
 		java.util.Map<java.lang.String, java.lang.String[]> parameterMap) {
 		return getService()

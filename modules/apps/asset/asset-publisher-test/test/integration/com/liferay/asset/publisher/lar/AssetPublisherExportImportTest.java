@@ -17,10 +17,7 @@ package com.liferay.asset.publisher.lar;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.asset.publisher.web.constants.AssetPublisherPortletKeys;
 import com.liferay.asset.publisher.web.util.AssetPublisherUtil;
-import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
-import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
-import com.liferay.portal.kernel.lar.exportimportconfiguration.ExportImportConfigurationConstants;
-import com.liferay.portal.kernel.lar.exportimportconfiguration.ExportImportConfigurationSettingsMapFactory;
+import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
@@ -61,10 +58,13 @@ import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.util.test.DDMStructureTestUtil;
+import com.liferay.portlet.exportimport.configuration.ExportImportConfigurationConstants;
+import com.liferay.portlet.exportimport.configuration.ExportImportConfigurationSettingsMapFactory;
+import com.liferay.portlet.exportimport.lar.ExportImportHelperUtil;
+import com.liferay.portlet.exportimport.lar.PortletDataHandlerKeys;
 import com.liferay.portlet.exportimport.model.ExportImportConfiguration;
 import com.liferay.portlet.exportimport.service.ExportImportConfigurationLocalServiceUtil;
 import com.liferay.portlet.exportimport.service.ExportImportLocalServiceUtil;
-import com.liferay.portlet.journal.model.JournalArticle;
 
 import java.io.Serializable;
 

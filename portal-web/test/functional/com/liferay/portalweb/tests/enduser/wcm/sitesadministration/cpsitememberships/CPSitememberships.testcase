@@ -94,7 +94,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LPS-55978" name="AddSiteTeam" priority="5">
+	<command name="AddSiteTeam" priority="5">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -119,7 +119,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LPS-55978" name="AddSiteTeams" priority="5">
+	<command name="AddSiteTeams" priority="5">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -229,7 +229,7 @@
 		</execute>
 	</command>
 
-	<command name="DeleteNoLiferaySite" priority="5">
+	<command name="DeleteNoLiferaySite" priority="4">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -250,7 +250,7 @@
 		<execute function="AssertTextEquals" locator1="CPSites#ERROR_MESSAGE_2" value1="The site cannot be deleted or deactivated because you are accessing the site." />
 	</command>
 
-	<command known-issues="LPS-55978" name="DeleteSiteTeam" priority="5">
+	<command name="DeleteSiteTeam" priority="5">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -300,6 +300,7 @@
 
 		<execute macro="Team#editCP">
 			<var name="teamDescriptionEdit" value="Site Team Description Edit" />
+			<var name="teamName" value="Site Team Name" />
 			<var name="teamNameEdit" value="Site Team Name Edit" />
 		</execute>
 
@@ -309,7 +310,7 @@
 		</execute>
 	</command>
 
-	<command name="LimitMembershipParentSite" priority="5">
+	<command name="LimitMembershipParentSite" priority="4">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -604,7 +605,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewNoManualMembershipManagement" priority="5">
+	<command name="ViewNoManualMembershipManagement" priority="4">
 		<execute macro="Site#manageMembershipOptions">
 			<var name="allowManualMembershipManagement" value="true" />
 		</execute>

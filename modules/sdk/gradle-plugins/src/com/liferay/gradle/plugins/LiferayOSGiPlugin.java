@@ -16,10 +16,10 @@ package com.liferay.gradle.plugins;
 
 import aQute.bnd.osgi.Constants;
 
+import com.liferay.gradle.plugins.css.builder.BuildCSSTask;
 import com.liferay.gradle.plugins.extensions.LiferayExtension;
 import com.liferay.gradle.plugins.extensions.LiferayOSGiExtension;
 import com.liferay.gradle.plugins.service.builder.BuildServiceTask;
-import com.liferay.gradle.plugins.tasks.BuildCssTask;
 import com.liferay.gradle.plugins.tasks.DirectDeployTask;
 import com.liferay.gradle.plugins.wsdd.builder.BuildWSDDTask;
 import com.liferay.gradle.plugins.wsdd.builder.WSDDBuilderPlugin;
@@ -285,6 +285,9 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 							".wsdd");
 					properties.put(Constants.FRAGMENT_HOST, bundleSymbolicName);
 					properties.put(
+						Constants.IMPORT_PACKAGE,
+						"javax.servlet,javax.servlet.http");
+					properties.put(
 						Constants.INCLUDE_RESOURCE,
 						"WEB-INF/=server-config.wsdd,classes;filter:=*.wsdd");
 
@@ -456,6 +459,15 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 	}
 
 	@Override
+	protected Task addTaskSetupArquillian(Project project) {
+		Task task = super.addTaskSetupArquillian(project);
+
+		task.setEnabled(false);
+
+		return task;
+	}
+
+	@Override
 	protected void applyPlugins(Project project) {
 		GradleUtil.applyPlugin(project, BundlePlugin.class);
 
@@ -542,24 +554,28 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 	}
 
 	@Override
-	protected void configureTaskBuildCssRootDirs(BuildCssTask buildCssTask) {
-		FileCollection rootDirs = buildCssTask.getRootDirs();
+	protected void configureTaskBuildCSSDocrootDirName(
+		BuildCSSTask buildCSSTask) {
 
-		if (!rootDirs.isEmpty()) {
+		Project project = buildCSSTask.getProject();
+
+		String docrootDirName = buildCSSTask.getDocrootDirName();
+
+		if (Validator.isNotNull(docrootDirName) &&
+			FileUtil.exists(project, docrootDirName)) {
+
 			return;
 		}
-
-		Project project = buildCssTask.getProject();
 
 		File docrootDir = project.file("docroot");
 
 		if (!docrootDir.exists()) {
-			super.configureTaskBuildCssRootDirs(buildCssTask);
+			super.configureTaskBuildCSSDocrootDirName(buildCSSTask);
 
 			return;
 		}
 
-		buildCssTask.setRootDirs(docrootDir);
+		buildCSSTask.setDocrootDirName(project.relativePath(docrootDir));
 	}
 
 	@Override

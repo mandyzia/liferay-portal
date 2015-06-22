@@ -106,7 +106,7 @@ public class StagingLocalServiceWrapper implements StagingLocalService,
 	}
 
 	@Override
-	public com.liferay.portal.kernel.lar.MissingReferences publishStagingRequest(
+	public com.liferay.portlet.exportimport.lar.MissingReferences publishStagingRequest(
 		long userId, long stagingRequestId,
 		com.liferay.portlet.exportimport.model.ExportImportConfiguration exportImportConfiguration)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -115,12 +115,11 @@ public class StagingLocalServiceWrapper implements StagingLocalService,
 	}
 
 	/**
-	* @throws PortalException
 	* @deprecated As of 7.0.0, with no direct replacement
 	*/
 	@Deprecated
 	@Override
-	public com.liferay.portal.kernel.lar.MissingReferences publishStagingRequest(
+	public com.liferay.portlet.exportimport.lar.MissingReferences publishStagingRequest(
 		long userId, long stagingRequestId, boolean privateLayout,
 		java.util.Map<java.lang.String, java.lang.String[]> parameterMap)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -152,7 +151,7 @@ public class StagingLocalServiceWrapper implements StagingLocalService,
 	*/
 	@Deprecated
 	@Override
-	public com.liferay.portal.kernel.lar.MissingReferences validateStagingRequest(
+	public com.liferay.portlet.exportimport.lar.MissingReferences validateStagingRequest(
 		long userId, long stagingRequestId, boolean privateLayout,
 		java.util.Map<java.lang.String, java.lang.String[]> parameterMap) {
 		return _stagingLocalService.validateStagingRequest(userId,

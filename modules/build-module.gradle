@@ -35,14 +35,6 @@ configurations {
 	portalTest {
 		extendsFrom portal
 	}
-
-	testCompile {
-		extendsFrom portalTest
-	}
-
-	testIntegrationCompile {
-		extendsFrom portalTest
-	}
 }
 
 dependencies {
@@ -65,5 +57,31 @@ repositories {
 sourceSets {
 	main {
 		compileClasspath += configurations.portal
+	}
+
+	test {
+		compileClasspath += configurations.portalTest
+		runtimeClasspath += configurations.portalTest
+	}
+
+	testIntegration {
+		compileClasspath += configurations.portalTest
+		runtimeClasspath += configurations.portalTest
+	}
+}
+
+group = "com.liferay"
+
+if (project.path in [":util:css-builder"]) {
+	apply plugin: "com.liferay.maven.plugin.builder"
+
+	afterEvaluate {
+		buildPluginDescriptor {
+			pomArtifactId = bundle.instructions["Bundle-SymbolicName"]
+		}
+	}
+
+	buildPluginDescriptor {
+		configurationScopeMapping "provided", "provided"
 	}
 }

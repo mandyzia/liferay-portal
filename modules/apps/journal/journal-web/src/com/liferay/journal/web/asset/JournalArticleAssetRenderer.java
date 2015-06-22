@@ -14,11 +14,19 @@
 
 package com.liferay.journal.web.asset;
 
+import com.liferay.journal.configuration.JournalServiceConfigurationValues;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.model.JournalArticleConstants;
+import com.liferay.journal.model.JournalArticleDisplay;
+import com.liferay.journal.service.JournalArticleLocalServiceUtil;
+import com.liferay.journal.service.JournalContentSearchLocalServiceUtil;
+import com.liferay.journal.service.permission.JournalArticlePermission;
 import com.liferay.journal.web.constants.JournalPortletKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.PortletRequestModel;
 import com.liferay.portal.kernel.trash.TrashRenderer;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -34,23 +42,15 @@ import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.asset.model.BaseAssetRenderer;
 import com.liferay.portlet.asset.model.DDMFormValuesReader;
-import com.liferay.portlet.journal.model.JournalArticle;
-import com.liferay.portlet.journal.model.JournalArticleConstants;
-import com.liferay.portlet.journal.model.JournalArticleDisplay;
-import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
-import com.liferay.portlet.journal.service.JournalContentSearchLocalServiceUtil;
-import com.liferay.portlet.journal.service.permission.JournalArticlePermission;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.portlet.ActionRequest;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -108,7 +108,9 @@ public class JournalArticleAssetRenderer
 
 	@Override
 	public String getDiscussionPath() {
-		if (PropsValues.JOURNAL_ARTICLE_COMMENTS_ENABLED) {
+		if (JournalServiceConfigurationValues.
+				JOURNAL_ARTICLE_COMMENTS_ENABLED) {
+
 			return "edit_article_discussion";
 		}
 		else {
@@ -221,16 +223,17 @@ public class JournalArticleAssetRenderer
 			LiferayPortletResponse liferayPortletResponse)
 		throws Exception {
 
-		PortletURL portletURL = liferayPortletResponse.createLiferayPortletURL(
-			getControlPanelPlid(liferayPortletRequest),
-			JournalPortletKeys.JOURNAL, PortletRequest.ACTION_PHASE);
+		LiferayPortletURL liferayPortletURL =
+			liferayPortletResponse.createLiferayPortletURL(
+				getControlPanelPlid(liferayPortletRequest),
+				JournalPortletKeys.JOURNAL, PortletRequest.RESOURCE_PHASE);
 
-		portletURL.setParameter(ActionRequest.ACTION_NAME, "exportArticle");
-		portletURL.setParameter(
+		liferayPortletURL.setParameter(
 			"groupId", String.valueOf(_article.getGroupId()));
-		portletURL.setParameter("articleId", _article.getArticleId());
+		liferayPortletURL.setParameter("articleId", _article.getArticleId());
+		liferayPortletURL.setResourceID("exportArticle");
 
-		return portletURL;
+		return liferayPortletURL;
 	}
 
 	@Override
