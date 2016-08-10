@@ -14,19 +14,19 @@
 
 package com.liferay.portal.service.impl;
 
-import com.liferay.portal.ImageTypeException;
-import com.liferay.portal.NoSuchImageException;
 import com.liferay.portal.image.HookFactory;
+import com.liferay.portal.kernel.exception.ImageTypeException;
+import com.liferay.portal.kernel.exception.NoSuchImageException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.image.Hook;
 import com.liferay.portal.kernel.image.ImageToolUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.Image;
+import com.liferay.portal.kernel.webserver.WebServerServletTokenUtil;
 import com.liferay.portal.service.base.ImageLocalServiceBaseImpl;
-import com.liferay.portal.webserver.WebServerServletTokenUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,37 +48,38 @@ public class ImageLocalServiceImpl extends ImageLocalServiceBaseImpl {
 			return null;
 		}
 
-		/*if (PropsValues.IMAGE_HOOK_IMPL.equals(
-				DatabaseHook.class.getName()) &&
+		/*
+		if (PropsValues.IMAGE_HOOK_IMPL.equals(DatabaseHook.class.getName()) &&
 			(imagePersistence.getListeners().length == 0)) {
 
 			runSQL("delete from Image where imageId = " + imageId);
 
 			imagePersistence.clearCache();
 		}
-		else {*/
-			Image image = getImage(imageId);
+		else {
+		*/
+		Image image = getImage(imageId);
 
-			if (image != null) {
-				imagePersistence.remove(image);
+		if (image != null) {
+			imagePersistence.remove(image);
 
-				Hook hook = HookFactory.getInstance();
+			Hook hook = HookFactory.getInstance();
 
-				try {
-					hook.deleteImage(image);
-				}
-				catch (NoSuchImageException nsie) {
+			try {
+				hook.deleteImage(image);
+			}
+			catch (NoSuchImageException nsie) {
 
-					// DLHook throws NoSuchImageException if the file no longer
-					// exists. See LPS-30430. This exception can be ignored.
+				// DLHook throws NoSuchImageException if the file no longer
+				// exists. See LPS-30430. This exception can be ignored.
 
-					if (_log.isWarnEnabled()) {
-						_log.warn(nsie, nsie);
-					}
+				if (_log.isWarnEnabled()) {
+					_log.warn(nsie, nsie);
 				}
 			}
+		}
 
-			return image;
+		return image;
 		//}
 	}
 

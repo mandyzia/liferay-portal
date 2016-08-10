@@ -101,8 +101,7 @@ public class MPIHelperUtilTest {
 				public void unregisterSPI(SPI spi) {
 				}
 
-			}
-		);
+			});
 	}
 
 	@After
@@ -833,20 +832,20 @@ public class MPIHelperUtilTest {
 			MessagingConfigurator messagingConfigurator =
 				new AbstractMessagingConfigurator() {
 
-				@Override
-				public void connect() {
-				}
+					@Override
+					public void connect() {
+					}
 
-				@Override
-				public void disconnect() {
-				}
+					@Override
+					public void disconnect() {
+					}
 
-				@Override
-				protected ClassLoader getOperatingClassloader() {
-					return null;
-				}
+					@Override
+					protected ClassLoader getOperatingClassloader() {
+						return null;
+					}
 
-			};
+				};
 
 			MessagingConfiguratorRegistry.registerMessagingConfigurator(
 				"servletContextName2", messagingConfigurator);

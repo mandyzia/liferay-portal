@@ -14,30 +14,31 @@
 
 package com.liferay.portal.servlet.filters.secure;
 
+import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.access.control.AccessControlUtil;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.auth.http.HttpAuthManagerUtil;
 import com.liferay.portal.kernel.security.auth.http.HttpAuthorizationHeader;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.ProtectedServletRequest;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.User;
-import com.liferay.portal.security.auth.CompanyThreadLocal;
-import com.liferay.portal.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
-import com.liferay.portal.security.permission.PermissionThreadLocal;
-import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
-import com.liferay.portal.util.WebKeys;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -94,8 +95,6 @@ public class SecureFilter extends BasePortalFilter {
 		throws Exception {
 
 		HttpSession session = request.getSession();
-
-		session.setAttribute(WebKeys.BASIC_AUTH_ENABLED, Boolean.TRUE);
 
 		long userId = GetterUtil.getLong(
 			(String)session.getAttribute(_AUTHENTICATED_USER));
@@ -215,21 +214,19 @@ public class SecureFilter extends BasePortalFilter {
 			FilterChain filterChain)
 		throws Exception {
 
-		String remoteAddr = request.getRemoteAddr();
-
 		if (AccessControlUtil.isAccessAllowed(request, _hostsAllowed)) {
 			if (_log.isDebugEnabled()) {
-				_log.debug("Access allowed for " + remoteAddr);
+				_log.debug("Access allowed for " + request.getRemoteAddr());
 			}
 		}
 		else {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Access denied for " + remoteAddr);
+				_log.warn("Access denied for " + request.getRemoteAddr());
 			}
 
 			response.sendError(
 				HttpServletResponse.SC_FORBIDDEN,
-				"Access denied for " + remoteAddr);
+				"Access denied for " + request.getRemoteAddr());
 
 			return;
 		}
@@ -271,15 +268,18 @@ public class SecureFilter extends BasePortalFilter {
 		}
 		else {
 			if (_log.isDebugEnabled()) {
-				String completeURL = HttpUtil.getCompleteURL(request);
-
-				_log.debug("Not securing " + completeURL);
+				_log.debug("Not securing " + HttpUtil.getCompleteURL(request));
 			}
 
-			User user = PortalUtil.getUser(request);
+			User user = null;
 
-			if (user == null) {
+			try {
 				user = PortalUtil.initUser(request);
+			}
+			catch (NoSuchUserException nsue) {
+				response.sendRedirect(HttpUtil.getCompleteURL(request));
+
+				return;
 			}
 
 			initThreadLocals(user);
@@ -298,7 +298,9 @@ public class SecureFilter extends BasePortalFilter {
 			}
 
 			if (request != null) {
-				processFilter(getClass(), request, response, filterChain);
+				Class<?> clazz = getClass();
+
+				processFilter(clazz.getName(), request, response, filterChain);
 			}
 		}
 	}
@@ -314,8 +316,8 @@ public class SecureFilter extends BasePortalFilter {
 
 		request = new ProtectedServletRequest(request, userIdString, authType);
 
-		session.setAttribute(WebKeys.USER, user);
 		session.setAttribute(_AUTHENTICATED_USER, userIdString);
+		session.setAttribute(WebKeys.USER, user);
 
 		initThreadLocals(request);
 

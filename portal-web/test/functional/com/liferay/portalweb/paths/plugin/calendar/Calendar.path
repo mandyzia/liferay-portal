@@ -24,6 +24,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SCHEDULER_DAY_VIEW_PNG</td>
+	<td>portal/screenshots/calendar/scheduler_event_day_view.png</td>
+	<td></td>
+</tr>
+<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -31,12 +36,12 @@
 <!--NAVIGATION-->
 <tr>
 	<td>NAVIGATION_CALENDAR</td>
-	<td>//ul[contains(@class,'nav nav-tabs')]/li/a[contains(.,'Calendar')]</td>
+	<td>//ul[contains(@class,'nav navbar-nav')]/li/a[contains(.,'Calendar')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NAVIGATION_RESOURCES</td>
-	<td>//ul[contains(@class,'nav nav-tabs')]/li/a[contains(.,'Resources')]</td>
+	<td>//ul[contains(@class,'nav navbar-nav')]/li/a[contains(.,'Resources')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -107,8 +112,38 @@
 </tr>
 <!--SMALL_CALENDAR-->
 <tr>
+	<td>SMALL_CALENDAR_PREVIOUS</td>
+	<td>//a[contains(@class,'yui3-calendarnav-prevmonth')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SMALL_CALENDAR_NEXT</td>
+	<td>//a[contains(@class,'yui3-calendarnav-nextmonth')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SMALL_CALENDAR_BUSY_DAY</td>
 	<td>//td[contains(@class,'yui3-calendar-day-selected lfr-busy-day')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SMALL_CALENDAR_SPECIFIC_DAY</td>
+	<td>//td[contains(@class,'yui3-calendar-day') and contains(text(),'${key_dateNumber}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SMALL_CALENDAR_SPECIFIC_BUSY_DAY</td>
+	<td>//td[contains(@class,'yui3-calendar-day') and contains(@class,'lfr-busy-day') and contains(text(),'${key_dateNumber}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SMALL_CALENDAR_DATE</td>
+	<td>//div[contains(@class,'yui3-calendar-header-label')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SMALL_CALENDAR_WEEK_START_DAY</td>
+	<td>xpath=(//tr[@class='yui3-calendar-weekdayrow']/th)[1]</td>
 	<td></td>
 </tr>
 <tr>
@@ -123,8 +158,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>MY_CALENDARS_CALENDAR</td>
+	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,'My Calendars')]/following-sibling::div[contains(.,'${key_userCalendarName}')]//span</td>
+	<td></td>
+</tr>
+<tr>
 	<td>MY_CALENDARS_MENULIST_ARROW</td>
-	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,'My Calendars')]/span[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@class,'calendar-portlet-list') and contains(.,'My Calendars')]//i[@class='icon-caret-down']</td>
 	<td></td>
 </tr>
 <tr>
@@ -151,52 +191,57 @@
 <!--MY_CALENDARS_CALENDAR-->
 <tr>
 	<td>MY_CALENDARS_CALENDAR_PRIMARY</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div/span[contains(.,'${key_user}')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div/span[contains(.,'${key_user}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_PRIMARY_COLOR</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div/div[contains(@style,'${key_color}')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div/div[contains(@style,'${key_color}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>MY_CALENDARS_CALENDAR_PRIMARY_COLOR_HIDDEN</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div/div[contains(@style,'')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_PRIMARY_COLOR_DEFAULT</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div/div[contains(@style,'D96666')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div/div[contains(@style,'D96666')] | //div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div/div[contains(@style,'background-color: rgb(217, 102, 102); border-color: rgb(217, 102, 102);')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_PRIMARY_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div[contains(.,'${key_user}')]/div[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div[contains(.,'${key_user}')]/div[@class='calendar-list-item-arrow']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_PRIMARY_GENERIC</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_PRIMARY_GENERIC_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div/div[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div/div[@class='calendar-list-item-arrow']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_ADDITIONAL</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div/span[contains(.,'${key_user} - ${key_calendarName}')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div/span[contains(.,'${key_calendarName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_ADDITIONAL_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div[contains(., '${key_user} - ${key_calendarName}')]/div[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div[contains(., '${key_calendarName}')]/div[@class='calendar-list-item-arrow']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_ADDITIONAL_GENERIC</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div[2]</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div[2]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MY_CALENDARS_CALENDAR_ADDITIONAL_GENERIC_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_myCalendarList')]/div/div[2]/div[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@id,'CalendarPortlet_myCalendarList')]/div/div[2]/div[@class='calendar-list-item-arrow']</td>
 	<td></td>
 </tr>
 <tr>
@@ -207,12 +252,17 @@
 <!--CURRENT_SITE_CALENDARS-->
 <tr>
 	<td>CURRENT_SITE_CALENDARS_HEADER</td>
-	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,'Current Site Calendars')]/span[@class='calendar-portlet-list-text']</td>
+	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,"${key_siteName}'s Calendars")]/span[@class='calendar-portlet-list-text']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CURRENT_SITE_CALENDARS_CALENDAR</td>
+	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,"${key_siteName}'s Calendars")]/following-sibling::div[contains(.,'${key_siteCalendarName}')]//span</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_MENULIST_ARROW</td>
-	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,'Current Site Calendars')]/span[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@class,'calendar-portlet-list') and contains(.,"${key_siteName}'s Calendars")]//i[@class='icon-caret-down']</td>
 	<td></td>
 </tr>
 <tr>
@@ -239,52 +289,62 @@
 <!--CURRENT_SITE_CALENDARS_CALENDAR-->
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div/span[contains(.,'${key_site}')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div/span[contains(.,'${key_calendarName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY_COLOR</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div/div[contains(@style,'${key_color}')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div/div[contains(@style,'${key_color}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY_COLOR_DEFAULT</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div/div[contains(@style,'D96666')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div/div[contains(@style,'D96666')] | //div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div/div[contains(@style,'background-color: rgb(217, 102, 102); border-color: rgb(217, 102, 102);')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY_COLOR_HIDDEN</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div/div[contains(@style,'')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div[contains(.,'${key_site}')]/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div[contains(.,'${key_site}')]/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY_GENERIC</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY_GENERIC_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_ADDITIONAL</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div/span[contains(.,'${key_site} - ${key_calendarName}')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div/span[contains(.,'${key_calendarName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_ADDITIONAL_GENERIC</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div[2]</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div[2]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_ADDITIONAL_GENERIC_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div[2]/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div[2]/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CURRENT_SITE_CALENDARS_CALENDAR_ADDITIONAL_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_siteCalendarList')]/div/div[contains(., '${key_site} - ${key_calendarName}')]/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div[contains(., '${key_calendarName}')]/div[@class='calendar-list-item-arrow']/i[@class='icon-caret-down']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CURRENT_SITE_CALENDARS_CALENDAR_MENULIST_ARROW</td>
+	<td>//div[contains(@id,'CalendarPortlet_siteCalendarList')]/div/div[contains(.,'${key_siteCalendarName}')]/div[@class='calendar-list-item-arrow']/i[contains(@class,'icon-caret-down')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -300,7 +360,7 @@
 </tr>
 <tr>
 	<td>OTHER_CALENDARS_SEARCH</td>
-	<td>//input[contains(@id,'calendarportlet_addOtherCalendar')]</td>
+	<td>//input[contains(@id,'CalendarPortlet_addOtherCalendar')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -316,27 +376,27 @@
 <!--OTHER_CALENDARS_CALENDAR-->
 <tr>
 	<td>OTHER_CALENDARS_CALENDAR</td>
-	<td>//div[contains(@id,'calendarportlet_otherCalendarList')]/div/div[contains(.,'${key_calendarName}')]</td>
+	<td>//div[contains(@id,'CalendarPortlet_otherCalendarList')]/div/div[contains(.,'${key_calendarName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>OTHER_CALENDARS_CALENDAR_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_otherCalendarList')]/div/div[contains(.,'${key_calendarName}')]/div[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@id,'CalendarPortlet_otherCalendarList')]/div/div[contains(.,'${key_calendarName}')]/div[@class='calendar-list-item-arrow']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>OTHER_CALENDARS_CALENDAR_GENERIC</td>
-	<td>//div[contains(@id,'calendarportlet_otherCalendarList')]/div/div/span</td>
+	<td>//div[contains(@id,'CalendarPortlet_otherCalendarList')]/div/div/span</td>
 	<td></td>
 </tr>
 <tr>
 	<td>OTHER_CALENDARS_CALENDAR_GENERIC_MENULIST_ARROW</td>
-	<td>//div[contains(@id,'calendarportlet_otherCalendarList')]/div/div/div[@class='calendar-list-item-arrow']</td>
+	<td>//div[contains(@id,'CalendarPortlet_otherCalendarList')]/div/div/div[@class='calendar-list-item-arrow']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>OTHER_CALENDARS_CALENDAR_EMPTY_MESSAGE</td>
-	<td>//div[contains(@id,'calendarportlet_otherCalendarList')]/div/div[@class='calendar-list-empty-message']</td>
+	<td>//div[contains(@id,'CalendarPortlet_otherCalendarList')]/div/div[@class='calendar-list-empty-message']</td>
 	<td></td>
 </tr>
 <tr>
@@ -371,8 +431,127 @@
 	<td></td>
 </tr>
 <tr>
+	<td>OTHER_CALENDARS_CALENDAR_MENULIST_OPTION</td>
+	<td>//div[not(contains(@class,'simple-menu-hidden hide'))]/ul/li[contains(@class,'simple-menu-item') and contains(.,'${key_menuListOption}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>OTHER_CALENDARS_CALENDAR_MENULIST_COLOR_PICKER</td>
 	<td>//div[not(contains(@class,'simple-menu-hidden hide'))]/ul/li[@class='simple-menu-item' and @data-id='colorPicker']/div/div/div/div[contains(@style,'${key_color}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--SCHEDULER-->
+<tr>
+	<td>SCHEDULER_SPECIFIC_DAY</td>
+	<td>xpath=(//div[@class='scheduler-view-day-table-col-shim'])[${key_dayOfWeek}]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--SCHEDULER_VIEW_DAY-->
+<tr>
+	<td>SCHEDULER_VIEW_DAY</td>
+	<td>//div[contains(@class,'scheduler-view scheduler-view-day') and not(contains(@class,'scheduler-view-week'))]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_DAY_CURRENT_DAY</td>
+	<td>//div[contains(@class,'scheduler-view scheduler-view-day') and not(contains(@class,'scheduler-view-week'))]//td[contains(@class,'scheduler-today')]//div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_DAY_FIRST_HOUR</td>
+	<td>//div[contains(@class,'scheduler-view-day-content') and not(contains(@class,'scheduler-view-week-content'))]//tr[@class='scheduler-view-coldata']/td[contains(@class,'scheduler-view-day-table-coltime')]//div[1]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_DAY_LAST_HOUR</td>
+	<td>//div[contains(@class,'scheduler-view-day-content') and not(contains(@class,'scheduler-view-week-content'))]//tr[@class='scheduler-view-coldata']/td[contains(@class,'scheduler-view-day-table-coltime')]//div[24]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_DAY_SHOW_MORE_LOCALIZED</td>
+	<td>//div[contains(@class,'scheduler-view-day-content') and not(contains(@class,'scheduler-view-week-content'))]//a[@class='scheduler-view-table-more' and contains(.,'${key_messageLocalized}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--SCHEDULER_VIEW_WEEK-->
+<tr>
+	<td>SCHEDULER_VIEW_WEEK</td>
+	<td>//div[contains(@class,'scheduler-view scheduler-view-day scheduler-view-week')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_WEEK_WEEK_START_DAY</td>
+	<td>xpath=(//tr[contains(@class,'scheduler-view-day-header')]//th[@class='scheduler-view-day-header-day']/a/span)[1]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_WEEK_CURRENT_DAY</td>
+	<td>//td[contains(@class,'scheduler-today')]//div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_WEEK_FIRST_HOUR</td>
+	<td>//div[contains(@class,'scheduler-view-day-content') and contains(@class,'scheduler-view-week-content')]//tr[@class='scheduler-view-coldata']/td[contains(@class,'scheduler-view-day-table-coltime')]//div[1]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_WEEK_LAST_HOUR</td>
+	<td>//div[contains(@class,'scheduler-view-day-content') and contains(@class,'scheduler-view-week-content')]//tr[@class='scheduler-view-coldata']/td[contains(@class,'scheduler-view-day-table-coltime')]//div[24]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_WEEK_SHOW_MORE_LOCALIZED</td>
+	<td>//div[contains(@class,'scheduler-view-week-content')]//a[@class='scheduler-view-table-more' and contains(.,'${key_messageLocalized}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--SCHEDULER_VIEW_MONTH-->
+<tr>
+	<td>SCHEDULER_VIEW_MONTH</td>
+	<td>//div[contains(@class,'scheduler-view scheduler-view-table scheduler-view-month scheduler-month-view')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_MONTH_WEEK_START_DAY</td>
+	<td>xpath=(//div[contains(@class,'scheduler-view-month-content')]//tr[@class='scheduler-view-table-header-col']//th[@class='scheduler-view-table-header-day']/div)[1]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_MONTH_DATE</td>
+	<td>//div[@class='scheduler-base-view-date']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_MONTH_WEEK_NUMBER</td>
+	<td>//div[@class='scheduler-view-table-row-container']/div[@class='scheduler-view-table-row'][${key_weekNumber}]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_MONTH_CURRENT_DAY</td>
+	<td>//div[contains(@class,'scheduler-month-view-content')]//td[contains(@class,'today')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_MONTH_SHOW_MORE_LOCALIZED</td>
+	<td>//div[contains(@class,'scheduler-view-month-content')]//a[@class='scheduler-view-table-more' and contains(.,'${key_messageLocalized}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -407,6 +586,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SCHEDULER_EVENT_ATTENDING_ROW_OPTIONS</td>
+	<td>//tr[@class='calendar-portlet-event-recorder-status-row']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_EVENT_CALENDAR_NAME</td>
+	<td>//tr[contains(@class,'calendar-portlet-event')]//label[contains(.,'${key_calendarName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SCHEDULER_EVENT_GENERIC</td>
 	<td>//div[contains(@class,'calendar-portlet-event')]</td>
 	<td></td>
@@ -414,6 +603,16 @@
 <tr>
 	<td>SCHEDULER_EVENT_SPECIFIC</td>
 	<td>//div[contains(@class,'calendar-portlet-event')]/div[contains(.,'${key_eventTitle}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_EVENT_SPECIFIC_ALL_DAY</td>
+	<td>//div[contains(@class,'calendar-portlet-event')]/div[contains(@class,'scheduler-event-content') and contains(.,'${key_eventTitle}')]/../../div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_EVENT_SPECIFIC_CURRENT_DAY_VIA_DAY_OR_WEEK_VIEW</td>
+	<td>//td[contains(@class,'scheduler-today')]//div[contains(@class,'event-content') and contains(.,'${key_eventTitle}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -447,6 +646,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SCHEDULER_EVENT_SPECIFIC_HEIGHT</td>
+	<td>//div[contains(@class,'calendar-portlet-event') and contains(@style,'height: ${key_pixelHeight}px;')]/div[contains(.,'${key_eventTitle}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SCHEDULER_EVENT_SPECIFIC_REPEAT</td>
 	<td>//div[contains(@class,'scheduler-event-repeated calendar-portlet-event')]/div[contains(.,'${key_eventTitle}')]</td>
 	<td></td>
@@ -454,6 +658,11 @@
 <tr>
 	<td>SCHEDULER_EVENT_SPECIFIC_REMINDER_ICON</td>
 	<td>//div[contains(@class,'calendar-portlet-event')]/div[contains(.,'${key_eventTitle}')]/..//span[contains(@class,'scheduler-event-icon-reminder')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_REGULAR_EVENT_SPECIFIC_CURRENT_DAY_VIA_DAY_OR_WEEK_VIEW</td>
+	<td>//td[contains(@class,'scheduler-today')]//div[contains(@class,'event-content') and contains(.,'${key_eventTitle}')]/../../div</td>
 	<td></td>
 </tr>
 <tr>
@@ -467,6 +676,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SCHEDULER_EVENT_REGULAR_TITLE_VIA_MONTH</td>
+	<td>//td[@class='scheduler-view-table-data-col']//div[contains(@class,'calendar-portlet-event') and contains(@data-startdate,'${key_startDate}') and contains(@data-starttime,'${key_startDateTime}') and contains(@data-enddate,'${key_endDate}') and contains(@data-endtime,'${key_endDateTime}')]/div[@class='scheduler-event-content']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SCHEDULER_EVENT_REPEAT</td>
 	<td>//div[contains(@class,'scheduler-event-repeated calendar-portlet-event') and contains(@data-starttime,'${key_startDateTime}') and contains(@data-enddate,'${key_endDate}') and contains(@data-endtime,'${key_endDateTime}')]</td>
 	<td></td>
@@ -474,6 +688,11 @@
 <tr>
 	<td>SCHEDULER_EVENT_REPEAT_TITLE</td>
 	<td>//div[contains(@class,'scheduler-event-repeated calendar-portlet-event') and contains(@data-starttime,'${key_startDateTime}') and contains(@data-enddate,'${key_endDate}') and contains(@data-endtime,'${key_endDateTime}')]/div[@class='scheduler-event-content']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_EVENT_SPECIFIC_EVENT_TIMES</td>
+	<td>//div[contains(@class,'calendar-portlet-event') and contains(@data-starttime,'${key_startDateTime}') and contains(@data-endtime,'${key_endDateTime}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -508,6 +727,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SCHEDULER_EVENT_DIALOG_BOX_USERS_LABEL</td>
+	<td>//tr/td[contains(.,'Users:')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_EVENT_DIALOG_BOX_USERS_FIELD</td>
+	<td>//tr/td//label[@class='calendar-portlet-invitees']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SCHEDULER_EVENT_DIALOG_BOX_SAVE_BUTTON</td>
 	<td>//form[@id='schedulerEventRecorderForm']//button[@id='saveBtn']</td>
 	<td></td>
@@ -525,6 +754,57 @@
 <tr>
 	<td>SCHEDULER_EVENT_DIALOG_BOX_DELETE_BUTTON</td>
 	<td>//form[@id='schedulerEventRecorderForm']//button[@id='deleteBtn']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_EVENT_DIALOG_BOX_WHEN_FIELD</td>
+	<td>//tr/td//label[@class='scheduler-event-recorder-date']</td>
+	<td></td>
+</tr>
+<!--SCHEDULER_VIEW-->
+<tr>
+	<td>SCHEDULER_VIEW_EVENT_FIRST_EVENT_AGENDA_VIEW</td>
+	<td>//div[@class='scheduler-view-agenda-events']/div[contains(@class,'header-first')]/following-sibling::div[contains(.,'${key_eventTitle}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_EVENT_LAST_EVENT_AGENDA_VIEW</td>
+	<td>//div[@class='scheduler-view-agenda-events']/div[contains(@class,'header-last')]/following-sibling::div[contains(.,'${key_eventTitle}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_EVENT_DAY_AND_WEEK_VIEW</td>
+	<td>//td[contains(@class,'scheduler-today') and contains(.,'${key_eventTitle}')]//div[@title='${key_eventTitle}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_EVENT_MONTH_VIEW</td>
+	<td>//table[contains(@class,'scheduler-view-table-data')]//td[contains(.,'${key_eventTitle}')]//div[@class='scheduler-event-content']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_EVENT_REPEATING_DAILY_REPEATED_EVENT_WEEK_AND_MONTH_VIEW</td>
+	<td>//div[contains(@class,'scheduler-event-repeated') and (@title='${key_eventTitle}')]/../../following-sibling::td//div[@class='scheduler-event-content']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_EVENT_REPEATING_WEEKLY_REPEATED_EVENT_WEEK_AND_MONTH_VIEW</td>
+	<td>//div[@class='scheduler-view-table-row' and contains(.,'${key_eventTitle}')]/following-sibling::div//div[@class='scheduler-event-content']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_ALL_DAY_EVENT_DAY_WEEK_AND_MONTH_VIEW</td>
+	<td>//table[contains(@class,'view-table-data')]//div[@title='${key_eventTitle}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_YEARLY_EVENT_DAY_WEEK_AND_MONTH_VIEW</td>
+	<td>//td[contains(@class,'scheduler-view-day') and contains(.,'${key_eventTitle}')]//div[@class='scheduler-event-content']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCHEDULER_VIEW_EVENT_NOT_TODAY</td>
+	<td>//td[not(contains(@class,'scheduler-today')) and contains(.,'${key_eventTitle}')]//div[@class='scheduler-event-content']/../../div</td>
 	<td></td>
 </tr>
 </tbody>

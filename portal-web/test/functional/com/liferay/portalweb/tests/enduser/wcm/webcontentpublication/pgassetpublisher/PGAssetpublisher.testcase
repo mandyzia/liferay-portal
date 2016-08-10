@@ -1,50 +1,61 @@
 <definition component-name="portal-wcm">
+	<property name="portal.release" value="true" />
 	<property name="testray.main.component.name" value="Asset Publisher" />
 
-	<var name="portletName" value="Asset Publisher" />
-
 	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
-			<var name="portletName" value="${portletName}" />
+			<var name="portletName" value="Asset Publisher" />
 		</execute>
 	</set-up>
 
 	<tear-down>
-		<execute macro="User#firstLoginPG" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="Site#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="User#firstLoginPG" />
 
-		<execute macro="User#tearDownCP" />
+				<execute macro="Site#tearDownCP" />
 
-		<execute macro="Role#tearDownCP" />
+				<execute macro="User#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="Role#tearDownCP" />
 
-		<execute macro="Bookmark#tearDownCP" />
+				<execute macro="Page#tearDownPG" />
 
-		<execute macro="BookmarksFolder#tearDownCP" />
+				<execute macro="Bookmark#tearDownCP" />
 
-		<execute macro="WebContent#tearDownCP" />
+				<execute macro="BookmarksFolder#tearDownCP" />
 
-		<execute macro="WebContentTemplates#tearDownCP" />
+				<execute macro="WebContent#tearDownCP" />
 
-		<execute macro="WebContentStructures#tearDownCP" />
+				<execute macro="WebContentTemplates#tearDownCP" />
 
-		<execute macro="BlogsEntry#tearDownCP" />
+				<execute macro="WebContentStructures#tearDownCP" />
+
+				<execute macro="BlogsEntry#tearDownCP" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="AddAPMultiplePortlet" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -53,7 +64,7 @@
 			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -64,11 +75,11 @@
 	</command>
 
 	<command name="AddBookmarkViaAP" priority="4">
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -76,7 +87,7 @@
 			<var name="portletName" value="Bookmarks" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -85,7 +96,7 @@
 			<var name="folderName" value="Test Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -93,10 +104,10 @@
 			<var name="bookmarkDescription" value="Test Bookmark Description" />
 			<var name="bookmarkFolderName" value="Test Folder Name" />
 			<var name="bookmarkName" value="Test Bookmark Name" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -105,12 +116,12 @@
 		</execute>
 	</command>
 
-	<command name="AddCustomTitleViaAP" priority="4">
-		<execute macro="Page#addPG">
+	<command name="AddCustomTitleViaAP" priority="3">
+		<execute macro="Page#add">
 			<var name="pageName" value="Test Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Test Page" />
 		</execute>
 
@@ -121,14 +132,14 @@
 		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
-			<var name="portletOption" value="Look and Feel" />
+			<var name="portletOption" value="Look and Feel Configuration" />
 		</execute>
 
 		<execute macro="Portlet#configureCustomTitleViaLookandfeelPG">
 			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Test Page" />
 		</execute>
 
@@ -137,654 +148,12 @@
 		</execute>
 	</command>
 
-	<command known-issues="LPS-56665" name="AssertViewPermissionsViaCPAndPG" priority="4">
-		<var name="roleType1" value="Regular" />
-		<var name="roleType2" value="Regular" />
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
-		</execute>
-
-		<execute macro="Site#addBlankCP">
-			<var name="siteName" value="Site Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#addCP">
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_GENERAL_PERMISSIONS_ACCESS_IN_SITE_ADMINISTRATION_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Access in Site Administration" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_GENERAL_PERMISSIONS_VIEW_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="View" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_ADD_WEB_CONTENT_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Add Web Content" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_VIEW_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="View" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_ADD_TO_PAGE_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Add to Page" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_CONFIGURATION_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Configuration" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_PERMISSIONS_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Permissions" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_VIEW_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="View" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#addCP">
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_GENERAL_PERMISSIONS_ACCESS_IN_SITE_ADMINISTRATION_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Access in Site Administration" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_GENERAL_PERMISSIONS_VIEW_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="View" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_ADD_WEB_CONTENT_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Add Web Content" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT_RESOURCE_PERMISSIONS_WEB_CONTENT_VIEW_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="View" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_CONTENT_WEB_CONTENT" />
-			<var name="permissionNavigationValue" value="Web Content" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_ADD_TO_PAGE_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Add to Page" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_CONFIGURATION_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Configuration" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_PERMISSIONS_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Permissions" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
-		</execute>
-
-		<execute macro="Role#definePermissionCP">
-			<var name="permissionDefinitionKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER_APPLICATION_PERIMISSIONS_VIEW_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="View" />
-			<var name="permissionNavigationKey" value="SITE_ADMIN_APPLICATIONS_ASSET_PUBLISHER" />
-			<var name="permissionNavigationValue" value="Asset Publisher" />
-			<var name="roleName" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentNavigator#gotoManageStructures" />
-
-		<execute macro="WebContentStructures#addCP">
-			<var name="structureDescription" value="Advertisement Structure Description" />
-			<var name="structureName" value="Advertisement WC Structure Name" />
-		</execute>
-
-		<for list="Text,Text Box" param="structureFieldName">
-			<execute macro="DynamicDataMapping#addField">
-				<var name="field" value="${structureFieldName}" />
-				<var name="fieldFieldLabel" value="${structureFieldName}" />
-				<var method="StringUtil#replace('${structureFieldName}', ' ', '_')" name="fieldName" />
-			</execute>
-		</for>
-
-		<execute macro="WebContentStructures#saveCP">
-			<var name="structureName" value="Advertisement WC Structure Name" />
-		</execute>
-
-		<var name="key_structureName" value="Advertisement WC Structure Name" />
-
-		<execute function="Click" locator1="CPWebcontentStructures#STRUCTURE_TABLE_ACTIONS" />
-		<execute function="AssertClick" locator1="CPWebcontentStructures#STRUCTURE_MENULIST_PERMISSIONS" value1="Permissions" />
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Remove" />
-			<var name="roleList" value="Guest,Site Member" />
-		</execute>
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Add" />
-			<var name="roleList" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentNavigator#gotoManageStructures" />
-
-		<execute macro="WebContentStructures#addCP">
-			<var name="structureDescription" value="Press Release Structure Description" />
-			<var name="structureName" value="Press Release Structure Name" />
-		</execute>
-
-		<for list="Text,Text Box" param="structureFieldName">
-			<execute macro="DynamicDataMapping#addField">
-				<var name="field" value="${structureFieldName}" />
-				<var name="fieldFieldLabel" value="${structureFieldName}" />
-				<var method="StringUtil#replace('${structureFieldName}', ' ', '_')" name="fieldName" />
-			</execute>
-		</for>
-
-		<execute macro="WebContentStructures#saveCP">
-			<var name="structureName" value="Press Release Structure Name" />
-		</execute>
-
-		<var name="key_structureName" value="Press Release Structure Name" />
-
-		<execute function="Click" locator1="CPWebcontentStructures#STRUCTURE_TABLE_ACTIONS" />
-		<execute function="Click" locator1="CPWebcontentStructures#STRUCTURE_MENULIST_PERMISSIONS" />
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Remove" />
-			<var name="roleList" value="Guest,Site Member" />
-		</execute>
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Add" />
-			<var name="roleList" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentTemplates#addCP">
-			<var name="structureName" value="Advertisement WC Structure Name" />
-			<var name="templateDescription" value="Advertisement Template Description" />
-			<var name="templateLanguage" value="Velocity (.vm)" />
-			<var name="templateName" value="Advertisement Template Name" />
-			<var name="template1Script">
-			<![CDATA[
-				<h2>$Text.getData()</h2>${line.separator}
-				<p>$Text Box.getData()</p>
-			]]>
-			</var>
-		</execute>
-
-		<var name="key_templateName" value="Advertisement Template Name" />
-
-		<execute function="Click" locator1="CPWebcontentTemplates#TEMPLATE_TABLE_ACTIONS" />
-		<execute function="Click" locator1="CPWebcontentTemplates#TEMPLATE_MENULIST_PERMISSIONS" />
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Remove" />
-			<var name="roleList" value="Guest,Site Member" />
-		</execute>
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Add" />
-			<var name="roleList" value="Advertiser Admin Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentTemplates#addCP">
-			<var name="structureName" value="Press Release Structure Name" />
-			<var name="templateDescription" value="Press Release Template Description" />
-			<var name="templateLanguage" value="Velocity (.vm)" />
-			<var name="templateName" value="Press Release Template Name" />
-			<var name="template2Script">
-			<![CDATA[
-				<h2>$Text.getData()</h2>${line.separator}
-				<p>$Text Box.getData()</p>
-			]]>
-			</var>
-		</execute>
-
-		<var name="key_templateName" value="Press Release Template Name" />
-
-		<execute function="Click" locator1="CPWebcontentTemplates#TEMPLATE_TABLE_ACTIONS" />
-		<execute function="Click" locator1="CPWebcontentTemplates#TEMPLATE_MENULIST_PERMISSIONS" />
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Remove" />
-			<var name="roleList" value="Guest,Site Member" />
-		</execute>
-
-		<execute macro="PermissionsInline#addOrRemoveViewPermissionFromAllRoles">
-			<var name="addOrRemoveViewPermission" value="Add" />
-			<var name="roleList" value="Press Secretary Name" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
-		</execute>
-
-		<execute macro="User#addCP">
-			<var name="userEmailAddress" value="user1@liferay.com" />
-			<var name="userFirstName" value="userfn1" />
-			<var name="userLastName" value="userln1" />
-			<var name="userScreenName" value="usersn1" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
-		</execute>
-
-		<execute macro="User#editPasswordCP">
-			<var name="userEmailAddress" value="user1@liferay.com" />
-			<var name="userScreenName" value="usersn1" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
-		</execute>
-
-		<execute macro="User#assignRegularRoleCP">
-			<var name="roleName" value="Advertiser Admin Name" />
-			<var name="userScreenName" value="usersn1" />
-		</execute>
-
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="Site#addMemberCP">
-			<var name="siteName" value="Site Name" />
-			<var name="userFirstName" value="userfn1" />
-			<var name="userLastName" value="userln1" />
-			<var name="userScreenName" value="usersn1" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
-		</execute>
-
-		<execute macro="User#addCP">
-			<var name="userEmailAddress" value="user2@liferay.com" />
-			<var name="userFirstName" value="userfn2" />
-			<var name="userLastName" value="userln2" />
-			<var name="userScreenName" value="usersn2" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
-		</execute>
-
-		<execute macro="User#editPasswordCP">
-			<var name="userEmailAddress" value="user2@liferay.com" />
-			<var name="userScreenName" value="usersn2" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
-		</execute>
-
-		<execute macro="User#assignRegularRoleCP">
-			<var name="roleName" value="Press Secretary Name" />
-			<var name="userScreenName" value="usersn2" />
-		</execute>
-
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="Site#addMemberCP">
-			<var name="siteName" value="Site Name" />
-			<var name="userFirstName" value="userfn2" />
-			<var name="userLastName" value="userln2" />
-			<var name="userScreenName" value="usersn2" />
-		</execute>
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
-		</execute>
-
-		<execute macro="SitePage#addCP">
-			<var name="siteName" value="Site Name" />
-			<var name="sitePageName" value="Asset Publisher Site Page" />
-			<var name="sitePagePrivacy" value="Public" />
-		</execute>
-
-		<execute macro="Page#openURL">
-			<var name="pageAccess" value="Public" />
-			<var name="siteName" value="Site Name" />
-			<var name="sitePageName" value="Asset Publisher Site Page" />
-			<var name="siteURL" value="true" />
-		</execute>
-
-		<execute macro="Portlet#addPG">
-			<var name="portletName" value="Asset Publisher" />
-		</execute>
-
-		<execute function="AssertClick" locator1="PGAssetpublisher#ADD_NEW_DROPDOWN" value1="Add New" />
-
-		<var name="key_structureName" value="Advertisement WC Structure Name" />
-
-		<execute function="AssertTextEquals" locator1="PGAssetpublisher#ADD_NEW_MENULIST_CUSTOM_STRUCTURE" value1="Advertisement WC Structure Name" />
-
-		<var name="key_structureName" value="Press Release Structure Name" />
-
-		<execute function="AssertTextEquals" locator1="PGAssetpublisher#ADD_NEW_MENULIST_CUSTOM_STRUCTURE" value1="Press Release Structure Name" />
-
-		<execute macro="User#logoutPG" />
-
-		<execute macro="User#loginUserPG">
-			<var name="password" value="test" />
-			<var name="userEmailAddress" value="user1@liferay.com" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentNavigator#gotoManageStructures" />
-
-		<execute macro="WebContentStructures#viewCP">
-			<var name="structureDescription" value="Advertisement Structure Description" />
-			<var name="structureFieldNames" value="Text,Text Box" />
-			<var name="structureName" value="Advertisement WC Structure Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute function="AssertClick" locator1="CPWebcontent#TOOLBAR_MANAGE" value1="Manage" />
-		<execute function="AssertClick" locator1="CPWebcontent#MANAGE_MENULIST_STRUCTURES" value1="Structures" />
-
-		<execute function="SelectFrame" locator1="CPWebcontentStructures#STRUCTURES_IFRAME" />
-
-		<var name="key_structureName" value="Press Release Structure Name" />
-
-		<execute function="AssertElementNotPresent" locator1="CPWebcontentStructures#STRUCTURE_TABLE_NAME" />
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentTemplates#viewCP">
-			<var name="templateDescription" value="Advertisement Template Description" />
-			<var name="templateName" value="Advertisement Template Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute function="AssertClick" locator1="CPWebcontent#TOOLBAR_MANAGE" value1="Manage" />
-		<execute function="AssertClick" locator1="CPWebcontent#MANAGE_MENULIST_TEMPLATES" value1="Templates" />
-
-		<execute function="SelectFrame" locator1="CPWebcontentTemplates#TEMPLATES_IFRAME" />
-
-		<var name="key_templateName" value="Press Release Template Name" />
-
-		<execute function="AssertElementNotPresent" locator1="CPWebcontentTemplates#TEMPLATE_TABLE_NAME" />
-
-		<execute macro="Page#openURL">
-			<var name="pageAccess" value="Public" />
-			<var name="siteName" value="Site Name" />
-			<var name="sitePageName" value="Asset Publisher Site Page" />
-			<var name="siteURL" value="true" />
-		</execute>
-
-		<execute function="AssertClick" locator1="PGAssetpublisher#ADD_NEW_DROPDOWN" value1="Add New" />
-
-		<var name="key_structureName" value="Advertisement WC Structure Name" />
-
-		<execute function="AssertTextEquals" locator1="PGAssetpublisher#ADD_NEW_MENULIST_CUSTOM_STRUCTURE" value1="Advertisement WC Structure Name" />
-
-		<var name="key_structureName" value="Press Release Structure Name" />
-
-		<execute function="AssertElementNotPresent" locator1="PGAssetpublisher#ADD_NEW_MENULIST_CUSTOM_STRUCTURE" />
-
-		<execute macro="User#logoutPG" />
-
-		<execute macro="User#loginUserPG">
-			<var name="password" value="test" />
-			<var name="userEmailAddress" value="user2@liferay.com" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentNavigator#gotoManageStructures" />
-
-		<execute macro="WebContentStructures#viewCP">
-			<var name="structureDescription" value="Press Release Structure Description" />
-			<var name="structureFieldNames" value="Text,Text Box" />
-			<var name="structureName" value="Press Release Structure Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute function="AssertClick" locator1="CPWebcontent#TOOLBAR_MANAGE" value1="Manage" />
-		<execute function="AssertClick" locator1="CPWebcontent#MANAGE_MENULIST_STRUCTURES" value1="Structures" />
-
-		<execute function="SelectFrame" locator1="CPWebcontentStructures#STRUCTURES_IFRAME" />
-
-		<var name="key_structureName" value="Advertisement WC Structure Name" />
-
-		<execute function="AssertElementNotPresent" locator1="CPWebcontentStructures#STRUCTURE_TABLE_NAME" />
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute macro="WebContentTemplates#viewCP">
-			<var name="templateDescription" value="Press Release Template Description" />
-			<var name="templateName" value="Press Release Template Name" />
-		</execute>
-
-		<execute macro="Page#gotoContentCP">
-			<var name="nonAdminUser" value="true" />
-			<var name="portletName" value="Web Content" />
-			<var name="siteScopeName" value="Site Name" />
-		</execute>
-
-		<execute function="AssertClick" locator1="CPWebcontent#TOOLBAR_MANAGE" value1="Manage" />
-		<execute function="AssertClick" locator1="CPWebcontent#MANAGE_MENULIST_TEMPLATES" value1="Templates" />
-
-		<execute function="SelectFrame" locator1="CPWebcontentTemplates#TEMPLATES_IFRAME" />
-
-		<var name="key_templateName" value="Advertisement Template Name" />
-
-		<execute function="AssertElementNotPresent" locator1="CPWebcontentTemplates#TEMPLATE_TABLE_NAME" />
-
-		<execute macro="Page#openURL">
-			<var name="pageAccess" value="Public" />
-			<var name="siteName" value="Site Name" />
-			<var name="sitePageName" value="Asset Publisher Site Page" />
-			<var name="siteURL" value="true" />
-		</execute>
-
-		<execute function="AssertClick" locator1="PGAssetpublisher#ADD_NEW_DROPDOWN" value1="Add New" />
-
-		<var name="key_structureName" value="Advertisement WC Structure Name" />
-
-		<execute function="AssertElementNotPresent" locator1="PGAssetpublisher#ADD_NEW_MENULIST_CUSTOM_STRUCTURE" />
-
-		<var name="key_structureName" value="Press Release Structure Name" />
-
-		<execute function="AssertTextEquals" locator1="PGAssetpublisher#ADD_NEW_MENULIST_CUSTOM_STRUCTURE" value1="Press Release Structure Name" />
-	</command>
-
-	<command name="ConfigureAPPortletDisplayPage" priority="5">
-		<execute macro="AssetPublisherPortlet#configureDisplayPagePG" />
-	</command>
-
-	<command known-issues="LPS-56541" name="ConfigureAPPortletDisplaytemplateFullContentWithBookmarks" priority="4">
-		<var name="bookmarkURL" value="http://www.liferay.com" />
-
-		<execute macro="Page#addPG">
+	<command name="ConfigureAPPortletDisplaytemplateWithBookmarks" priority="4">
+		<execute macro="Page#add">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -792,7 +161,7 @@
 			<var name="portletName" value="Bookmarks" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -801,16 +170,17 @@
 			<var name="folderName" value="Test Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
 		<execute macro="Bookmark#addPG">
 			<var name="bookmarkDescription" value="Test Bookmark Description" />
 			<var name="bookmarkName" value="Test Bookmark Name" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -823,49 +193,15 @@
 			<var name="displayTemplate" value="Full Content" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#viewConfigureAPDisplayTemplateFullContentBookmarksPG">
 			<var name="assetTitle" value="Test Bookmark Name" />
 		</execute>
-	</command>
 
-	<command name="ConfigureAPPortletDisplaytemplateTableWithBookmarks" priority="4">
-		<var name="bookmarkURL" value="http://www.liferay.com" />
-
-		<execute macro="Page#addPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="Portlet#addPG">
-			<var name="portletName" value="Bookmarks" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="BookmarksFolder#addPG">
-			<var name="folderDescription" value="Test Folder Description" />
-			<var name="folderName" value="Test Folder Name" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="Bookmark#addPG">
-			<var name="bookmarkDescription" value="Test Bookmark Description" />
-			<var name="bookmarkName" value="Test Bookmark Name" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -878,7 +214,7 @@
 			<var name="displayTemplate" value="Table" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -887,42 +223,8 @@
 			<var name="bookmarkDescription" value="Test Bookmark Description" />
 			<var name="bookmarkName" value="Test Bookmark Name" />
 		</execute>
-	</command>
 
-	<command name="ConfigureAPPortletDisplaytemplateTitlelistWithBookmarks" priority="4">
-		<var name="bookmarkURL" value="http://www.liferay.com" />
-
-		<execute macro="Page#addPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="Portlet#addPG">
-			<var name="portletName" value="Bookmarks" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="BookmarksFolder#addPG">
-			<var name="folderDescription" value="Test Folder Description" />
-			<var name="folderName" value="Test Folder Name" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Bookmarks Page" />
-		</execute>
-
-		<execute macro="Bookmark#addPG">
-			<var name="bookmarkDescription" value="Test Bookmark Description" />
-			<var name="bookmarkName" value="Test Bookmark Name" />
-		</execute>
-
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -935,7 +237,7 @@
 			<var name="displayTemplate" value="Title List" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -947,13 +249,24 @@
 	</command>
 
 	<command name="ConfigureAPPortletEnableRatings" priority="4">
-		<var name="assetTitle" value="WC WebContent Title" />
+		<execute macro="TestCase#getSiteName">
+			<return from="siteName" name="siteName" />
+			<var name="siteName" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
 
 		<execute macro="AssetPublisherPortlet#configureFlaggableDisplaySettingsPG">
 			<var name="enableRatings" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -961,7 +274,7 @@
 			<var name="enableRatings" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -970,7 +283,7 @@
 			<var name="webContentTitle" value="WC WebContent Title" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -983,53 +296,56 @@
 			<var name="displayTemplate" value="Full Content" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#rate4StarsPG" />
 
-		<execute macro="Page#gotoPG">
-			<var name="assetTitle" value="${assetTitle}" />
-		<var name="pageName" value="Asset Publisher Page" />
-</execute>
+		<execute macro="Navigator#gotoPage">
+			<var name="assetTitle" value="WC WebContent Title" />
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
 
 		<execute macro="AssetPublisherPortlet#viewRate4StarsPG" />
 	</command>
 
 	<command name="ConfigureAPPortletScopeMultipleSites" priority="4">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="TestCase#getSiteName">
+			<return from="siteName" name="siteName" />
+			<var name="siteName" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoControlPanelSites">
+			<var name="portlet" value="Sites" />
 		</execute>
 
 		<execute macro="Site#addBlankCP">
 			<var name="siteName" value="Test Site" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="Portlet#addDuplicatePG">
-			<var name="portletName" value="${portletName}" />
+			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#configureAddSiteScopes">
-			<var name="addSite" value="true" />
-			<var name="defaultSite" value="true" />
-			<var name="siteName" value="Test Site" />
+			<var name="otherSite" value="Test Site" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#viewMultipleSiteScopesAddDropdowns">
-			<var name="siteName1" value="Liferay" />
+			<var name="siteName1" value="${siteName}" />
 			<var name="siteName2" value="Test Site" />
 		</execute>
 	</command>
@@ -1039,7 +355,7 @@
 			<var name="selectedAsset" value="Blogs Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1054,7 +370,7 @@
 			<var name="selectedAsset" value="Bookmarks Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1069,22 +385,24 @@
 			<var name="selectedAsset" value="Document" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#viewSelectedPG">
-			<var name="selectedAsset" value="Document" />
+			<var name="selectedAsset" value="Basic Document" />
 			<var name="selectedAssetConfiguration" value="Document" />
 		</execute>
 	</command>
 
 	<command name="ConfigureAPPortletSelectedWebContent" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="AssetPublisherPortlet#configureSelectedPG">
 			<var name="selectedAsset" value="Web Content Article" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1099,7 +417,7 @@
 			<var name="setAsDefaultPage" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1109,13 +427,11 @@
 	</command>
 
 	<command name="ConfigureAPPortletWithSelectedBookmarksEntry" priority="4">
-		<var name="bookmarkURL" value="http://www.liferay.com" />
-
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -1123,7 +439,7 @@
 			<var name="portletName" value="Bookmarks" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -1132,25 +448,25 @@
 			<var name="folderName" value="Test Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
 		<execute macro="Bookmark#addPG">
 			<var name="bookmarkDescription" value="Test Bookmark Description" />
 			<var name="bookmarkName" value="Test Bookmark Name" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#configureAPSelectMoreThanOnePG">
-			<var name="contentName" value="Bookmarks Entry" />
-			<var name="selectContent" value="${contentName}" />
+			<var name="selectContent" value="Bookmarks Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1158,17 +474,16 @@
 			<var name="assetTitle" value="Test Bookmark Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#configureAPSelectMoreThanOnePG" >
-			<var name="contentName" value="Bookmarks Entry" />
 			<var name="moveSelected" value="true" />
-			<var name="selectContent" value="${contentName}" />
+			<var name="selectContent" value="Bookmarks Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1177,16 +492,116 @@
 		</execute>
 	</command>
 
+	<command name="FilterTagsByNameAP" priority="4">
+		<execute macro="Page#add">
+			<var name="pageName" value="Tags Navigation Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Tags Navigation Page" />
+		</execute>
+
+		<execute macro="Portlet#addPG">
+			<var name="portletName" value="Tags Navigation" />
+		</execute>
+
+		<execute macro="TagsNavigationPortlet#configureDisplayStylePG">
+			<var name="displayTemplate" value="Number" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Tags Navigation Page" />
+		</execute>
+
+		<execute macro="TagsNavigationPortlet#configureFlaggableSettingsPG">
+			<var name="showAssetCount" value="true" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Tags Navigation Page" />
+		</execute>
+
+		<execute macro="Portlet#addPG">
+			<var name="portletName" value="Asset Publisher" />
+		</execute>
+
+		<for list="first tag,second tag,third tag" param="tagName">
+			<execute macro="Navigator#openURL" />
+
+			<execute macro="ProductMenu#gotoSitesContent">
+				<var name="portlet" value="Tags" />
+			</execute>
+
+			<execute macro="Tag#addCP">
+				<var name="tagName" value="${tagName}" />
+			</execute>
+		</for>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Web Content" />
+		</execute>
+
+		<execute macro="WebContentNavigator#gotoAddCP" />
+
+		<execute macro="WebContent#addWithTagCP">
+			<var name="tagNameList" value="first tag,second tag" />
+			<var name="webContentContent" value="Web Content Content" />
+			<var name="webContentTitle" value="Web Content Title" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
+		</execute>
+
+		<execute macro="DMDocument#addCP">
+			<var name="dmDocumentFile" value="Document_1.txt" />
+			<var name="dmDocumentSize" value="0KB" />
+			<var name="dmDocumentTitle" value="DM Document Title" />
+			<var name="tagNameList" value="first tag" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Tags Navigation Page" />
+		</execute>
+
+		<execute macro="TagsNavigationPortlet#clickTagView">
+			<var name="tagAssetCount" value="first tag (2)" />
+			<var name="tagName" value="first tag" />
+		</execute>
+
+		<execute macro="AssetPublisherPortlet#viewTagFocusPG">
+			<var name="assetTitleList" value="DM Document Title,Web Content Title" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Tags Navigation Page" />
+		</execute>
+
+		<execute macro="TagsNavigationPortlet#clickTagView">
+			<var name="tagAssetCount" value="second tag (1)" />
+			<var name="tagName" value="second tag" />
+		</execute>
+
+		<execute macro="AssetPublisherPortlet#viewTagFocusPG">
+			<var name="assetTitleList" value="Web Content Title" />
+			<var name="nonTaggedAsset" value="DM Document Title" />
+		</execute>
+	</command>
+
 	<command name="FindSiteAPViaSearchScopeSelector" priority="4">
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="ProductMenu#gotoControlPanelSites">
+			<var name="portlet" value="Sites" />
 		</execute>
 
 		<execute macro="Site#addBlankCP">
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1196,7 +611,7 @@
 	</command>
 
 	<command name="OrderContentByModifiedDateViaAP" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1205,7 +620,7 @@
 			<var name="sortOrder" value="Descending" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1214,7 +629,7 @@
 			<var name="webContentTitle" value="WebContent Title 1" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1223,7 +638,7 @@
 			<var name="webContentTitle" value="WebContent Title 2" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1232,7 +647,7 @@
 			<var name="webContentTitle" value="WebContent Title 3" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1248,7 +663,7 @@
 			<var name="webContentTitleEdit" value="WebContent Title 1 Edit" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1259,8 +674,8 @@
 		</execute>
 	</command>
 
-	<command known-issues="LPS-56665" name="OrderWCByModifiedDateViaAP" priority="3">
-		<execute macro="Page#gotoPG">
+	<command name="OrderWCByModifiedDateViaAP" priority="3">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1269,7 +684,7 @@
 			<var name="selectedAsset" value="Web Content Article" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1278,37 +693,34 @@
 			<var name="sortOrder" value="Descending" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 1" />
 			<var name="webContentTitle" value="WebContent Title 1" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 2" />
 			<var name="webContentTitle" value="WebContent Title 2" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 3" />
 			<var name="webContentTitle" value="WebContent Title 3" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1324,7 +736,7 @@
 			<var name="webContentTitleEdit" value="WebContent Title 1 Edit" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1335,8 +747,8 @@
 		</execute>
 	</command>
 
-	<command known-issues="LPS-56665" name="OrderWCByPublishDateViaAP" priority="3">
-		<execute macro="Page#gotoPG">
+	<command name="OrderWCByPublishDateViaAP" priority="3">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1345,7 +757,7 @@
 			<var name="selectedAsset" value="Web Content Article" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1354,37 +766,38 @@
 			<var name="sortOrder" value="Descending" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 1" />
 			<var name="webContentTitle" value="WebContent Title 1" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute function="Pause" locator1="65000" />
+
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 2" />
 			<var name="webContentTitle" value="WebContent Title 2" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute function="Pause" locator1="65000" />
+
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 3" />
 			<var name="webContentTitle" value="WebContent Title 3" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -1396,46 +809,69 @@
 	</command>
 
 	<command name="RestoreAPArchivedSetup" priority="4">
-		<execute macro="AssetPublisherPortlet#saveArchivedSetupPG">
-			<var name="archiveName" value="AP Archive Name" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Web Content" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="WebContentNavigator#gotoAddCP" />
+
+		<execute macro="WebContent#addCP">
+			<var name="webContentContent" value="WC WebContent Content" />
+			<var name="webContentTitle" value="WC WebContent Title" />
+		</execute>
+
+		<execute macro="PortletEntry#publish" />
+
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#restoreArchivedSetupPG">
-			<var name="archiveName" value="AP Archive Name" />
-		</execute>
+		<execute macro="AssetPublisherPortlet#configureManualAssetSelectionPG" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#viewRestoredSetupPG">
-			<var name="archiveName" value="AP Archive Name" />
+		<execute macro="AssetPublisherPortlet#saveConfigurationTemplatePG">
+			<var name="configurationName" value="AP Manual Display" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#deleteArchivedSetupPG">
-			<var name="archiveName" value="AP Archive Name" />
-		</execute>
-	</command>
-
-	<command name="SaveAPArchivedSetup" priority="4">
-		<execute macro="AssetPublisherPortlet#saveArchivedSetupPG">
-			<var name="archiveName" value="AP Archive Name" />
+		<execute macro="Portlet#deletePG">
+			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#deleteArchivedSetupPG">
-			<var name="archiveName" value="AP Archive Name" />
+		<execute macro="Portlet#addPG">
+			<var name="portletName" value="Asset Publisher" />
+		</execute>
+
+		<execute macro="AssetPublisherPortlet#restoreConfigurationTemplatePG">
+			<var name="configurationName" value="AP Manual Display" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
+
+		<execute macro="AssetPublisherPortlet#viewManualNoAssetsMessagePG" />
+
+		<execute macro="AssetPublisherPortlet#viewRestoredSetupPG" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
+
+		<execute macro="AssetPublisherPortlet#deleteConfigurationTemplatePG">
+			<var name="configurationName" value="AP Manual Display" />
 		</execute>
 	</command>
 </definition>

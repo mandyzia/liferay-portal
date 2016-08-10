@@ -14,8 +14,8 @@
 
 package com.liferay.taglib.ui;
 
-import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.taglib.util.IncludeTag;
 
 import java.util.Date;
@@ -81,7 +81,7 @@ public class AppViewEntryTag extends IncludeTag {
 	}
 
 	public void setDescription(String description) {
-		_description = HtmlUtil.unescape(description);
+		_description = description;
 	}
 
 	public void setDisplayDate(Date displayDate) {
@@ -120,6 +120,10 @@ public class AppViewEntryTag extends IncludeTag {
 
 	public void setLocked(boolean locked) {
 		_locked = locked;
+	}
+
+	public void setMarkupView(String markupView) {
+		_markupView = markupView;
 	}
 
 	public void setModifiedDate(Date modifiedDate) {
@@ -167,7 +171,7 @@ public class AppViewEntryTag extends IncludeTag {
 	}
 
 	public void setTitle(String title) {
-		_title = HtmlUtil.unescape(title);
+		_title = title;
 	}
 
 	public void setUrl(String url) {
@@ -193,7 +197,7 @@ public class AppViewEntryTag extends IncludeTag {
 		_data = null;
 		_description = null;
 		_displayDate = null;
-		_displayStyle = null;
+		_displayStyle = "descriptive";
 		_expirationDate = null;
 		_folder = false;
 		_groupId = 0;
@@ -215,6 +219,7 @@ public class AppViewEntryTag extends IncludeTag {
 		_title = null;
 		_url = null;
 		_version = null;
+		_markupView = null;
 	}
 
 	protected ServletContext getActionJspServletContext() {
@@ -227,7 +232,12 @@ public class AppViewEntryTag extends IncludeTag {
 
 	@Override
 	protected String getPage() {
-		return _PAGE;
+		if (Validator.isNotNull(_markupView)) {
+			return "/html/taglib/ui/app_view_entry/" + _markupView + "/" +
+				_displayStyle + ".jsp";
+		}
+
+		return "/html/taglib/ui/app_view_entry/" + _displayStyle + ".jsp";
 	}
 
 	@Override
@@ -298,14 +308,11 @@ public class AppViewEntryTag extends IncludeTag {
 		request.setAttribute(
 			"liferay-ui:app-view-entry:thumbnailStyle", _thumbnailStyle);
 		request.setAttribute("liferay-ui:app-view-entry:title", _title);
-		request.setAttribute("liferay-ui:app-view-entry:version", _version);
 		request.setAttribute("liferay-ui:app-view-entry:url", _url);
+		request.setAttribute("liferay-ui:app-view-entry:version", _version);
 	}
 
 	private static final boolean _CLEAN_UP_SET_ATTRIBUTES = true;
-
-	private static final String _PAGE =
-		"/html/taglib/ui/app_view_entry/page.jsp";
 
 	private String _actionJsp;
 	private ServletContext _actionJspServletContext;
@@ -320,7 +327,7 @@ public class AppViewEntryTag extends IncludeTag {
 	private Map<String, Object> _data;
 	private String _description;
 	private Date _displayDate;
-	private String _displayStyle;
+	private String _displayStyle = "descriptive";
 	private Date _expirationDate;
 	private boolean _folder;
 	private long _groupId;
@@ -328,14 +335,15 @@ public class AppViewEntryTag extends IncludeTag {
 	private String _latestApprovedVersion;
 	private String _latestApprovedVersionAuthor;
 	private boolean _locked;
+	private String _markupView;
 	private Date _modifiedDate;
 	private Date _reviewDate;
 	private String _rowCheckerId;
 	private String _rowCheckerName;
 	private boolean _shortcut;
-	private boolean _showCheckbox = false;
+	private boolean _showCheckbox;
 	private boolean _showLinkTitle = true;
-	private int _status = 0;
+	private int _status;
 	private String _thumbnailDivStyle = StringPool.BLANK;
 	private String _thumbnailSrc;
 	private String _thumbnailStyle;

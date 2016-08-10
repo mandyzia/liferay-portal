@@ -14,54 +14,55 @@
 
 package com.liferay.portal.struts;
 
-import com.liferay.portal.LayoutPermissionException;
-import com.liferay.portal.PortletActiveException;
-import com.liferay.portal.UserActiveException;
+import com.liferay.portal.kernel.exception.LayoutPermissionException;
+import com.liferay.portal.kernel.exception.PortletActiveException;
+import com.liferay.portal.kernel.exception.UserActiveException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.PasswordPolicy;
+import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.model.PortletPreferencesIds;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserTracker;
+import com.liferay.portal.kernel.model.UserTrackerPath;
 import com.liferay.portal.kernel.portlet.FriendlyURLMapper;
+import com.liferay.portal.kernel.portlet.InvokerPortlet;
+import com.liferay.portal.kernel.portlet.LiferayPortletURL;
+import com.liferay.portal.kernel.portlet.PortletConfigFactoryUtil;
+import com.liferay.portal.kernel.portlet.PortletInstanceFactoryUtil;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
+import com.liferay.portal.kernel.security.auth.InterruptedPortletRequestWhitelistUtil;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
+import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
+import com.liferay.portal.kernel.service.persistence.UserTrackerPathUtil;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.servlet.HttpMethods;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.struts.LastPath;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.liveusers.LiveUsers;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.PasswordPolicy;
-import com.liferay.portal.model.Portlet;
-import com.liferay.portal.model.PortletPreferencesIds;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.UserTracker;
-import com.liferay.portal.model.UserTrackerPath;
-import com.liferay.portal.security.auth.InterruptedPortletRequestWhitelistUtil;
-import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.PortletLocalServiceUtil;
-import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
-import com.liferay.portal.service.permission.PortletPermissionUtil;
-import com.liferay.portal.service.persistence.UserTrackerPathUtil;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.InvokerPortlet;
-import com.liferay.portlet.PortletConfigFactoryUtil;
-import com.liferay.portlet.PortletInstanceFactoryUtil;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
-import com.liferay.portlet.PortletURLImpl;
 import com.liferay.portlet.RenderRequestFactory;
 import com.liferay.portlet.RenderRequestImpl;
 import com.liferay.portlet.RenderResponseFactory;
@@ -147,15 +148,6 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 			HttpServletRequest request, HttpServletResponse response)
 		throws IOException, ServletException {
 
-		HttpSession session = request.getSession();
-
-		Boolean basicAuthEnabled = (Boolean)session.getAttribute(
-			WebKeys.BASIC_AUTH_ENABLED);
-
-		if (basicAuthEnabled != null) {
-			session.removeAttribute(WebKeys.BASIC_AUTH_ENABLED);
-		}
-
 		String path = super.processPath(request, response);
 
 		ActionMapping actionMapping =
@@ -163,9 +155,7 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 
 		Action action = StrutsActionRegistryUtil.getAction(path);
 
-		if (((basicAuthEnabled != null) && basicAuthEnabled.booleanValue()) ||
-			((actionMapping == null) && (action == null))) {
-
+		if ((actionMapping == null) && (action == null)) {
 			String lastPath = getLastPath(request);
 
 			if (_log.isDebugEnabled()) {
@@ -263,6 +253,7 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 
 		PortletConfig portletConfig = PortletConfigFactoryUtil.create(
 			portlet, servletContext);
+
 		PortletContext portletContext = portletConfig.getPortletContext();
 
 		RenderRequestImpl renderRequestImpl = RenderRequestFactory.create(
@@ -348,8 +339,8 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 				request.getQueryString());
 		}
 
-		PortletURLImpl portletURL = new PortletURLImpl(
-			request, portletId, plid, PortletRequest.RENDER_PHASE);
+		LiferayPortletURL portletURL = PortletURLFactoryUtil.create(
+			request, portletId, layout, PortletRequest.RENDER_PHASE);
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
@@ -423,7 +414,7 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 			return sb.toString();
 		}
 
-		Map<String, String[]> parameterMap = lastPath.getParameterMap();
+		String parameters = lastPath.getParameters();
 
 		// Only test for existing mappings for last paths that were set when the
 		// user accessed a layout directly instead of through its friendly URL
@@ -433,7 +424,7 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 				(ActionMapping)moduleConfig.findActionConfig(
 					lastPath.getPath());
 
-			if ((actionMapping == null) || (parameterMap == null)) {
+			if ((actionMapping == null) || parameters.isEmpty()) {
 				return sb.toString();
 			}
 		}
@@ -443,7 +434,7 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 		lastPathSB.append(portalURL);
 		lastPathSB.append(lastPath.getContextPath());
 		lastPathSB.append(lastPath.getPath());
-		lastPathSB.append(HttpUtil.parameterMapToString(parameterMap));
+		lastPathSB.append(parameters);
 
 		return lastPathSB.toString();
 	}
@@ -663,7 +654,8 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 				if (lastPath == null) {
 					lastPath = new LastPath(
 						themeDisplay.getPathMain(), path,
-						request.getParameterMap());
+						HttpUtil.parameterMapToString(
+							request.getParameterMap()));
 				}
 
 				session.setAttribute(WebKeys.LAST_PATH, lastPath);
@@ -771,7 +763,7 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 			else if ((user != null) && !user.isPasswordReset() &&
 					 path.equals(_PATH_PORTAL_UPDATE_PASSWORD)) {
 
-				return null;
+				return _PATH_PORTAL_LAYOUT;
 			}
 
 			// Authenticated users must have an email address

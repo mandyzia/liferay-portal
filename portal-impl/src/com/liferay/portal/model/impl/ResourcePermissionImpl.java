@@ -15,8 +15,8 @@
 package com.liferay.portal.model.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.model.ResourceAction;
-import com.liferay.portal.service.ResourceActionLocalServiceUtil;
+import com.liferay.portal.kernel.model.ResourceAction;
+import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
 
 /**
  * Stores the permissions assigned to roles under permissions version 6. A
@@ -95,7 +95,10 @@ public class ResourcePermissionImpl extends ResourcePermissionBaseImpl {
 			ResourceActionLocalServiceUtil.getResourceAction(
 				getName(), actionId);
 
-		setActionIds(getActionIds() | resourceAction.getBitwiseValue());
+		long actionIds = getActionIds() | resourceAction.getBitwiseValue();
+
+		setActionIds(actionIds);
+		setViewActionId(actionIds % 2 == 1);
 	}
 
 	@Override
@@ -124,7 +127,10 @@ public class ResourcePermissionImpl extends ResourcePermissionBaseImpl {
 			ResourceActionLocalServiceUtil.getResourceAction(
 				getName(), actionId);
 
-		setActionIds(getActionIds() & (~resourceAction.getBitwiseValue()));
+		long actionIds = getActionIds() & (~resourceAction.getBitwiseValue());
+
+		setActionIds(actionIds);
+		setViewActionId(actionIds % 2 == 1);
 	}
 
 }

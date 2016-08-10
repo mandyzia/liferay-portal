@@ -14,16 +14,20 @@
 
 package com.liferay.portal.service.impl;
 
-import com.liferay.portal.OldServiceComponentException;
 import com.liferay.portal.kernel.cache.CacheRegistryUtil;
 import com.liferay.portal.kernel.dao.db.DB;
-import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
-import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
-import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
+import com.liferay.portal.kernel.dao.db.DBContext;
+import com.liferay.portal.kernel.dao.db.DBManagerUtil;
+import com.liferay.portal.kernel.dao.db.DBProcessContext;
+import com.liferay.portal.kernel.exception.OldServiceComponentException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.ModelHintsUtil;
+import com.liferay.portal.kernel.model.ServiceComponent;
+import com.liferay.portal.kernel.service.configuration.ServiceComponentConfiguration;
+import com.liferay.portal.kernel.upgrade.UpgradeStep;
 import com.liferay.portal.kernel.upgrade.util.UpgradeTable;
 import com.liferay.portal.kernel.upgrade.util.UpgradeTableFactoryUtil;
 import com.liferay.portal.kernel.upgrade.util.UpgradeTableListener;
@@ -36,14 +40,16 @@ import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
-import com.liferay.portal.model.ModelHintsUtil;
-import com.liferay.portal.model.ServiceComponent;
 import com.liferay.portal.service.base.ServiceComponentLocalServiceBaseImpl;
-import com.liferay.portal.service.configuration.ServiceComponentConfiguration;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.registry.Filter;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.collections.ServiceTrackerCollections;
+import com.liferay.registry.collections.ServiceTrackerList;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 
 import java.lang.reflect.Field;
 
@@ -58,16 +64,32 @@ import java.util.List;
 public class ServiceComponentLocalServiceImpl
 	extends ServiceComponentLocalServiceBaseImpl {
 
+	public ServiceComponentLocalServiceImpl() {
+		Registry registry = RegistryUtil.getRegistry();
+
+		Filter filter = registry.getFilter(
+			"(&(objectClass=" + UpgradeStep.class.getName() +
+				")(upgrade.from.schema.version=0.0.0)(upgrade.initial." +
+					"database.creation=true))");
+
+		_serviceTrackerList = ServiceTrackerCollections.openList(
+			UpgradeStep.class, filter);
+	}
+
+	@Override
+	public void destroy() {
+		super.destroy();
+
+		_serviceTrackerList.close();
+	}
+
 	@Override
 	public void destroyServiceComponent(
 		ServiceComponentConfiguration serviceComponentConfiguration,
 		ClassLoader classLoader) {
 
-		try {
-			clearCacheRegistry(serviceComponentConfiguration);
-		}
-		catch (Exception e) {
-			throw new SystemException(e);
+		if (PropsValues.CACHE_CLEAR_ON_PLUGIN_UNDEPLOY) {
+			CacheRegistryUtil.clear();
 		}
 	}
 
@@ -207,19 +229,22 @@ public class ServiceComponentLocalServiceImpl
 
 	@Override
 	public void verifyDB() {
-		List<ServiceComponent> serviceComponents =
-			serviceComponentPersistence.findAll();
-
-		for (ServiceComponent serviceComponent : serviceComponents) {
-			String buildNamespace = serviceComponent.getBuildNamespace();
-			String tablesSQL = serviceComponent.getTablesSQL();
-			String sequencesSQL = serviceComponent.getSequencesSQL();
-			String indexesSQL = serviceComponent.getIndexesSQL();
-
+		for (UpgradeStep upgradeStep : _serviceTrackerList) {
 			try {
-				serviceComponentLocalService.upgradeDB(
-					null, buildNamespace, 0, false, null, tablesSQL,
-					sequencesSQL, indexesSQL);
+				upgradeStep.upgrade(
+					new DBProcessContext() {
+
+						@Override
+						public DBContext getDBContext() {
+							return new DBContext();
+						}
+
+						@Override
+						public OutputStream getOutputStream() {
+							return null;
+						}
+
+					});
 			}
 			catch (Exception e) {
 				_log.error(e, e);
@@ -279,44 +304,13 @@ public class ServiceComponentLocalServiceImpl
 
 	}
 
-	protected void clearCacheRegistry(
-			ServiceComponentConfiguration serviceComponentConfiguration)
-		throws DocumentException {
-
-		InputStream inputStream =
-			serviceComponentConfiguration.getHibernateInputStream();
-
-		if (inputStream == null) {
-			return;
-		}
-
-		Document document = UnsecureSAXReaderUtil.read(inputStream);
-
-		Element rootElement = document.getRootElement();
-
-		List<Element> classElements = rootElement.elements("class");
-
-		for (Element classElement : classElements) {
-			String name = classElement.attributeValue("name");
-
-			CacheRegistryUtil.unregister(name);
-		}
-
-		CacheRegistryUtil.clear();
-
-		if (PropsValues.CACHE_CLEAR_ON_PLUGIN_UNDEPLOY) {
-			EntityCacheUtil.clearCache();
-			FinderCacheUtil.clearCache();
-		}
-	}
-
 	protected void doUpgradeDB(
 			ClassLoader classLoader, String buildNamespace, long buildNumber,
 			boolean buildAutoUpgrade, ServiceComponent previousServiceComponent,
 			String tablesSQL, String sequencesSQL, String indexesSQL)
 		throws Exception {
 
-		DB db = DBFactoryUtil.getDB();
+		DB db = DBManagerUtil.getDB();
 
 		if (previousServiceComponent == null) {
 			if (_log.isInfoEnabled()) {
@@ -558,6 +552,8 @@ public class ServiceComponentLocalServiceImpl
 		ServiceComponentLocalServiceImpl.class);
 
 	private static final PACL _pacl = new NoPACL();
+
+	private final ServiceTrackerList<UpgradeStep> _serviceTrackerList;
 
 	private static class NoPACL implements PACL {
 

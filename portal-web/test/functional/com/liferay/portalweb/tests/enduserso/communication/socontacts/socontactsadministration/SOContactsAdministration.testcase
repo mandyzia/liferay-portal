@@ -647,7 +647,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -666,7 +666,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -680,7 +680,7 @@
 			<var name="userName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -699,7 +699,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -717,7 +717,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -776,7 +776,7 @@
 			<var name="userName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -795,7 +795,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -809,7 +809,7 @@
 			<var name="userName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -823,7 +823,7 @@
 			<var name="userName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -841,7 +841,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1552,7 +1552,7 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Members" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -1683,7 +1683,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1701,7 +1701,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1726,7 +1726,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1744,7 +1744,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1792,7 +1792,7 @@
 			<var name="userScreenName" value="${adminScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1810,7 +1810,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1828,7 +1828,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1841,7 +1841,7 @@
 			<var name="userScreenName" value="${adminScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -1859,7 +1859,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -2058,12 +2058,8 @@
 		</execute>
 
 		<execute macro="SOProfile#addInstantMessenger">
-			<var name="userInstantMessengerAIM" value="socialofficesn" />
-			<var name="userInstantMessengerICQ" value="socialofficesn" />
 			<var name="userInstantMessengerJabber" value="socialofficesn" />
 			<var name="userInstantMessengerSkype" value="socialofficesn" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="socialofficesn" />
-			<var name="userInstantMessengerYM" value="socialofficesn" />
 		</execute>
 
 		<execute macro="SOProfile#addIntroduction">
@@ -2172,12 +2168,8 @@
 		</execute>
 
 		<execute macro="SOProfile#addInstantMessenger">
-			<var name="userInstantMessengerAIM" value="socialofficesn" />
-			<var name="userInstantMessengerICQ" value="socialofficesn" />
 			<var name="userInstantMessengerJabber" value="socialofficesn" />
 			<var name="userInstantMessengerSkype" value="socialofficesn" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="socialofficesn" />
-			<var name="userInstantMessengerYM" value="socialofficesn" />
 		</execute>
 
 		<execute macro="SOProfile#addIntroduction">
@@ -2741,7 +2733,7 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Members" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -2873,7 +2865,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -2892,7 +2884,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -2918,7 +2910,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -2937,7 +2929,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -2987,7 +2979,7 @@
 			<var name="userScreenName" value="${adminScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3006,7 +2998,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3025,7 +3017,7 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3038,7 +3030,7 @@
 			<var name="userScreenName" value="${adminScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3057,7 +3049,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3089,7 +3081,7 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -3180,13 +3172,13 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoMyProfile" />
+		<execute macro="UserBar#gotoProfile" />
 
 		<execute function="Click" locator1="SOProfile#NAVIGATION_CONTACTS" />
 
 		<execute function="AssertTextEquals" locator1="SOContactsProfile#NO_CONTACTS_MESSAGE" value1="${adminName} has no connections." />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3218,13 +3210,13 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoMyProfile" />
+		<execute macro="UserBar#gotoProfile" />
 
 		<execute function="Click" locator1="SOProfile#NAVIGATION_CONTACTS" />
 
 		<execute function="AssertTextEquals" locator1="SOContactsProfile#NO_CONTACTS_MESSAGE" value1="${adminName} has no connections." />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3234,7 +3226,7 @@
 		<execute function="Select" locator1="SOContactscenter#CONTACTS_LIST_FILTER" value1="Connections" />
 		<execute function="AssertTextEquals" locator1="SOContactscenter#CONTACTS_LIST_EMPTY" value1="There are no results." />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3275,7 +3267,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoMyProfile" />
+		<execute macro="UserBar#gotoProfile" />
 
 		<execute function="Click" locator1="SOProfile#NAVIGATION_CONTACTS" />
 
@@ -3288,7 +3280,7 @@
 		<execute function="AssertTextEquals" locator1="SOContactsProfile#USER_DETAILS_NAME" value1="${userName}" />
 		<execute function="AssertTextEquals" locator1="SOContactsProfile#USER_DETAILS_EMAIL" value1="${userEmailAddress}" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3395,7 +3387,7 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -3464,7 +3456,7 @@
 			<var name="userName" value="${userName2}" />
 		</execute>
 
-		<execute macro="Page#gotoMyProfile" />
+		<execute macro="UserBar#gotoProfile" />
 
 		<execute function="Click" locator1="SOProfile#NAVIGATION_CONTACTS" />
 
@@ -3542,7 +3534,7 @@
 			<var name="contactName" value="${contactName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Contacts Center" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -3580,7 +3572,7 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Members" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -3631,12 +3623,8 @@
 		<var name="userAddressType" value="Personal" />
 		<var name="userEmailAddress" value="socialoffice01@liferay.com" />
 		<var name="userFirstName" value="Social01" />
-		<var name="userInstantMessengerAIM" value="socialofficesn" />
-		<var name="userInstantMessengerICQ" value="socialofficesn" />
 		<var name="userInstantMessengerJabber" value="socialofficesn" />
 		<var name="userInstantMessengerSkype" value="socialofficesn" />
-		<var name="userInstantMessengerWindowsLiveMessenger" value="socialofficesn" />
-		<var name="userInstantMessengerYM" value="socialofficesn" />
 		<var name="userIntroduction" value="Introduction Content" />
 		<var name="userLastName" value="User01" />
 		<var name="userListName" value="User01, Social01" />
@@ -3650,7 +3638,6 @@
 		<var name="userScreenName" value="socialoffice01" />
 		<var name="userSMS" value="socialoffice@liferay.com" />
 		<var name="userSocialNetworkFacebook" value="socialoffice01" />
-		<var name="userSocialNetworkMyspace" value="socialoffice01" />
 		<var name="userSocialNetworkTwitter" value="socialoffice01" />
 		<var name="userTag" value="tag1" />
 		<var name="userWebsiteType" value="Personal" />
@@ -3687,12 +3674,8 @@
 		</execute>
 
 		<execute macro="SOProfile#addInstantMessenger">
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIM}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQ}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabber}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkype}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessenger}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYM}" />
 		</execute>
 
 		<execute macro="SOProfile#addPhoneNumbers">
@@ -3712,7 +3695,6 @@
 
 		<execute macro="SOProfile#addSocialNetwork">
 			<var name="userSocialNetworkFacebook" value="${userSocialNetworkFacebook}" />
-			<var name="userSocialNetworkMyspace" value="${userSocialNetworkMyspace}" />
 			<var name="userSocialNetworkTwitter" value="${userSocialNetworkTwitter}" />
 		</execute>
 
@@ -3763,12 +3745,8 @@
 		<execute macro="SOContactsCenter#viewUserDetailsInstantMessenger">
 			<var name="userEmailAddress" value="${userEmailAddress}" />
 			<var name="userFirstName" value="${userFirstName}" />
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIM}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQ}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabber}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkype}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessenger}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYM}" />
 			<var name="userLastName" value="${userLastName}" />
 			<var name="userListName" value="${userListName}" />
 			<var name="userName" value="${userName}" />
@@ -3872,12 +3850,8 @@
 		</execute>
 
 		<execute macro="SOProfile#viewInstantMessenger">
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIM}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQ}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabber}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkype}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessenger}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYM}" />
 		</execute>
 
 		<execute macro="SOProfile#viewPhoneNumbers">
@@ -3897,7 +3871,6 @@
 
 		<execute macro="SOProfile#viewSocialNetwork">
 			<var name="userSocialNetworkFacebook" value="${userSocialNetworkFacebook}" />
-			<var name="userSocialNetworkMyspace" value="${userSocialNetworkMyspace}" />
 			<var name="userSocialNetworkTwitter" value="${userSocialNetworkTwitter}" />
 		</execute>
 
@@ -3935,12 +3908,8 @@
 		</execute>
 
 		<execute macro="SOProfile#viewInstantMessenger">
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIM}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQ}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabber}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkype}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessenger}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYM}" />
 		</execute>
 
 		<execute macro="SOProfile#viewPhoneNumbers">
@@ -3960,7 +3929,6 @@
 
 		<execute macro="SOProfile#viewSocialNetwork">
 			<var name="userSocialNetworkFacebook" value="${userSocialNetworkFacebook}" />
-			<var name="userSocialNetworkMyspace" value="${userSocialNetworkMyspace}" />
 			<var name="userSocialNetworkTwitter" value="${userSocialNetworkTwitter}" />
 		</execute>
 
@@ -4145,18 +4113,10 @@
 	<command name="ViewUserDetailsInstantMessenger" priority="4">
 		<var name="userEmailAddress" value="socialoffice01@liferay.com" />
 		<var name="userFirstName" value="Social01" />
-		<var name="userInstantMessengerAIM" value="socialofficesn" />
-		<var name="userInstantMessengerAIMEdit" value="socialofficesnedit" />
-		<var name="userInstantMessengerICQ" value="socialofficesn" />
-		<var name="userInstantMessengerICQEdit" value="socialofficesnedit" />
 		<var name="userInstantMessengerJabber" value="socialofficesn" />
 		<var name="userInstantMessengerJabberEdit" value="socialofficesnedit" />
 		<var name="userInstantMessengerSkype" value="socialofficesn" />
 		<var name="userInstantMessengerSkypeEdit" value="socialofficesnedit" />
-		<var name="userInstantMessengerWindowsLiveMessenger" value="socialofficesn" />
-		<var name="userInstantMessengerWindowsLiveMessengerEdit" value="socialofficesnedit" />
-		<var name="userInstantMessengerYM" value="socialofficesn" />
-		<var name="userInstantMessengerYMEdit" value="socialofficesnedit" />
 		<var name="userLastName" value="User01" />
 		<var name="userListName" value="User01, Social01" />
 		<var name="userMiddleName" value="Office01" />
@@ -4177,21 +4137,13 @@
 		</execute>
 
 		<execute macro="SOProfile#addInstantMessenger">
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIM}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQ}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabber}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkype}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessenger}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYM}" />
 		</execute>
 
 		<execute macro="SOProfile#editInstantMessenger">
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIMEdit}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQEdit}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabberEdit}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkypeEdit}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessengerEdit}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYMEdit}" />
 		</execute>
 
 		<execute macro="User#logoutAndLoginPG">
@@ -4202,12 +4154,8 @@
 		<execute macro="SOContactsCenter#viewUserDetailsInstantMessenger">
 			<var name="userEmailAddress" value="${userEmailAddress}" />
 			<var name="userFirstName" value="${userFirstName}" />
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIMEdit}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQEdit}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabberEdit}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkypeEdit}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessengerEdit}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYMEdit}" />
 			<var name="userLastName" value="${userLastName}" />
 			<var name="userListName" value="${userListName}" />
 			<var name="userName" value="${userName}" />
@@ -4235,12 +4183,8 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute function="AssertTextNotPresent" value1="${userInstantMessengerAIMEdit}" />
-		<execute function="AssertTextNotPresent" value1="${userInstantMessengerICQEdit}" />
 		<execute function="AssertTextNotPresent" value1="${userInstantMessengerJabberEdit}" />
 		<execute function="AssertTextNotPresent" value1="${userInstantMessengerSkypeEdit}" />
-		<execute function="AssertTextNotPresent" value1="${userInstantMessengerWindowsLiveMessengerEdit}" />
-		<execute function="AssertTextNotPresent" value1="${userInstantMessengerYMEdit}" />
 	</command>
 
 	<command name="ViewUserDetailsIntroduction" priority="4">

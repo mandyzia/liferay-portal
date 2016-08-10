@@ -1,18 +1,21 @@
 <definition component-name="portal-collaboration">
-	<property name="portlet.plugins.includes" value="notifications-portlet" />
+	<property name="portal.release" value="true" />
+	<property name="custom.properties" value="default.layout.template.id=1_column" />
 	<property name="testray.main.component.name" value="Notifications" />
 
 	<var name="pageName" value="Bookmarks Page" />
 	<var name="portletName" value="Bookmarks" />
 
 	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -20,8 +23,8 @@
 			<var name="portletName" value="${portletName}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#addCP">
@@ -31,8 +34,8 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#editPasswordCP">
@@ -41,8 +44,8 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#assignRegularRoleCP">
@@ -52,17 +55,27 @@
 	</set-up>
 
 	<tear-down>
-		<execute macro="Bookmark#tearDownCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="BookmarksFolder#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="Bookmark#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="BookmarksFolder#tearDownCP" />
 
-		<execute macro="User#tearDownCP" />
+				<execute macro="Page#tearDownPG" />
+
+				<execute macro="User#tearDownCP" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="ViewWebsiteNotificationForNewBookmarkInFolder" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -71,7 +84,7 @@
 			<var name="folderName" value="Bookmarks Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -80,7 +93,7 @@
 			<var name="folderName" value="Bookmarks Folder Name" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -91,7 +104,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -101,10 +114,14 @@
 
 		<execute macro="Bookmark#addPG">
 			<var name="bookmarkName" value="Bookmark Name" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -115,15 +132,15 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Notifications#viewCountAlert">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="1" />
 		</execute>
 
-		<execute macro="Notifications#gotoDockbar" />
+		<execute macro="Notifications#gotoNotifications" />
 
 		<execute macro="Notifications#viewNewContent">
 			<var name="assetType" value="bookmarks entry" />
@@ -135,18 +152,22 @@
 			<var name="contentBody" value="Bookmark Name" />
 		</execute>
 
-		<execute macro="Bookmark#viewPG">
-			<var name="bookmarkName" value="Bookmark Name" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+		<execute macro="BookmarksFolder#gotoPG">
+			<var name="folderName" value="Bookmarks Folder Name" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Bookmark#viewEntry">
+			<var name="bookmarkName" value="Bookmark Name" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
+		</execute>
+
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 	</command>
 
 	<command name="ViewWebsiteNotificationForUpdatedBookmarkInFolder" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -160,7 +181,7 @@
 			<var name="folderName" value="Bookmarks Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -170,10 +191,14 @@
 
 		<execute macro="Bookmark#addPG">
 			<var name="bookmarkName" value="Bookmark Name" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -184,7 +209,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -195,11 +220,11 @@
 		<execute macro="Bookmark#editPG">
 			<var name="bookmarkName" value="Bookmark Name" />
 			<var name="bookmarkNameEdit" value="Bookmark Name Edit" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
-			<var name="bookmarkURLEdit" value="http://www.liferay.com" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
+			<var name="bookmarkURLEdit" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -210,15 +235,15 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Notifications#viewCountAlert">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="1" />
 		</execute>
 
-		<execute macro="Notifications#gotoDockbar" />
+		<execute macro="Notifications#gotoNotifications" />
 
 		<execute macro="Notifications#viewUpdatedContent">
 			<var name="assetType" value="bookmarks entry" />
@@ -230,12 +255,16 @@
 			<var name="contentBody" value="Bookmark Name Edit" />
 		</execute>
 
-		<execute macro="Bookmark#viewPG">
-			<var name="bookmarkName" value="Bookmark Name Edit" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+		<execute macro="BookmarksFolder#gotoPG">
+			<var name="folderName" value="Bookmarks Folder Name" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Bookmark#viewEntry">
+			<var name="bookmarkName" value="Bookmark Name Edit" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
+		</execute>
+
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 	</command>

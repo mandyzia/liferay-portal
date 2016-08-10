@@ -14,8 +14,11 @@
 
 package com.liferay.portlet.documentlibrary.util;
 
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.service.DLFolderLocalServiceUtil;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -23,22 +26,20 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
-import com.liferay.portal.kernel.search.DocumentImpl;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.FolderIndexer;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.search.SearchEngineUtil;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
-import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.permission.DLFolderPermission;
+import com.liferay.trash.kernel.util.TrashUtil;
 
 import java.util.Locale;
 
@@ -96,13 +97,7 @@ public class DLFolderIndexer
 
 	@Override
 	protected void doDelete(DLFolder dlFolder) throws Exception {
-		Document document = new DocumentImpl();
-
-		document.addUID(CLASS_NAME, dlFolder.getFolderId());
-
-		SearchEngineUtil.deleteDocument(
-			getSearchEngineId(), dlFolder.getCompanyId(),
-			document.get(Field.UID), isCommitImmediately());
+		deleteDocument(dlFolder.getCompanyId(), dlFolder.getFolderId());
 	}
 
 	@Override
@@ -117,7 +112,15 @@ public class DLFolderIndexer
 		document.addKeyword(Field.FOLDER_ID, dlFolder.getParentFolderId());
 		document.addKeyword(
 			Field.HIDDEN, (dlFolder.isHidden() || dlFolder.isInHiddenFolder()));
-		document.addText(Field.TITLE, dlFolder.getName());
+
+		String title = dlFolder.getName();
+
+		if (dlFolder.isInTrash()) {
+			title = TrashUtil.getOriginalTitle(title);
+		}
+
+		document.addText(Field.TITLE, title);
+
 		document.addKeyword(Field.TREE_PATH, dlFolder.getTreePath());
 		document.addKeyword(
 			Field.TREE_PATH,
@@ -151,11 +154,9 @@ public class DLFolderIndexer
 
 		Document document = getDocument(dlFolder);
 
-		if (document != null) {
-			SearchEngineUtil.updateDocument(
-				getSearchEngineId(), dlFolder.getCompanyId(), document,
-				isCommitImmediately());
-		}
+		IndexWriterHelperUtil.updateDocument(
+			getSearchEngineId(), dlFolder.getCompanyId(), document,
+			isCommitImmediately());
 	}
 
 	@Override
@@ -173,10 +174,10 @@ public class DLFolderIndexer
 	}
 
 	protected void reindexFolders(final long companyId) throws PortalException {
-		final ActionableDynamicQuery actionableDynamicQuery =
-			DLFolderLocalServiceUtil.getActionableDynamicQuery();
+		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
+			DLFolderLocalServiceUtil.getIndexableActionableDynamicQuery();
 
-		actionableDynamicQuery.setAddCriteriaMethod(
+		indexableActionableDynamicQuery.setAddCriteriaMethod(
 			new ActionableDynamicQuery.AddCriteriaMethod() {
 
 				@Override
@@ -188,20 +189,16 @@ public class DLFolderIndexer
 				}
 
 			});
-		actionableDynamicQuery.setCompanyId(companyId);
-		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+		indexableActionableDynamicQuery.setCompanyId(companyId);
+		indexableActionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod<DLFolder>() {
 
 				@Override
-				public void performAction(Object object) {
-					DLFolder dlFolder = (DLFolder)object;
-
+				public void performAction(DLFolder dlFolder) {
 					try {
 						Document document = getDocument(dlFolder);
 
-						if (document != null) {
-							actionableDynamicQuery.addDocument(document);
-						}
+						indexableActionableDynamicQuery.addDocuments(document);
 					}
 					catch (PortalException pe) {
 						if (_log.isWarnEnabled()) {
@@ -214,9 +211,9 @@ public class DLFolderIndexer
 				}
 
 			});
-		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
+		indexableActionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
-		actionableDynamicQuery.performActions();
+		indexableActionableDynamicQuery.performActions();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

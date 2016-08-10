@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.blogs.service.persistence.test;
 
+import com.liferay.blogs.kernel.exception.NoSuchEntryException;
+import com.liferay.blogs.kernel.model.BlogsEntry;
+import com.liferay.blogs.kernel.service.BlogsEntryLocalServiceUtil;
+import com.liferay.blogs.kernel.service.persistence.BlogsEntryPersistence;
+import com.liferay.blogs.kernel.service.persistence.BlogsEntryUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -30,19 +36,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
-
-import com.liferay.portlet.blogs.NoSuchEntryException;
-import com.liferay.portlet.blogs.model.BlogsEntry;
-import com.liferay.portlet.blogs.service.BlogsEntryLocalServiceUtil;
-import com.liferay.portlet.blogs.service.persistence.BlogsEntryPersistence;
-import com.liferay.portlet.blogs.service.persistence.BlogsEntryUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -53,14 +53,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class BlogsEntryPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -163,6 +165,8 @@ public class BlogsEntryPersistenceTest {
 
 		newBlogsEntry.setSmallImageURL(RandomTestUtil.randomString());
 
+		newBlogsEntry.setLastPublishDate(RandomTestUtil.nextDate());
+
 		newBlogsEntry.setStatus(RandomTestUtil.nextInt());
 
 		newBlogsEntry.setStatusByUserId(RandomTestUtil.nextLong());
@@ -226,6 +230,9 @@ public class BlogsEntryPersistenceTest {
 			newBlogsEntry.getSmallImageId());
 		Assert.assertEquals(existingBlogsEntry.getSmallImageURL(),
 			newBlogsEntry.getSmallImageURL());
+		Assert.assertEquals(Time.getShortTimestamp(
+				existingBlogsEntry.getLastPublishDate()),
+			Time.getShortTimestamp(newBlogsEntry.getLastPublishDate()));
 		Assert.assertEquals(existingBlogsEntry.getStatus(),
 			newBlogsEntry.getStatus());
 		Assert.assertEquals(existingBlogsEntry.getStatusByUserId(),
@@ -368,11 +375,33 @@ public class BlogsEntryPersistenceTest {
 	}
 
 	@Test
+	public void testCountByG_U_SArrayable() throws Exception {
+		_persistence.countByG_U_S(RandomTestUtil.nextLong(),
+			RandomTestUtil.nextLong(), new int[] { RandomTestUtil.nextInt(), 0 });
+	}
+
+	@Test
 	public void testCountByG_U_NotS() throws Exception {
 		_persistence.countByG_U_NotS(RandomTestUtil.nextLong(),
 			RandomTestUtil.nextLong(), RandomTestUtil.nextInt());
 
 		_persistence.countByG_U_NotS(0L, 0L, 0);
+	}
+
+	@Test
+	public void testCountByG_D_S() throws Exception {
+		_persistence.countByG_D_S(RandomTestUtil.nextLong(),
+			RandomTestUtil.nextDate(), RandomTestUtil.nextInt());
+
+		_persistence.countByG_D_S(0L, RandomTestUtil.nextDate(), 0);
+	}
+
+	@Test
+	public void testCountByG_GtD_S() throws Exception {
+		_persistence.countByG_GtD_S(RandomTestUtil.nextLong(),
+			RandomTestUtil.nextDate(), RandomTestUtil.nextInt());
+
+		_persistence.countByG_GtD_S(0L, RandomTestUtil.nextDate(), 0);
 	}
 
 	@Test
@@ -474,12 +503,12 @@ public class BlogsEntryPersistenceTest {
 			"entryId", true, "groupId", true, "companyId", true, "userId",
 			true, "userName", true, "createDate", true, "modifiedDate", true,
 			"title", true, "subtitle", true, "urlTitle", true, "description",
-			true, "content", true, "displayDate", true, "allowPingbacks", true,
-			"allowTrackbacks", true, "trackbacks", true, "coverImageCaption",
-			true, "coverImageFileEntryId", true, "coverImageURL", true,
-			"smallImage", true, "smallImageFileEntryId", true, "smallImageId",
-			true, "smallImageURL", true, "status", true, "statusByUserId",
-			true, "statusByUserName", true, "statusDate", true);
+			true, "displayDate", true, "allowPingbacks", true,
+			"allowTrackbacks", true, "coverImageCaption", true,
+			"coverImageFileEntryId", true, "coverImageURL", true, "smallImage",
+			true, "smallImageFileEntryId", true, "smallImageId", true,
+			"smallImageURL", true, "lastPublishDate", true, "status", true,
+			"statusByUserId", true, "statusByUserName", true, "statusDate", true);
 	}
 
 	@Test
@@ -588,11 +617,9 @@ public class BlogsEntryPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = BlogsEntryLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<BlogsEntry>() {
 				@Override
-				public void performAction(Object object) {
-					BlogsEntry blogsEntry = (BlogsEntry)object;
-
+				public void performAction(BlogsEntry blogsEntry) {
 					Assert.assertNotNull(blogsEntry);
 
 					count.increment();
@@ -684,17 +711,17 @@ public class BlogsEntryPersistenceTest {
 
 		BlogsEntry existingBlogsEntry = _persistence.findByPrimaryKey(newBlogsEntry.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingBlogsEntry.getUuid(),
+		Assert.assertTrue(Objects.equals(existingBlogsEntry.getUuid(),
 				ReflectionTestUtil.invoke(existingBlogsEntry,
 					"getOriginalUuid", new Class<?>[0])));
-		Assert.assertEquals(existingBlogsEntry.getGroupId(),
-			ReflectionTestUtil.invoke(existingBlogsEntry, "getOriginalGroupId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingBlogsEntry.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingBlogsEntry,
+				"getOriginalGroupId", new Class<?>[0]));
 
-		Assert.assertEquals(existingBlogsEntry.getGroupId(),
-			ReflectionTestUtil.invoke(existingBlogsEntry, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingBlogsEntry.getUrlTitle(),
+		Assert.assertEquals(Long.valueOf(existingBlogsEntry.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingBlogsEntry,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertTrue(Objects.equals(existingBlogsEntry.getUrlTitle(),
 				ReflectionTestUtil.invoke(existingBlogsEntry,
 					"getOriginalUrlTitle", new Class<?>[0])));
 	}
@@ -749,6 +776,8 @@ public class BlogsEntryPersistenceTest {
 		blogsEntry.setSmallImageId(RandomTestUtil.nextLong());
 
 		blogsEntry.setSmallImageURL(RandomTestUtil.randomString());
+
+		blogsEntry.setLastPublishDate(RandomTestUtil.nextDate());
 
 		blogsEntry.setStatus(RandomTestUtil.nextInt());
 

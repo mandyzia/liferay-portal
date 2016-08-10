@@ -1,5 +1,3 @@
-<#assign liferay_ui = taglibLiferayHash["/WEB-INF/tld/liferay-ui.tld"] />
-
 <#list entries as entry>
 	<div class="entry">
 		<#assign viewURL = renderResponse.createRenderURL() />
@@ -21,7 +19,7 @@
 
 			<#assign summary = entry.getDescription() />
 
-			<#if (validator.isNull(summary))>
+			<#if validator.isNull(summary)>
 				<#assign summary = entry.getContent() />
 			</#if>
 
@@ -35,10 +33,10 @@
 				${dateUtil.getDate(entry.getCreateDate(), "dd MMM yyyy - HH:mm:ss", locale)}
 			</span>
 
-			<#assign blogsEntryClassName = "com.liferay.portlet.blogs.model.BlogsEntry" />
+			<#assign blogsEntryClassName = "com.liferay.blogs.kernel.model.BlogsEntry" />
 
-			<#if blogsPortletInstanceSettings.isEnableFlags()>
-				<@liferay_ui["flags"]
+			<#if blogsPortletInstanceConfiguration.enableFlags()>
+				<@liferay_flags["flags"]
 					className=blogsEntryClassName
 					classPK=entry.getEntryId()
 					contentTitle=entry.getTitle()
@@ -53,7 +51,6 @@
 					portletURL=renderResponse.createRenderURL()
 				/>
 			</span>
-
 			<span class="entry-tags">
 				<@liferay_ui["asset-tags-summary"]
 					className=blogsEntryClassName

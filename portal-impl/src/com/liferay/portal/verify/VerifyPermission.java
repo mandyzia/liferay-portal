@@ -14,8 +14,11 @@
 
 package com.liferay.portal.verify;
 
+import com.liferay.portal.dao.orm.common.SQLTransformer;
 import com.liferay.portal.kernel.dao.db.DB;
-import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
+import com.liferay.portal.kernel.dao.db.DBManagerUtil;
+import com.liferay.portal.kernel.dao.db.DBType;
+import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
@@ -23,31 +26,39 @@ import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.PortletConstants;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.ResourcePermission;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserGroup;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
+import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LoggingTimer;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.PortletConstants;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.ResourcePermission;
-import com.liferay.portal.model.Role;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.UserGroup;
-import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionCacheUtil;
-import com.liferay.portal.security.permission.ResourceActionsUtil;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.ResourceActionLocalServiceUtil;
-import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
-import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.impl.ResourcePermissionLocalServiceImpl;
 import com.liferay.portal.util.PortalInstances;
-import com.liferay.portal.util.PortalUtil;
+
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,37 +72,102 @@ import java.util.List;
 public class VerifyPermission extends VerifyProcess {
 
 	protected void checkPermissions() throws Exception {
-		List<String> modelNames = ResourceActionsUtil.getModelNames();
+		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+			List<String> modelNames = ResourceActionsUtil.getModelNames();
 
-		for (String modelName : modelNames) {
-			List<String> actionIds =
-				ResourceActionsUtil.getModelResourceActions(modelName);
+			for (String modelName : modelNames) {
+				List<String> actionIds =
+					ResourceActionsUtil.getModelResourceActions(modelName);
 
 				ResourceActionLocalServiceUtil.checkResourceActions(
 					modelName, actionIds, true);
+			}
+
+			List<String> portletNames = ResourceActionsUtil.getPortletNames();
+
+			for (String portletName : portletNames) {
+				List<String> actionIds =
+					ResourceActionsUtil.getPortletResourceActions(portletName);
+
+				ResourceActionLocalServiceUtil.checkResourceActions(
+					portletName, actionIds, true);
+			}
 		}
+	}
 
-		List<String> portletNames = ResourceActionsUtil.getPortletNames();
+	protected void deleteConflictingUserDefaultRolePermissions(
+			long companyId, long powerUserRoleId, long userRoleId,
+			long userClassNameId, long userGroupClassNameId)
+		throws Exception {
 
-		for (String portletName : portletNames) {
-			List<String> actionIds =
-				ResourceActionsUtil.getPortletResourceActions(portletName);
+		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+			StringBundler sb = new StringBundler(14);
 
-			ResourceActionLocalServiceUtil.checkResourceActions(
-				portletName, actionIds, true);
+			sb.append("select resourcePermission1.resourcePermissionId from ");
+			sb.append("ResourcePermission resourcePermission1 inner join ");
+			sb.append("ResourcePermission resourcePermission2 on ");
+			sb.append("resourcePermission1.companyId = ");
+			sb.append("resourcePermission2.companyId and ");
+			sb.append("resourcePermission1.name = resourcePermission2.name ");
+			sb.append("and resourcePermission1.scope = ");
+			sb.append("resourcePermission2.scope and ");
+			sb.append("resourcePermission1.primKey = ");
+			sb.append("resourcePermission2.primKey inner join Layout on ");
+			sb.append("resourcePermission1.companyId = Layout.companyId and ");
+			sb.append("resourcePermission1.primKey like ");
+			sb.append("replace('[$PLID$]_LAYOUT_%', '[$PLID$]', ");
+			sb.append("cast_text(Layout.plid)) and Layout.type_ = '");
+			sb.append(LayoutConstants.TYPE_PORTLET);
+			sb.append(CharPool.APOSTROPHE);
+			sb.append(" inner join Group_ on Layout.groupId = Group_.groupId ");
+			sb.append("where resourcePermission1.companyId = ");
+			sb.append(companyId);
+			sb.append(" and resourcePermission1.roleId = ");
+			sb.append(powerUserRoleId);
+			sb.append(" and resourcePermission2.roleId = ");
+			sb.append(userRoleId);
+			sb.append(" and resourcePermission1.scope = ");
+			sb.append(ResourceConstants.SCOPE_INDIVIDUAL);
+			sb.append(" and (Group_.classNameId = ");
+			sb.append(userClassNameId);
+			sb.append(" or Group_.classNameId = ");
+			sb.append(userGroupClassNameId);
+			sb.append(")");
+
+			try (Statement ps1 = connection.createStatement();
+				PreparedStatement ps2 =
+					AutoBatchPreparedStatementUtil.concurrentAutoBatch(
+						connection,
+						"delete from ResourcePermission where " +
+							"resourcePermissionId = ?")) {
+
+				String sql = SQLTransformer.transform(sb.toString());
+
+				try (ResultSet rs = ps1.executeQuery(sql)) {
+					while (rs.next()) {
+						ps2.setLong(1, rs.getLong(1));
+
+						ps2.addBatch();
+					}
+				}
+
+				ps2.executeBatch();
+			}
 		}
 	}
 
 	protected void deleteDefaultPrivateLayoutPermissions() throws Exception {
-		long[] companyIds = PortalInstances.getCompanyIdsBySQL();
+		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+			long[] companyIds = PortalInstances.getCompanyIdsBySQL();
 
-		for (long companyId : companyIds) {
-			try {
-				deleteDefaultPrivateLayoutPermissions_6(companyId);
-			}
-			catch (Exception e) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(e, e);
+			for (long companyId : companyIds) {
+				try {
+					deleteDefaultPrivateLayoutPermissions_6(companyId);
+				}
+				catch (Exception e) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(e, e);
+					}
 				}
 			}
 		}
@@ -128,78 +204,142 @@ public class VerifyPermission extends VerifyProcess {
 	}
 
 	protected void fixOrganizationRolePermissions() throws Exception {
-		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
-			ResourcePermission.class);
+		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+			DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
+				ResourcePermission.class);
 
-		dynamicQuery.add(
-			RestrictionsFactoryUtil.eq("name", Organization.class.getName()));
+			dynamicQuery.add(
+				RestrictionsFactoryUtil.eq(
+					"name", Organization.class.getName()));
 
-		List<ResourcePermission> resourcePermissions =
-			ResourcePermissionLocalServiceUtil.dynamicQuery(dynamicQuery);
+			List<ResourcePermission> resourcePermissions =
+				ResourcePermissionLocalServiceUtil.dynamicQuery(dynamicQuery);
 
-		for (ResourcePermission resourcePermission : resourcePermissions) {
-			ResourcePermission groupResourcePermission = null;
-
-			try {
-				groupResourcePermission =
-					ResourcePermissionLocalServiceUtil.getResourcePermission(
+			for (ResourcePermission resourcePermission : resourcePermissions) {
+				ResourcePermission groupResourcePermission =
+					ResourcePermissionLocalServiceUtil.fetchResourcePermission(
 						resourcePermission.getCompanyId(),
 						Group.class.getName(), resourcePermission.getScope(),
 						resourcePermission.getPrimKey(),
 						resourcePermission.getRoleId());
-			}
-			catch (Exception e) {
-				ResourcePermissionLocalServiceUtil.setResourcePermissions(
-					resourcePermission.getCompanyId(), Group.class.getName(),
-					resourcePermission.getScope(),
-					resourcePermission.getPrimKey(),
-					resourcePermission.getRoleId(),
-					ResourcePermissionLocalServiceImpl.EMPTY_ACTION_IDS);
 
-				groupResourcePermission =
-					ResourcePermissionLocalServiceUtil.getResourcePermission(
+				if (groupResourcePermission == null) {
+					ResourcePermissionLocalServiceUtil.setResourcePermissions(
 						resourcePermission.getCompanyId(),
 						Group.class.getName(), resourcePermission.getScope(),
 						resourcePermission.getPrimKey(),
-						resourcePermission.getRoleId());
-			}
+						resourcePermission.getRoleId(),
+						ResourcePermissionLocalServiceImpl.EMPTY_ACTION_IDS);
 
-			for (String actionId : _DEPRECATED_ORGANIZATION_ACTION_IDS) {
-				if (resourcePermission.hasActionId(actionId)) {
-					resourcePermission.removeResourceAction(actionId);
+					groupResourcePermission =
+						ResourcePermissionLocalServiceUtil.
+							getResourcePermission(
+								resourcePermission.getCompanyId(),
+								Group.class.getName(),
+								resourcePermission.getScope(),
+								resourcePermission.getPrimKey(),
+								resourcePermission.getRoleId());
+				}
 
-					groupResourcePermission.addResourceAction(actionId);
+				for (String actionId : _deprecatedOrganizationActionIds) {
+					if (resourcePermission.hasActionId(actionId)) {
+						resourcePermission.removeResourceAction(actionId);
+
+						groupResourcePermission.addResourceAction(actionId);
+					}
+				}
+
+				try {
+					resourcePermission.resetOriginalValues();
+
+					ResourcePermissionLocalServiceUtil.updateResourcePermission(
+						resourcePermission);
+
+					groupResourcePermission.resetOriginalValues();
+
+					ResourcePermissionLocalServiceUtil.updateResourcePermission(
+						groupResourcePermission);
+				}
+				catch (Exception e) {
+					_log.error(e, e);
 				}
 			}
 
-			try {
-				resourcePermission.resetOriginalValues();
-
-				ResourcePermissionLocalServiceUtil.updateResourcePermission(
-					resourcePermission);
-
-				groupResourcePermission.resetOriginalValues();
-
-				ResourcePermissionLocalServiceUtil.updateResourcePermission(
-					groupResourcePermission);
-			}
-			catch (Exception e) {
-				_log.error(e, e);
-			}
+			PermissionCacheUtil.clearResourceCache();
 		}
-
-		PermissionCacheUtil.clearResourceCache();
 	}
 
 	protected void fixUserDefaultRolePermissions() throws Exception {
-		long userClassNameId = PortalUtil.getClassNameId(User.class);
-		long userGroupClassNameId = PortalUtil.getClassNameId(UserGroup.class);
+		DB db = DBManagerUtil.getDB();
 
-		DB db = DBFactoryUtil.getDB();
+		DBType dbType = db.getDBType();
 
-		String dbType = db.getType();
+		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+			long userClassNameId = PortalUtil.getClassNameId(User.class);
+			long userGroupClassNameId = PortalUtil.getClassNameId(
+				UserGroup.class);
 
-		long[] companyIds = PortalInstances.getCompanyIdsBySQL();
+			long[] companyIds = PortalInstances.getCompanyIdsBySQL();
+
+			if (dbType == DBType.MYSQL) {
+				fixUserDefaultRolePermissionsMySQL(
+					userClassNameId, userGroupClassNameId, companyIds);
+
+				return;
+			}
+
+			if (dbType == DBType.ORACLE) {
+				fixUserDefaultRolePermissionsOracle(
+					userClassNameId, userGroupClassNameId, companyIds);
+
+				return;
+			}
+
+			for (long companyId : companyIds) {
+				Role powerUserRole = RoleLocalServiceUtil.getRole(
+					companyId, RoleConstants.POWER_USER);
+				Role userRole = RoleLocalServiceUtil.getRole(
+					companyId, RoleConstants.USER);
+
+				deleteConflictingUserDefaultRolePermissions(
+					companyId, powerUserRole.getRoleId(), userRole.getRoleId(),
+					userClassNameId, userGroupClassNameId);
+
+				StringBundler sb = new StringBundler(20);
+
+				sb.append("update ResourcePermission set roleId = ");
+				sb.append(userRole.getRoleId());
+				sb.append(" where resourcePermissionId in (select ");
+				sb.append("resourcePermissionId from ResourcePermission ");
+				sb.append("inner join Layout on ResourcePermission.companyId ");
+				sb.append("= Layout.companyId and ResourcePermission.primKey ");
+				sb.append("like replace('[$PLID$]_LAYOUT_%', '[$PLID$]', ");
+				sb.append("cast_text(Layout.plid)) inner join Group_ on ");
+				sb.append("Layout.groupId = Group_.groupId where ");
+				sb.append("ResourcePermission.scope = ");
+				sb.append(ResourceConstants.SCOPE_INDIVIDUAL);
+				sb.append(" and ResourcePermission.roleId = ");
+				sb.append(powerUserRole.getRoleId());
+				sb.append(" and (Group_.classNameId = ");
+				sb.append(userClassNameId);
+				sb.append(" or Group_.classNameId = ");
+				sb.append(userGroupClassNameId);
+				sb.append(") and Layout.type_ = '");
+				sb.append(LayoutConstants.TYPE_PORTLET);
+				sb.append("')");
+
+				runSQL(sb.toString());
+			}
+		}
+		finally {
+			EntityCacheUtil.clearCache();
+			FinderCacheUtil.clearCache();
+		}
+	}
+
+	protected void fixUserDefaultRolePermissionsMySQL(
+			long userClassNameId, long userGroupClassNameId, long[] companyIds)
+		throws Exception {
 
 		for (long companyId : companyIds) {
 			Role powerUserRole = RoleLocalServiceUtil.getRole(
@@ -207,72 +347,101 @@ public class VerifyPermission extends VerifyProcess {
 			Role userRole = RoleLocalServiceUtil.getRole(
 				companyId, RoleConstants.USER);
 
-			StringBundler joinSB = new StringBundler(22);
+			StringBundler sb = new StringBundler(19);
 
-			joinSB.append("ResourcePermission resourcePermission1 left outer ");
-			joinSB.append("join ResourcePermission resourcePermission2 on ");
-			joinSB.append("resourcePermission1.companyId = ");
-			joinSB.append("resourcePermission2.companyId and ");
-			joinSB.append("resourcePermission1.name = ");
-			joinSB.append("resourcePermission2.name and ");
-			joinSB.append("resourcePermission1.primKey = ");
-			joinSB.append("resourcePermission2.primKey and ");
-			joinSB.append("resourcePermission1.scope = ");
-			joinSB.append("resourcePermission2.scope and ");
-			joinSB.append("resourcePermission2.roleId = ");
-			joinSB.append(userRole.getRoleId());
-			joinSB.append(" inner join Layout on ");
-			joinSB.append("resourcePermission1.companyId = Layout.companyId ");
-			joinSB.append("and resourcePermission1.primKey like ");
-			joinSB.append("replace('[$PLID$]");
-			joinSB.append(PortletConstants.LAYOUT_SEPARATOR);
-			joinSB.append("%', '[$PLID$]', cast_text(Layout.plid)) inner ");
-			joinSB.append("join Group_ on Layout.groupId = ");
-			joinSB.append("Group_.groupId and Layout.type_ = '");
-			joinSB.append(LayoutConstants.TYPE_PORTLET);
-			joinSB.append(StringPool.APOSTROPHE);
+			sb.append("update ignore ResourcePermission inner join Layout on ");
+			sb.append("ResourcePermission.companyId = Layout.companyId and ");
+			sb.append("ResourcePermission.primKey like ");
+			sb.append("replace('[$PLID$]_LAYOUT_%', '[$PLID$]', ");
+			sb.append("cast_text(Layout.plid)) inner join Group_ on ");
+			sb.append("Layout.groupId = Group_.groupId set ");
+			sb.append("ResourcePermission.roleId = ");
+			sb.append(userRole.getRoleId());
+			sb.append(" where ResourcePermission.scope = ");
+			sb.append(ResourceConstants.SCOPE_INDIVIDUAL);
+			sb.append(" and ResourcePermission.roleId = ");
+			sb.append(powerUserRole.getRoleId());
+			sb.append(" and (Group_.classNameId = ");
+			sb.append(userClassNameId);
+			sb.append(" or Group_.classNameId = ");
+			sb.append(userGroupClassNameId);
+			sb.append(") and Layout.type_ = '");
+			sb.append(LayoutConstants.TYPE_PORTLET);
+			sb.append(StringPool.APOSTROPHE);
 
-			StringBundler whereSB = new StringBundler(12);
+			runSQL(sb.toString());
+		}
+	}
 
-			whereSB.append("where resourcePermission1.scope = ");
-			whereSB.append(ResourceConstants.SCOPE_INDIVIDUAL);
-			whereSB.append(" and resourcePermission1.primKey like '%");
-			whereSB.append(PortletConstants.LAYOUT_SEPARATOR);
-			whereSB.append("%' and resourcePermission1.roleId = ");
-			whereSB.append(powerUserRole.getRoleId());
-			whereSB.append(" and resourcePermission2.roleId is null and ");
-			whereSB.append("(Group_.classNameId = ");
-			whereSB.append(userClassNameId);
-			whereSB.append(" or Group_.classNameId = ");
-			whereSB.append(userGroupClassNameId);
-			whereSB.append(StringPool.CLOSE_PARENTHESIS);
+	protected void fixUserDefaultRolePermissionsOracle(
+			long userClassNameId, long userGroupClassNameId, long[] companyIds)
+		throws Exception {
 
-			StringBundler sb = new StringBundler(8);
-
-			if (dbType.equals(DB.TYPE_MYSQL)) {
-				sb.append("update ");
-				sb.append(joinSB.toString());
-				sb.append(" set resourcePermission1.roleId = ");
-				sb.append(userRole.getRoleId());
-				sb.append(StringPool.SPACE);
-				sb.append(whereSB.toString());
+		try {
+			runSQL("alter table ResourcePermission drop column plid");
+		}
+		catch (SQLException sqle) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(sqle, sqle);
 			}
-			else {
-				sb.append("update ResourcePermission set roleId = ");
-				sb.append(userRole.getRoleId());
-				sb.append(" where resourcePermissionId in (select ");
-				sb.append("resourcePermission1.resourcePermissionId from ");
-				sb.append(joinSB.toString());
-				sb.append(StringPool.SPACE);
-				sb.append(whereSB.toString());
-				sb.append(StringPool.CLOSE_PARENTHESIS);
-			}
+		}
+
+		runSQL("alter table ResourcePermission add plid NUMBER null");
+
+		runSQL("create index tmp_res_plid on ResourcePermission(plid)");
+
+		StringBundler sb = new StringBundler(6);
+
+		sb.append("update ResourcePermission r1 set plid = (select ");
+		sb.append("SUBSTR(ResourcePermission.primKey, 0, ");
+		sb.append("INSTR(ResourcePermission.primKey, '_LAYOUT_') -1) from ");
+		sb.append("ResourcePermission where r1.resourcePermissionId = ");
+		sb.append("ResourcePermission.resourcePermissionId and ");
+		sb.append("ResourcePermission.primKey like '%_LAYOUT_%')");
+
+		runSQL(sb.toString());
+
+		try (CallableStatement cs = connection.prepareCall(
+				"{call DBMS_ERRLOG.CREATE_ERROR_LOG('ResourcePermission')}")) {
+
+			cs.execute();
+		}
+
+		for (long companyId : companyIds) {
+			Role powerUserRole = RoleLocalServiceUtil.getRole(
+				companyId, RoleConstants.POWER_USER);
+			Role userRole = RoleLocalServiceUtil.getRole(
+				companyId, RoleConstants.USER);
+
+			sb = new StringBundler(20);
+
+			sb.append("update ResourcePermission r1 set roleId = ");
+			sb.append(userRole.getRoleId());
+			sb.append(" where exists (select ");
+			sb.append("ResourcePermission.resourcePermissionId from ");
+			sb.append("ResourcePermission inner join Layout on ");
+			sb.append("ResourcePermission.plid = Layout.plid inner join ");
+			sb.append("Group_ on Layout.groupId = Group_.groupId where ");
+			sb.append("r1.resourcePermissionId = ResourcePermission.");
+			sb.append("resourcePermissionId and ResourcePermission.scope = ");
+			sb.append(ResourceConstants.SCOPE_INDIVIDUAL);
+			sb.append(" and ResourcePermission.roleId = ");
+			sb.append(powerUserRole.getRoleId());
+			sb.append(" and (Group_.classNameId = ");
+			sb.append(userClassNameId);
+			sb.append(" or Group_.classNameId = ");
+			sb.append(userGroupClassNameId);
+			sb.append(") and Layout.type_ = '");
+			sb.append(LayoutConstants.TYPE_PORTLET);
+			sb.append("') log errors into ERR$_ResourcePermission ('') ");
+			sb.append("reject limit unlimited");
 
 			runSQL(sb.toString());
 		}
 
-		EntityCacheUtil.clearCache();
-		FinderCacheUtil.clearCache();
+		runSQL("drop table ERR$_ResourcePermission");
+
+		runSQL("alter table ResourcePermission drop column plid");
 	}
 
 	protected boolean isPrivateLayout(String name, String primKey)
@@ -300,21 +469,20 @@ public class VerifyPermission extends VerifyProcess {
 		return true;
 	}
 
-	private static final List<String> _DEPRECATED_ORGANIZATION_ACTION_IDS =
-		new ArrayList<>();
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		VerifyPermission.class);
 
+	private static final List<String> _deprecatedOrganizationActionIds =
+		new ArrayList<>();
+
 	static {
-		_DEPRECATED_ORGANIZATION_ACTION_IDS.add(
-			ActionKeys.MANAGE_ARCHIVED_SETUPS);
-		_DEPRECATED_ORGANIZATION_ACTION_IDS.add(ActionKeys.MANAGE_LAYOUTS);
-		_DEPRECATED_ORGANIZATION_ACTION_IDS.add(ActionKeys.MANAGE_STAGING);
-		_DEPRECATED_ORGANIZATION_ACTION_IDS.add(ActionKeys.MANAGE_TEAMS);
-		_DEPRECATED_ORGANIZATION_ACTION_IDS.add(ActionKeys.PUBLISH_STAGING);
-		_DEPRECATED_ORGANIZATION_ACTION_IDS.add("APPROVE_PROPOSAL");
-		_DEPRECATED_ORGANIZATION_ACTION_IDS.add("ASSIGN_REVIEWER");
+		_deprecatedOrganizationActionIds.add(ActionKeys.MANAGE_ARCHIVED_SETUPS);
+		_deprecatedOrganizationActionIds.add(ActionKeys.MANAGE_LAYOUTS);
+		_deprecatedOrganizationActionIds.add(ActionKeys.MANAGE_STAGING);
+		_deprecatedOrganizationActionIds.add(ActionKeys.MANAGE_TEAMS);
+		_deprecatedOrganizationActionIds.add(ActionKeys.PUBLISH_STAGING);
+		_deprecatedOrganizationActionIds.add("APPROVE_PROPOSAL");
+		_deprecatedOrganizationActionIds.add("ASSIGN_REVIEWER");
 	}
 
 }

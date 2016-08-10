@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.expando.service.persistence.test;
 
+import com.liferay.expando.kernel.exception.NoSuchRowException;
+import com.liferay.expando.kernel.model.ExpandoRow;
+import com.liferay.expando.kernel.service.ExpandoRowLocalServiceUtil;
+import com.liferay.expando.kernel.service.persistence.ExpandoRowPersistence;
+import com.liferay.expando.kernel.service.persistence.ExpandoRowUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -32,15 +38,10 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.expando.NoSuchRowException;
-import com.liferay.portlet.expando.model.ExpandoRow;
-import com.liferay.portlet.expando.service.ExpandoRowLocalServiceUtil;
-import com.liferay.portlet.expando.service.persistence.ExpandoRowPersistence;
-import com.liferay.portlet.expando.service.persistence.ExpandoRowUtil;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,8 +58,9 @@ import java.util.Set;
  * @generated
  */
 public class ExpandoRowPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -296,11 +298,9 @@ public class ExpandoRowPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = ExpandoRowLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<ExpandoRow>() {
 				@Override
-				public void performAction(Object object) {
-					ExpandoRow expandoRow = (ExpandoRow)object;
-
+				public void performAction(ExpandoRow expandoRow) {
 					Assert.assertNotNull(expandoRow);
 
 					count.increment();
@@ -392,12 +392,12 @@ public class ExpandoRowPersistenceTest {
 
 		ExpandoRow existingExpandoRow = _persistence.findByPrimaryKey(newExpandoRow.getPrimaryKey());
 
-		Assert.assertEquals(existingExpandoRow.getTableId(),
-			ReflectionTestUtil.invoke(existingExpandoRow, "getOriginalTableId",
-				new Class<?>[0]));
-		Assert.assertEquals(existingExpandoRow.getClassPK(),
-			ReflectionTestUtil.invoke(existingExpandoRow, "getOriginalClassPK",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingExpandoRow.getTableId()),
+			ReflectionTestUtil.<Long>invoke(existingExpandoRow,
+				"getOriginalTableId", new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingExpandoRow.getClassPK()),
+			ReflectionTestUtil.<Long>invoke(existingExpandoRow,
+				"getOriginalClassPK", new Class<?>[0]));
 	}
 
 	protected ExpandoRow addExpandoRow() throws Exception {

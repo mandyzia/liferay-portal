@@ -17,18 +17,18 @@ package com.liferay.portal.model.impl;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
-import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutTypeController;
+import com.liferay.portal.kernel.servlet.DirectRequestDispatcherFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.LayoutTypeController;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.struts.StrutsUtil;
 import com.liferay.portal.util.PropsUtil;
-import com.liferay.portal.util.WebKeys;
 import com.liferay.taglib.servlet.PipingServletResponse;
 
 import java.util.Collection;
@@ -50,6 +50,8 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 
 		Filter filter = new Filter(type);
 
+		_browsable = GetterUtil.getBoolean(
+			PropsUtil.get(PropsKeys.LAYOUT_BROWSABLE, filter), true);
 		_configurationActionDelete = StringUtil.split(
 			GetterUtil.getString(
 				PropsUtil.get(
@@ -62,6 +64,8 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 			PropsUtil.get(PropsKeys.LAYOUT_EDIT_PAGE, filter));
 		_firstPageable = GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.LAYOUT_FIRST_PAGEABLE, filter));
+		_fullPageDisplayable = GetterUtil.getBoolean(
+			PropsUtil.get(PropsKeys.FULL_PAGE_DISPLAYABLE, filter));
 		_parentable = GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.LAYOUT_PARENTABLE, filter), true);
 		_sitemapable = GetterUtil.getBoolean(
@@ -85,16 +89,17 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 	}
 
 	@Override
+	public String getType() {
+		return _type;
+	}
+
+	@Override
 	public String getURL() {
 		return _url;
 	}
 
-	public String getViewPath(String portletId, boolean wap) {
+	public String getViewPath(String portletId) {
 		String path = StrutsUtil.TEXT_HTML_DIR;
-
-		if (wap) {
-			path = StrutsUtil.TEXT_WAP_DIR;
-		}
 
 		// Manually check the p_p_id. See LEP-1724.
 
@@ -123,7 +128,8 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 			WebKeys.CTX);
 
 		RequestDispatcher requestDispatcher =
-			servletContext.getRequestDispatcher(getEditPage());
+			DirectRequestDispatcherFactoryUtil.getRequestDispatcher(
+				servletContext, getEditPage());
 
 		UnsyncStringWriter unsyncStringWriter = new UnsyncStringWriter();
 
@@ -146,10 +152,11 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 
 		String portletId = ParamUtil.getString(request, "p_p_id");
 
-		String path = getViewPath(portletId, BrowserSnifferUtil.isWap(request));
+		String path = getViewPath(portletId);
 
 		RequestDispatcher requestDispatcher =
-			servletContext.getRequestDispatcher(path);
+			DirectRequestDispatcherFactoryUtil.getRequestDispatcher(
+				servletContext, path);
 
 		UnsyncStringWriter unsyncStringWriter = new UnsyncStringWriter();
 
@@ -171,8 +178,28 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 	}
 
 	@Override
+	public boolean isBrowsable() {
+		return _browsable;
+	}
+
+	@Override
+	public boolean isCheckLayoutViewPermission() {
+		return true;
+	}
+
+	@Override
 	public boolean isFirstPageable() {
 		return _firstPageable;
+	}
+
+	@Override
+	public boolean isFullPageDisplayable() {
+		return _fullPageDisplayable;
+	}
+
+	@Override
+	public boolean isInstanceable() {
+		return true;
 	}
 
 	@Override
@@ -201,8 +228,8 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 
 			return values.contains(friendlyURL);
 		}
-		catch (SystemException e) {
-			throw new RuntimeException(e);
+		catch (SystemException se) {
+			throw new RuntimeException(se);
 		}
 	}
 
@@ -210,10 +237,12 @@ public class LayoutTypeControllerImpl implements LayoutTypeController {
 		return StrutsUtil.TEXT_HTML_DIR + _editPage;
 	}
 
+	private final boolean _browsable;
 	private final String[] _configurationActionDelete;
 	private final String[] _configurationActionUpdate;
 	private final String _editPage;
 	private final boolean _firstPageable;
+	private final boolean _fullPageDisplayable;
 	private final boolean _parentable;
 	private final boolean _sitemapable;
 	private final String _type;

@@ -17,22 +17,22 @@ package com.liferay.portal.security.auth;
 import com.liferay.portal.events.EventsProcessorUtil;
 import com.liferay.portal.kernel.events.Action;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.jaas.PortalPrincipal;
 import com.liferay.portal.kernel.security.jaas.PortalRole;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.HttpMethods;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.IntegerWrapper;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.User;
 import com.liferay.portal.security.jaas.JAASHelper;
-import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.servlet.MainServlet;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
 import com.liferay.portal.test.rule.callback.MainServletTestCallback;
 import com.liferay.portal.util.PropsValues;
 
@@ -78,8 +78,7 @@ public class JAASTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Before
 	public void setUp() throws Exception {
@@ -106,6 +105,57 @@ public class JAASTest {
 
 		_jaasAuthTypeField.set(null, _jaasAuthType);
 		_jaasEnabledField.set(null, _jaasEnabled);
+	}
+
+	@Test
+	public void testGetUser() throws Exception {
+		_jaasAuthTypeField.set(null, "screenName");
+
+		final IntegerWrapper counter = new IntegerWrapper();
+
+		JAASHelper jaasHelper = JAASHelper.getInstance();
+
+		JAASHelper.setInstance(
+			new JAASHelper() {
+
+				@Override
+				protected long doGetJaasUserId(long companyId, String name)
+					throws PortalException {
+
+					try {
+						return super.doGetJaasUserId(companyId, name);
+					}
+					finally {
+						counter.increment();
+					}
+				}
+
+			});
+
+		MainServlet mainServlet = MainServletTestCallback.getMainServlet();
+
+		MockHttpServletRequest mockHttpServletRequest =
+			new MockHttpServletRequest(
+				mainServlet.getServletContext(), HttpMethods.GET,
+				StringPool.SLASH);
+
+		mockHttpServletRequest.setRemoteUser(
+			String.valueOf(_user.getScreenName()));
+
+		try {
+			User user = PortalUtil.getUser(mockHttpServletRequest);
+
+			Assert.assertEquals(1, counter.getValue());
+			Assert.assertEquals(_user.getUserId(), user.getUserId());
+
+			user = PortalUtil.getUser(mockHttpServletRequest);
+
+			Assert.assertEquals(1, counter.getValue());
+			Assert.assertEquals(_user.getUserId(), user.getUserId());
+		}
+		finally {
+			JAASHelper.setInstance(jaasHelper);
+		}
 	}
 
 	@Test
@@ -287,28 +337,6 @@ public class JAASTest {
 
 	@Test
 	public void testProcessLoginEvents() throws Exception {
-		final IntegerWrapper counter = new IntegerWrapper();
-
-		JAASHelper jaasHelper = JAASHelper.getInstance();
-
-		JAASHelper.setInstance(
-			new JAASHelper() {
-
-				@Override
-				protected long doGetJaasUserId(long companyId, String name)
-					throws PortalException {
-
-					try {
-						return super.doGetJaasUserId(companyId, name);
-					}
-					finally {
-						counter.increment();
-					}
-				}
-
-			}
-		);
-
 		MainServlet mainServlet = MainServletTestCallback.getMainServlet();
 
 		Date lastLoginDate = _user.getLastLoginDate();
@@ -332,7 +360,6 @@ public class JAASTest {
 			mainServlet.service(
 				mockHttpServletRequest, new MockHttpServletResponse());
 
-			Assert.assertEquals(2, counter.getValue());
 			Assert.assertTrue(preJAASAction.isRan());
 			Assert.assertTrue(postJAASAction.isRan());
 
@@ -345,8 +372,6 @@ public class JAASTest {
 				PropsKeys.LOGIN_EVENTS_PRE, postJAASAction);
 			EventsProcessorUtil.unregisterEvent(
 				PropsKeys.LOGIN_EVENTS_POST, postJAASAction);
-
-			JAASHelper.setInstance(jaasHelper);
 		}
 	}
 
@@ -390,7 +415,7 @@ public class JAASTest {
 	private Field _jaasEnabledField;
 	private User _user;
 
-	private class JAASAction extends Action {
+	private static class JAASAction extends Action {
 
 		public boolean isRan() {
 			return _ran;
@@ -407,7 +432,7 @@ public class JAASTest {
 
 	}
 
-	private class JAASCallbackHandler implements CallbackHandler {
+	private static class JAASCallbackHandler implements CallbackHandler {
 
 		public JAASCallbackHandler(String name, String password) {
 			_name = name;
@@ -443,7 +468,7 @@ public class JAASTest {
 
 	}
 
-	private class JAASConfiguration extends Configuration {
+	private static class JAASConfiguration extends Configuration {
 
 		@Override
 		public AppConfigurationEntry[] getAppConfigurationEntry(String name) {

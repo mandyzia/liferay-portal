@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchLayoutRevisionException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchLayoutRevisionException;
+import com.liferay.portal.kernel.model.LayoutRevision;
+import com.liferay.portal.kernel.service.LayoutRevisionLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.LayoutRevisionPersistence;
+import com.liferay.portal.kernel.service.persistence.LayoutRevisionUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -30,16 +34,13 @@ import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.model.LayoutRevision;
-import com.liferay.portal.service.LayoutRevisionLocalServiceUtil;
-import com.liferay.portal.service.persistence.LayoutRevisionPersistence;
-import com.liferay.portal.service.persistence.LayoutRevisionUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -56,8 +57,9 @@ import java.util.Set;
  * @generated
  */
 public class LayoutRevisionPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -160,10 +162,6 @@ public class LayoutRevisionPersistenceTest {
 
 		newLayoutRevision.setColorSchemeId(RandomTestUtil.randomString());
 
-		newLayoutRevision.setWapThemeId(RandomTestUtil.randomString());
-
-		newLayoutRevision.setWapColorSchemeId(RandomTestUtil.randomString());
-
 		newLayoutRevision.setCss(RandomTestUtil.randomString());
 
 		newLayoutRevision.setStatus(RandomTestUtil.nextInt());
@@ -228,10 +226,6 @@ public class LayoutRevisionPersistenceTest {
 			newLayoutRevision.getThemeId());
 		Assert.assertEquals(existingLayoutRevision.getColorSchemeId(),
 			newLayoutRevision.getColorSchemeId());
-		Assert.assertEquals(existingLayoutRevision.getWapThemeId(),
-			newLayoutRevision.getWapThemeId());
-		Assert.assertEquals(existingLayoutRevision.getWapColorSchemeId(),
-			newLayoutRevision.getWapColorSchemeId());
 		Assert.assertEquals(existingLayoutRevision.getCss(),
 			newLayoutRevision.getCss());
 		Assert.assertEquals(existingLayoutRevision.getStatus(),
@@ -361,10 +355,9 @@ public class LayoutRevisionPersistenceTest {
 			"layoutBranchId", true, "parentLayoutRevisionId", true, "head",
 			true, "major", true, "plid", true, "privateLayout", true, "name",
 			true, "title", true, "description", true, "keywords", true,
-			"robots", true, "typeSettings", true, "iconImageId", true,
-			"themeId", true, "colorSchemeId", true, "wapThemeId", true,
-			"wapColorSchemeId", true, "css", true, "status", true,
-			"statusByUserId", true, "statusByUserName", true, "statusDate", true);
+			"robots", true, "iconImageId", true, "themeId", true,
+			"colorSchemeId", true, "status", true, "statusByUserId", true,
+			"statusByUserName", true, "statusDate", true);
 	}
 
 	@Test
@@ -473,11 +466,9 @@ public class LayoutRevisionPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = LayoutRevisionLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<LayoutRevision>() {
 				@Override
-				public void performAction(Object object) {
-					LayoutRevision layoutRevision = (LayoutRevision)object;
-
+				public void performAction(LayoutRevision layoutRevision) {
 					Assert.assertNotNull(layoutRevision);
 
 					count.increment();
@@ -571,14 +562,15 @@ public class LayoutRevisionPersistenceTest {
 
 		LayoutRevision existingLayoutRevision = _persistence.findByPrimaryKey(newLayoutRevision.getPrimaryKey());
 
-		Assert.assertEquals(existingLayoutRevision.getLayoutSetBranchId(),
-			ReflectionTestUtil.invoke(existingLayoutRevision,
+		Assert.assertEquals(Long.valueOf(
+				existingLayoutRevision.getLayoutSetBranchId()),
+			ReflectionTestUtil.<Long>invoke(existingLayoutRevision,
 				"getOriginalLayoutSetBranchId", new Class<?>[0]));
-		Assert.assertEquals(existingLayoutRevision.getHead(),
-			ReflectionTestUtil.invoke(existingLayoutRevision,
+		Assert.assertEquals(Boolean.valueOf(existingLayoutRevision.getHead()),
+			ReflectionTestUtil.<Boolean>invoke(existingLayoutRevision,
 				"getOriginalHead", new Class<?>[0]));
-		Assert.assertEquals(existingLayoutRevision.getPlid(),
-			ReflectionTestUtil.invoke(existingLayoutRevision,
+		Assert.assertEquals(Long.valueOf(existingLayoutRevision.getPlid()),
+			ReflectionTestUtil.<Long>invoke(existingLayoutRevision,
 				"getOriginalPlid", new Class<?>[0]));
 	}
 
@@ -632,10 +624,6 @@ public class LayoutRevisionPersistenceTest {
 		layoutRevision.setThemeId(RandomTestUtil.randomString());
 
 		layoutRevision.setColorSchemeId(RandomTestUtil.randomString());
-
-		layoutRevision.setWapThemeId(RandomTestUtil.randomString());
-
-		layoutRevision.setWapColorSchemeId(RandomTestUtil.randomString());
 
 		layoutRevision.setCss(RandomTestUtil.randomString());
 

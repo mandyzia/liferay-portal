@@ -36,7 +36,7 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -48,7 +48,7 @@
 			<var name="site" value="${siteName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -64,18 +64,16 @@
 			<var name="user" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#addActivityEntryComment">
 			<var name="commentContent" value="${commentContent}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -92,7 +90,7 @@
 			<var name="userName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -108,7 +106,7 @@
 			<var name="eventType" value="${eventType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -184,7 +182,7 @@
 			<var name="userScreenName" value="${userScreenName3}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -197,7 +195,7 @@
 			<var name="site" value="${siteName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -209,7 +207,7 @@
 			<var name="site" value="${siteName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -235,9 +233,8 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#addActivityEntryComment">
@@ -254,9 +251,8 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#addActivityEntryComment">
@@ -274,9 +270,8 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#addActivityEntryComment">
@@ -289,9 +284,8 @@
 			<var name="userLoginFullName" value="${userName1}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -327,9 +321,8 @@
 			<var name="userLoginFullName" value="${userName2}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -365,9 +358,8 @@
 			<var name="userLoginFullName" value="${userName3}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -403,9 +395,8 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -453,7 +444,7 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -465,7 +456,7 @@
 			<var name="site" value="${siteName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -481,18 +472,16 @@
 			<var name="user" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#addActivityEntryComment">
 			<var name="commentContent" value="${commentContent}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#deleteActivityEntryComment">
@@ -500,9 +489,8 @@
 			<var name="commentCount" value="1" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -513,7 +501,7 @@
 
 		<execute function="AssertTextNotPresent" value1="1 Comment" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -548,7 +536,7 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -560,7 +548,7 @@
 			<var name="site" value="${siteName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -576,18 +564,16 @@
 			<var name="user" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#addActivityEntryComment">
 			<var name="commentContent" value="${commentContent}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#editActivityEntryComment">
@@ -596,9 +582,8 @@
 			<var name="commentCount" value="1" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -615,7 +600,7 @@
 			<var name="userName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -631,7 +616,7 @@
 			<var name="eventType" value="${eventType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -661,7 +646,7 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -677,7 +662,7 @@
 			<var name="user" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -693,7 +678,7 @@
 			<var name="user" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -709,9 +694,8 @@
 			<var name="user" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOActivities#viewCalendarActivityEntry">
@@ -739,7 +723,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="SOS-2314" name="ViewRemoveCalendarViewPermissionsActivities" priority="4">
+	<command name="ViewRemoveCalendarViewPermissionsActivities" priority="4">
 		<var name="eventTitle" value="Calendar Event Title" />
 		<var name="eventType" value="Regular" />
 		<var name="pageName" value="Calendar" />
@@ -767,7 +751,7 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
 		</execute>
@@ -784,9 +768,8 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute function="AssertTextEquals" locator1="SOActivities#NO_ACTIVITIES" value1="There are no activities." />

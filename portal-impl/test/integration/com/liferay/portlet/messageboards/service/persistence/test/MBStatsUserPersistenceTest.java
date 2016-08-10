@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.messageboards.service.persistence.test;
 
+import com.liferay.message.boards.kernel.exception.NoSuchStatsUserException;
+import com.liferay.message.boards.kernel.model.MBStatsUser;
+import com.liferay.message.boards.kernel.service.MBStatsUserLocalServiceUtil;
+import com.liferay.message.boards.kernel.service.persistence.MBStatsUserPersistence;
+import com.liferay.message.boards.kernel.service.persistence.MBStatsUserUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -32,15 +38,10 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.messageboards.NoSuchStatsUserException;
-import com.liferay.portlet.messageboards.model.MBStatsUser;
-import com.liferay.portlet.messageboards.service.MBStatsUserLocalServiceUtil;
-import com.liferay.portlet.messageboards.service.persistence.MBStatsUserPersistence;
-import com.liferay.portlet.messageboards.service.persistence.MBStatsUserUtil;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,8 +58,9 @@ import java.util.Set;
  * @generated
  */
 public class MBStatsUserPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -117,6 +119,8 @@ public class MBStatsUserPersistenceTest {
 
 		newMBStatsUser.setGroupId(RandomTestUtil.nextLong());
 
+		newMBStatsUser.setCompanyId(RandomTestUtil.nextLong());
+
 		newMBStatsUser.setUserId(RandomTestUtil.nextLong());
 
 		newMBStatsUser.setMessageCount(RandomTestUtil.nextInt());
@@ -131,6 +135,8 @@ public class MBStatsUserPersistenceTest {
 			newMBStatsUser.getStatsUserId());
 		Assert.assertEquals(existingMBStatsUser.getGroupId(),
 			newMBStatsUser.getGroupId());
+		Assert.assertEquals(existingMBStatsUser.getCompanyId(),
+			newMBStatsUser.getCompanyId());
 		Assert.assertEquals(existingMBStatsUser.getUserId(),
 			newMBStatsUser.getUserId());
 		Assert.assertEquals(existingMBStatsUser.getMessageCount(),
@@ -194,8 +200,8 @@ public class MBStatsUserPersistenceTest {
 
 	protected OrderByComparator<MBStatsUser> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("MBStatsUser",
-			"statsUserId", true, "groupId", true, "userId", true,
-			"messageCount", true, "lastPostDate", true);
+			"statsUserId", true, "groupId", true, "companyId", true, "userId",
+			true, "messageCount", true, "lastPostDate", true);
 	}
 
 	@Test
@@ -304,11 +310,9 @@ public class MBStatsUserPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = MBStatsUserLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<MBStatsUser>() {
 				@Override
-				public void performAction(Object object) {
-					MBStatsUser mbStatsUser = (MBStatsUser)object;
-
+				public void performAction(MBStatsUser mbStatsUser) {
 					Assert.assertNotNull(mbStatsUser);
 
 					count.increment();
@@ -400,12 +404,12 @@ public class MBStatsUserPersistenceTest {
 
 		MBStatsUser existingMBStatsUser = _persistence.findByPrimaryKey(newMBStatsUser.getPrimaryKey());
 
-		Assert.assertEquals(existingMBStatsUser.getGroupId(),
-			ReflectionTestUtil.invoke(existingMBStatsUser,
+		Assert.assertEquals(Long.valueOf(existingMBStatsUser.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingMBStatsUser,
 				"getOriginalGroupId", new Class<?>[0]));
-		Assert.assertEquals(existingMBStatsUser.getUserId(),
-			ReflectionTestUtil.invoke(existingMBStatsUser, "getOriginalUserId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingMBStatsUser.getUserId()),
+			ReflectionTestUtil.<Long>invoke(existingMBStatsUser,
+				"getOriginalUserId", new Class<?>[0]));
 	}
 
 	protected MBStatsUser addMBStatsUser() throws Exception {
@@ -414,6 +418,8 @@ public class MBStatsUserPersistenceTest {
 		MBStatsUser mbStatsUser = _persistence.create(pk);
 
 		mbStatsUser.setGroupId(RandomTestUtil.nextLong());
+
+		mbStatsUser.setCompanyId(RandomTestUtil.nextLong());
 
 		mbStatsUser.setUserId(RandomTestUtil.nextLong());
 

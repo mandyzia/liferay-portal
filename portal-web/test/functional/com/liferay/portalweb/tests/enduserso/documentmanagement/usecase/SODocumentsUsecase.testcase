@@ -140,9 +140,12 @@
 			<var name="siteType" value="${siteType4}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName1}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName1}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -154,9 +157,12 @@
 			<var name="userScreenName" value="${userScreenName1}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName2}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName2}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -168,9 +174,12 @@
 			<var name="userScreenName" value="${userScreenName2}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName3}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName3}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -182,9 +191,12 @@
 			<var name="userScreenName" value="${userScreenName3}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName4}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName4}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -201,7 +213,7 @@
 			<var name="userLoginFullName" value="${userName1}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -212,13 +224,13 @@
 			<var name="dmFolderName" value="${dmFolderName1}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
 		</execute>
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName1}" />
 		</execute>
 
@@ -233,7 +245,7 @@
 			<var name="userLoginFullName" value="${userName2}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -244,13 +256,13 @@
 			<var name="dmFolderName" value="${dmFolderName2}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
 		</execute>
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName2}" />
 		</execute>
 
@@ -265,7 +277,7 @@
 			<var name="userLoginFullName" value="${userName3}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -276,13 +288,13 @@
 			<var name="dmFolderName" value="${dmFolderName3}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
 		</execute>
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName3}" />
 		</execute>
 
@@ -297,7 +309,7 @@
 			<var name="userLoginFullName" value="${userName4}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -308,13 +320,13 @@
 			<var name="dmFolderName" value="${dmFolderName4}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
 		</execute>
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName4}" />
 		</execute>
 
@@ -329,7 +341,7 @@
 			<var name="userLoginFullName" value="${userName1}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -342,7 +354,7 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle3}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle4}" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName1}" />
 		</execute>
 
@@ -360,13 +372,13 @@
 			<var name="dmDocumentVersionNumber" value="${dmDocumentVersionNumber}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName1}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -381,7 +393,7 @@
 			<var name="userLoginFullName" value="${userName2}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -394,7 +406,7 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle3}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle4}" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName2}" />
 		</execute>
 
@@ -412,13 +424,13 @@
 			<var name="dmDocumentVersionNumber" value="${dmDocumentVersionNumber}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName2}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -433,7 +445,7 @@
 			<var name="userLoginFullName" value="${userName3}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -446,7 +458,7 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle2}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle4}" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName3}" />
 		</execute>
 
@@ -464,14 +476,14 @@
 			<var name="dmDocumentVersionNumber" value="${dmDocumentVersionNumber}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageAccess" value="Private" />
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName3}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -486,7 +498,7 @@
 			<var name="userLoginFullName" value="${userName4}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
@@ -499,7 +511,7 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle2}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle3}" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName4}" />
 		</execute>
 
@@ -517,14 +529,14 @@
 			<var name="dmDocumentVersionNumber" value="${dmDocumentVersionNumber}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageAccess" value="Private" />
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName4}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -539,13 +551,13 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 			<var name="soPage" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -555,13 +567,13 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle3}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle4}" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName1}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -571,13 +583,13 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle3}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle4}" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName2}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -587,14 +599,14 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle3}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle4}" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageAccess" value="Private" />
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName3}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />
@@ -604,14 +616,14 @@
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle3}" />
 		<execute function="AssertTextNotPresent" value1="${dmDocumentTitle4}" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageAccess" value="Private" />
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName4}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#INFO_MESSAGE" value1="There are no documents or media files in this folder." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="There are no documents or media files in this folder." />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName1}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName2}" />
 		<execute function="AssertTextNotPresent" value1="${dmFolderName3}" />

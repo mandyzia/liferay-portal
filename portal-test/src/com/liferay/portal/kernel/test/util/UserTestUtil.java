@@ -15,25 +15,25 @@
 package com.liferay.portal.kernel.test.util;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserGroupRole;
+import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
+import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserGroupRoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.service.UserServiceUtil;
 import com.liferay.portal.kernel.test.randomizerbumpers.NumericStringRandomizerBumper;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Company;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.Role;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.UserGroupRole;
-import com.liferay.portal.service.CompanyLocalServiceUtil;
-import com.liferay.portal.service.RoleLocalServiceUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.service.UserServiceUtil;
 
 import java.util.Calendar;
 import java.util.List;
@@ -47,11 +47,7 @@ import java.util.Locale;
 public class UserTestUtil {
 
 	public static User addCompanyAdminUser(Company company) throws Exception {
-		User user = addUser();
-
-		user.setCompanyId(company.getCompanyId());
-
-		UserLocalServiceUtil.updateUser(user);
+		User user = addUser(company);
 
 		Role role = RoleLocalServiceUtil.getRole(
 			company.getCompanyId(), RoleConstants.ADMINISTRATOR);
@@ -113,16 +109,11 @@ public class UserTestUtil {
 
 		User organizationUser = addUser(organization.getGroupId());
 
-		long[] userIds = {organizationUser.getUserId()};
+		UserLocalServiceUtil.addOrganizationUser(
+			organization.getOrganizationId(), organizationUser.getUserId());
 
-		UserLocalServiceUtil.addOrganizationUsers(
-			organization.getOrganizationId(), userIds);
-
-		Role role = RoleLocalServiceUtil.getRole(
-			TestPropsValues.getCompanyId(), roleName);
-
-		UserGroupRoleLocalServiceUtil.addUserGroupRoles(
-			userIds, organization.getGroupId(), role.getRoleId());
+		addUserGroupRole(
+			organizationUser.getUserId(), organization.getGroupId(), roleName);
 
 		return organizationUser;
 	}
@@ -188,6 +179,16 @@ public class UserTestUtil {
 				birthdayYear, jobTitle, groupIds, organizationIds, roleIds,
 				userGroupIds, sendMail, serviceContext);
 		}
+	}
+
+	public static User addUser(Company company) throws Exception {
+		return addUser(
+			company.getCompanyId(), TestPropsValues.getUserId(),
+			RandomTestUtil.randomString(NumericStringRandomizerBumper.INSTANCE),
+			LocaleUtil.getDefault(), RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(),
+			new long[] {TestPropsValues.getGroupId()},
+			ServiceContextTestUtil.getServiceContext());
 	}
 
 	public static User addUser(long... groupIds) throws Exception {
@@ -271,6 +272,17 @@ public class UserTestUtil {
 			ServiceContextTestUtil.getServiceContext());
 	}
 
+	public static void addUserGroupRole(
+			long userId, long groupId, String roleName)
+		throws Exception {
+
+		Role role = RoleLocalServiceUtil.getRole(
+			TestPropsValues.getCompanyId(), roleName);
+
+		UserGroupRoleLocalServiceUtil.addUserGroupRoles(
+			new long[] {userId}, groupId, role.getRoleId());
+	}
+
 	public static User getAdminUser(long companyId) throws PortalException {
 		Role role = RoleLocalServiceUtil.getRole(
 			companyId, RoleConstants.ADMINISTRATOR);
@@ -286,6 +298,14 @@ public class UserTestUtil {
 	}
 
 	public static User updateUser(User user) throws Exception {
+		ServiceContext serviceContext = new ServiceContext();
+
+		return updateUser(user, serviceContext);
+	}
+
+	public static User updateUser(User user, ServiceContext serviceContext)
+		throws Exception {
+
 		String oldPassword = StringPool.BLANK;
 		String newPassword1 = StringPool.BLANK;
 		String newPassword2 = StringPool.BLANK;
@@ -311,15 +331,10 @@ public class UserTestUtil {
 		int birthdayDay = 1;
 		int birthdayYear = 1970;
 		String smsSn = StringPool.BLANK;
-		String aimSn = StringPool.BLANK;
 		String facebookSn = StringPool.BLANK;
-		String icqSn = StringPool.BLANK;
 		String jabberSn = StringPool.BLANK;
-		String msnSn = StringPool.BLANK;
-		String mySpaceSn = StringPool.BLANK;
 		String skypeSn = StringPool.BLANK;
 		String twitterSn = StringPool.BLANK;
-		String ymSn = StringPool.BLANK;
 		String jobTitle = StringPool.BLANK;
 		long[] groupIds = null;
 		long[] organizationIds = null;
@@ -327,17 +342,15 @@ public class UserTestUtil {
 		List<UserGroupRole> userGroupRoles = null;
 		long[] userGroupIds = null;
 
-		ServiceContext serviceContext = new ServiceContext();
-
 		return UserServiceUtil.updateUser(
 			user.getUserId(), oldPassword, newPassword1, newPassword2,
 			passwordReset, reminderQueryQuestion, reminderQueryAnswer,
 			screenName, emailAddress, facebookId, openId, languageId,
 			timeZoneId, greeting, comments, firstName, middleName, lastName,
 			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
-			smsSn, aimSn, facebookSn, icqSn, jabberSn, msnSn, mySpaceSn,
-			skypeSn, twitterSn, ymSn, jobTitle, groupIds, organizationIds,
-			roleIds, userGroupRoles, userGroupIds, serviceContext);
+			smsSn, facebookSn, jabberSn, skypeSn, twitterSn, jobTitle, groupIds,
+			organizationIds, roleIds, userGroupRoles, userGroupIds,
+			serviceContext);
 	}
 
 }

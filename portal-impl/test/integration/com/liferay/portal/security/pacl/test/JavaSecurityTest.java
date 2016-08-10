@@ -14,8 +14,8 @@
 
 package com.liferay.portal.security.pacl.test;
 
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.test.rule.PACLTestRule;
-import com.liferay.portal.util.PortalUtil;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -32,6 +32,9 @@ import java.security.Permissions;
 import java.security.Policy;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
+import java.security.SecurityPermission;
+
+import java.util.concurrent.Callable;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -78,8 +81,7 @@ public class JavaSecurityTest {
 					}
 
 				},
-				accessControlContext
-			);
+				accessControlContext);
 
 			Assert.fail();
 		}
@@ -129,15 +131,13 @@ public class JavaSecurityTest {
 								}
 
 							},
-							accessControlContext
-						);
+							accessControlContext);
 
 						return null;
 					}
 
 				},
-				accessControlContext
-			);
+				accessControlContext);
 
 			Assert.fail();
 		}
@@ -170,8 +170,8 @@ public class JavaSecurityTest {
 
 						return assignedDomains;
 					}
-				}
-			);
+
+				});
 
 			AccessController.doPrivileged(
 				new PrivilegedAction<Void>() {
@@ -184,8 +184,7 @@ public class JavaSecurityTest {
 					}
 
 				},
-				accessControlContext
-			);
+				accessControlContext);
 
 			Assert.fail();
 		}
@@ -284,7 +283,24 @@ public class JavaSecurityTest {
 	@Test
 	public void testPolicy2() throws Exception {
 		try {
-			Policy.setPolicy(null);
+
+			// Simulate the stack length required to set the policy without
+			// actually setting it (in case we fail)
+
+			Callable<Void> callable = new Callable<Void>() {
+
+				@Override
+				public Void call() throws Exception {
+					SecurityManager sm = System.getSecurityManager();
+
+					sm.checkPermission(new SecurityPermission("setPolicy"));
+
+					return null;
+				}
+
+			};
+
+			callable.call();
 
 			Assert.fail();
 		}
@@ -306,7 +322,9 @@ public class JavaSecurityTest {
 	@Test
 	public void testProtectionDomain2() throws Exception {
 		try {
-			getClass().getProtectionDomain();
+			Class<?> clazz = getClass();
+
+			clazz.getProtectionDomain();
 
 			Assert.fail();
 		}

@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchVirtualHostException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchVirtualHostException;
+import com.liferay.portal.kernel.model.VirtualHost;
+import com.liferay.portal.kernel.service.VirtualHostLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.VirtualHostPersistence;
+import com.liferay.portal.kernel.service.persistence.VirtualHostUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -30,17 +34,13 @@ import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.VirtualHost;
-import com.liferay.portal.service.VirtualHostLocalServiceUtil;
-import com.liferay.portal.service.persistence.VirtualHostPersistence;
-import com.liferay.portal.service.persistence.VirtualHostUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,14 +51,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class VirtualHostPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -290,11 +292,9 @@ public class VirtualHostPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = VirtualHostLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<VirtualHost>() {
 				@Override
-				public void performAction(Object object) {
-					VirtualHost virtualHost = (VirtualHost)object;
-
+				public void performAction(VirtualHost virtualHost) {
 					Assert.assertNotNull(virtualHost);
 
 					count.increment();
@@ -388,15 +388,15 @@ public class VirtualHostPersistenceTest {
 
 		VirtualHost existingVirtualHost = _persistence.findByPrimaryKey(newVirtualHost.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingVirtualHost.getHostname(),
+		Assert.assertTrue(Objects.equals(existingVirtualHost.getHostname(),
 				ReflectionTestUtil.invoke(existingVirtualHost,
 					"getOriginalHostname", new Class<?>[0])));
 
-		Assert.assertEquals(existingVirtualHost.getCompanyId(),
-			ReflectionTestUtil.invoke(existingVirtualHost,
+		Assert.assertEquals(Long.valueOf(existingVirtualHost.getCompanyId()),
+			ReflectionTestUtil.<Long>invoke(existingVirtualHost,
 				"getOriginalCompanyId", new Class<?>[0]));
-		Assert.assertEquals(existingVirtualHost.getLayoutSetId(),
-			ReflectionTestUtil.invoke(existingVirtualHost,
+		Assert.assertEquals(Long.valueOf(existingVirtualHost.getLayoutSetId()),
+			ReflectionTestUtil.<Long>invoke(existingVirtualHost,
 				"getOriginalLayoutSetId", new Class<?>[0]));
 	}
 

@@ -14,7 +14,15 @@
 
 package com.liferay.portlet.asset.service.impl;
 
+import com.liferay.asset.kernel.exception.DuplicateVocabularyException;
+import com.liferay.asset.kernel.exception.VocabularyNameException;
+import com.liferay.asset.kernel.model.AssetCategoryConstants;
+import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.SystemEventConstants;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
@@ -26,22 +34,16 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
+import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.SystemEventConstants;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.asset.DuplicateVocabularyException;
-import com.liferay.portlet.asset.VocabularyNameException;
-import com.liferay.portlet.asset.model.AssetCategoryConstants;
-import com.liferay.portlet.asset.model.AssetVocabulary;
 import com.liferay.portlet.asset.service.base.AssetVocabularyLocalServiceBaseImpl;
 import com.liferay.portlet.asset.util.AssetUtil;
 
@@ -136,8 +138,7 @@ public class AssetVocabularyLocalServiceImpl
 		}
 		else {
 			addVocabularyResources(
-				vocabulary, serviceContext.getGroupPermissions(),
-				serviceContext.getGuestPermissions());
+				vocabulary, serviceContext.getModelPermissions());
 		}
 
 		return vocabulary;
@@ -179,14 +180,13 @@ public class AssetVocabularyLocalServiceImpl
 
 	@Override
 	public void addVocabularyResources(
-			AssetVocabulary vocabulary, String[] groupPermissions,
-			String[] guestPermissions)
+			AssetVocabulary vocabulary, ModelPermissions modelPermissions)
 		throws PortalException {
 
 		resourceLocalService.addModelResources(
 			vocabulary.getCompanyId(), vocabulary.getGroupId(),
 			vocabulary.getUserId(), AssetVocabulary.class.getName(),
-			vocabulary.getVocabularyId(), groupPermissions, guestPermissions);
+			vocabulary.getVocabularyId(), modelPermissions);
 	}
 
 	@Override
@@ -205,7 +205,7 @@ public class AssetVocabularyLocalServiceImpl
 		action = SystemEventConstants.ACTION_SKIP,
 		type = SystemEventConstants.TYPE_DELETE
 	)
-	public void deleteVocabulary(AssetVocabulary vocabulary)
+	public AssetVocabulary deleteVocabulary(AssetVocabulary vocabulary)
 		throws PortalException {
 
 		// Vocabulary
@@ -222,6 +222,8 @@ public class AssetVocabularyLocalServiceImpl
 
 		assetCategoryLocalService.deleteVocabularyCategories(
 			vocabulary.getVocabularyId());
+
+		return vocabulary;
 	}
 
 	@Override
@@ -378,8 +380,17 @@ public class AssetVocabularyLocalServiceImpl
 			long companyId, long groupId, String title, int start, int end)
 		throws PortalException {
 
+		return searchVocabularies(companyId, groupId, title, start, end, null);
+	}
+
+	@Override
+	public BaseModelSearchResult<AssetVocabulary> searchVocabularies(
+			long companyId, long groupId, String title, int start, int end,
+			Sort sort)
+		throws PortalException {
+
 		SearchContext searchContext = buildSearchContext(
-			companyId, groupId, title, start, end);
+			companyId, groupId, title, start, end, sort);
 
 		return searchVocabularies(searchContext);
 	}
@@ -417,7 +428,8 @@ public class AssetVocabularyLocalServiceImpl
 	}
 
 	protected SearchContext buildSearchContext(
-		long companyId, long groupId, String title, int start, int end) {
+		long companyId, long groupId, String title, int start, int end,
+		Sort sort) {
 
 		SearchContext searchContext = new SearchContext();
 
@@ -426,6 +438,7 @@ public class AssetVocabularyLocalServiceImpl
 		searchContext.setEnd(end);
 		searchContext.setGroupIds(new long[] {groupId});
 		searchContext.setKeywords(title);
+		searchContext.setSorts(sort);
 		searchContext.setStart(start);
 
 		QueryConfig queryConfig = searchContext.getQueryConfig();

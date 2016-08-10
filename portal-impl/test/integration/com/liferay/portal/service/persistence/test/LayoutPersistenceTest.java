@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchLayoutException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchLayoutException;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.LayoutPersistence;
+import com.liferay.portal.kernel.service.persistence.LayoutUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -31,17 +35,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.persistence.LayoutPersistence;
-import com.liferay.portal.service.persistence.LayoutUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -52,14 +52,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class LayoutPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -162,10 +164,6 @@ public class LayoutPersistenceTest {
 
 		newLayout.setColorSchemeId(RandomTestUtil.randomString());
 
-		newLayout.setWapThemeId(RandomTestUtil.randomString());
-
-		newLayout.setWapColorSchemeId(RandomTestUtil.randomString());
-
 		newLayout.setCss(RandomTestUtil.randomString());
 
 		newLayout.setPriority(RandomTestUtil.nextInt());
@@ -175,6 +173,8 @@ public class LayoutPersistenceTest {
 		newLayout.setLayoutPrototypeLinkEnabled(RandomTestUtil.randomBoolean());
 
 		newLayout.setSourcePrototypeLayoutUuid(RandomTestUtil.randomString());
+
+		newLayout.setLastPublishDate(RandomTestUtil.nextDate());
 
 		_layouts.add(_persistence.update(newLayout));
 
@@ -220,10 +220,6 @@ public class LayoutPersistenceTest {
 		Assert.assertEquals(existingLayout.getThemeId(), newLayout.getThemeId());
 		Assert.assertEquals(existingLayout.getColorSchemeId(),
 			newLayout.getColorSchemeId());
-		Assert.assertEquals(existingLayout.getWapThemeId(),
-			newLayout.getWapThemeId());
-		Assert.assertEquals(existingLayout.getWapColorSchemeId(),
-			newLayout.getWapColorSchemeId());
 		Assert.assertEquals(existingLayout.getCss(), newLayout.getCss());
 		Assert.assertEquals(existingLayout.getPriority(),
 			newLayout.getPriority());
@@ -233,6 +229,9 @@ public class LayoutPersistenceTest {
 			newLayout.getLayoutPrototypeLinkEnabled());
 		Assert.assertEquals(existingLayout.getSourcePrototypeLayoutUuid(),
 			newLayout.getSourcePrototypeLayoutUuid());
+		Assert.assertEquals(Time.getShortTimestamp(
+				existingLayout.getLastPublishDate()),
+			Time.getShortTimestamp(newLayout.getLastPublishDate()));
 	}
 
 	@Test
@@ -366,6 +365,15 @@ public class LayoutPersistenceTest {
 	}
 
 	@Test
+	public void testCountByG_P_P_LtP() throws Exception {
+		_persistence.countByG_P_P_LtP(RandomTestUtil.nextLong(),
+			RandomTestUtil.randomBoolean(), RandomTestUtil.nextLong(),
+			RandomTestUtil.nextInt());
+
+		_persistence.countByG_P_P_LtP(0L, RandomTestUtil.randomBoolean(), 0L, 0);
+	}
+
+	@Test
 	public void testFindByPrimaryKeyExisting() throws Exception {
 		Layout newLayout = addLayout();
 
@@ -399,13 +407,11 @@ public class LayoutPersistenceTest {
 			true, "userId", true, "userName", true, "createDate", true,
 			"modifiedDate", true, "privateLayout", true, "layoutId", true,
 			"parentLayoutId", true, "name", true, "title", true, "description",
-			true, "keywords", true, "robots", true, "type", true,
-			"typeSettings", true, "hidden", true, "friendlyURL", true,
-			"iconImageId", true, "themeId", true, "colorSchemeId", true,
-			"wapThemeId", true, "wapColorSchemeId", true, "css", true,
-			"priority", true, "layoutPrototypeUuid", true,
-			"layoutPrototypeLinkEnabled", true, "sourcePrototypeLayoutUuid",
-			true);
+			true, "keywords", true, "robots", true, "type", true, "hidden",
+			true, "friendlyURL", true, "iconImageId", true, "themeId", true,
+			"colorSchemeId", true, "priority", true, "layoutPrototypeUuid",
+			true, "layoutPrototypeLinkEnabled", true,
+			"sourcePrototypeLayoutUuid", true, "lastPublishDate", true);
 	}
 
 	@Test
@@ -510,11 +516,9 @@ public class LayoutPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = LayoutLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<Layout>() {
 				@Override
-				public void performAction(Object object) {
-					Layout layout = (Layout)object;
-
+				public void performAction(Layout layout) {
 					Assert.assertNotNull(layout);
 
 					count.increment();
@@ -605,47 +609,47 @@ public class LayoutPersistenceTest {
 
 		Layout existingLayout = _persistence.findByPrimaryKey(newLayout.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingLayout.getUuid(),
+		Assert.assertTrue(Objects.equals(existingLayout.getUuid(),
 				ReflectionTestUtil.invoke(existingLayout, "getOriginalUuid",
 					new Class<?>[0])));
-		Assert.assertEquals(existingLayout.getGroupId(),
-			ReflectionTestUtil.invoke(existingLayout, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertEquals(existingLayout.getPrivateLayout(),
-			ReflectionTestUtil.invoke(existingLayout,
+		Assert.assertEquals(Long.valueOf(existingLayout.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingLayout,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertEquals(Boolean.valueOf(existingLayout.getPrivateLayout()),
+			ReflectionTestUtil.<Boolean>invoke(existingLayout,
 				"getOriginalPrivateLayout", new Class<?>[0]));
 
-		Assert.assertEquals(existingLayout.getIconImageId(),
-			ReflectionTestUtil.invoke(existingLayout, "getOriginalIconImageId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingLayout.getIconImageId()),
+			ReflectionTestUtil.<Long>invoke(existingLayout,
+				"getOriginalIconImageId", new Class<?>[0]));
 
-		Assert.assertEquals(existingLayout.getGroupId(),
-			ReflectionTestUtil.invoke(existingLayout, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertEquals(existingLayout.getPrivateLayout(),
-			ReflectionTestUtil.invoke(existingLayout,
+		Assert.assertEquals(Long.valueOf(existingLayout.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingLayout,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertEquals(Boolean.valueOf(existingLayout.getPrivateLayout()),
+			ReflectionTestUtil.<Boolean>invoke(existingLayout,
 				"getOriginalPrivateLayout", new Class<?>[0]));
-		Assert.assertEquals(existingLayout.getLayoutId(),
-			ReflectionTestUtil.invoke(existingLayout, "getOriginalLayoutId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingLayout.getLayoutId()),
+			ReflectionTestUtil.<Long>invoke(existingLayout,
+				"getOriginalLayoutId", new Class<?>[0]));
 
-		Assert.assertEquals(existingLayout.getGroupId(),
-			ReflectionTestUtil.invoke(existingLayout, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertEquals(existingLayout.getPrivateLayout(),
-			ReflectionTestUtil.invoke(existingLayout,
+		Assert.assertEquals(Long.valueOf(existingLayout.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingLayout,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertEquals(Boolean.valueOf(existingLayout.getPrivateLayout()),
+			ReflectionTestUtil.<Boolean>invoke(existingLayout,
 				"getOriginalPrivateLayout", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingLayout.getFriendlyURL(),
+		Assert.assertTrue(Objects.equals(existingLayout.getFriendlyURL(),
 				ReflectionTestUtil.invoke(existingLayout,
 					"getOriginalFriendlyURL", new Class<?>[0])));
 
-		Assert.assertEquals(existingLayout.getGroupId(),
-			ReflectionTestUtil.invoke(existingLayout, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertEquals(existingLayout.getPrivateLayout(),
-			ReflectionTestUtil.invoke(existingLayout,
+		Assert.assertEquals(Long.valueOf(existingLayout.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingLayout,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertEquals(Boolean.valueOf(existingLayout.getPrivateLayout()),
+			ReflectionTestUtil.<Boolean>invoke(existingLayout,
 				"getOriginalPrivateLayout", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(
+		Assert.assertTrue(Objects.equals(
 				existingLayout.getSourcePrototypeLayoutUuid(),
 				ReflectionTestUtil.invoke(existingLayout,
 					"getOriginalSourcePrototypeLayoutUuid", new Class<?>[0])));
@@ -702,10 +706,6 @@ public class LayoutPersistenceTest {
 
 		layout.setColorSchemeId(RandomTestUtil.randomString());
 
-		layout.setWapThemeId(RandomTestUtil.randomString());
-
-		layout.setWapColorSchemeId(RandomTestUtil.randomString());
-
 		layout.setCss(RandomTestUtil.randomString());
 
 		layout.setPriority(RandomTestUtil.nextInt());
@@ -715,6 +715,8 @@ public class LayoutPersistenceTest {
 		layout.setLayoutPrototypeLinkEnabled(RandomTestUtil.randomBoolean());
 
 		layout.setSourcePrototypeLayoutUuid(RandomTestUtil.randomString());
+
+		layout.setLastPublishDate(RandomTestUtil.nextDate());
 
 		_layouts.add(_persistence.update(layout));
 

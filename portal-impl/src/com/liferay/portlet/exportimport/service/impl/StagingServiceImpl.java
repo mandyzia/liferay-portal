@@ -14,13 +14,13 @@
 
 package com.liferay.portlet.exportimport.service.impl;
 
+import com.liferay.exportimport.kernel.lar.MissingReferences;
+import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.service.permission.GroupPermissionUtil;
-import com.liferay.portlet.exportimport.lar.MissingReferences;
-import com.liferay.portlet.exportimport.model.ExportImportConfiguration;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portlet.exportimport.service.base.StagingServiceBaseImpl;
 
 import java.util.Map;
@@ -91,7 +91,7 @@ public class StagingServiceImpl extends StagingServiceBaseImpl {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link #publishStagingRequest(long,
-	 *             boolean, java.util.Map)}
+	 *             boolean, Map)}
 	 */
 	@Deprecated
 	@Override

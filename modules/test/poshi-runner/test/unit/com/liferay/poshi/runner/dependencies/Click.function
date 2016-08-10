@@ -1,4 +1,0 @@
-<definition default="clickAt">
-	<command name="clickAt" />
-	<command name="click" />
-</definition>

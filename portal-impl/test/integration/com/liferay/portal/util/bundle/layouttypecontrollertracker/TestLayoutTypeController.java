@@ -14,8 +14,8 @@
 
 package com.liferay.portal.util.bundle.layouttypecontrollertracker;
 
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutTypeController;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutTypeController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +45,11 @@ public class TestLayoutTypeController implements LayoutTypeController {
 	}
 
 	@Override
+	public String getType() {
+		return null;
+	}
+
+	@Override
 	public String getURL() {
 		return null;
 	}
@@ -66,8 +71,28 @@ public class TestLayoutTypeController implements LayoutTypeController {
 	}
 
 	@Override
+	public boolean isBrowsable() {
+		return true;
+	}
+
+	@Override
+	public boolean isCheckLayoutViewPermission() {
+		return true;
+	}
+
+	@Override
 	public boolean isFirstPageable() {
 		return false;
+	}
+
+	@Override
+	public boolean isFullPageDisplayable() {
+		return false;
+	}
+
+	@Override
+	public boolean isInstanceable() {
+		return true;
 	}
 
 	@Override

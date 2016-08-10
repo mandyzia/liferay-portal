@@ -10,9 +10,9 @@
 	<taskdef classpathref="css.builder.classpath" resource="com/liferay/css/builder/ant/taskdefs.properties" />
 
 	<target name="build-css">
-		<css-builder
+		<build-css
 			docrootDirName="css"
-			portalCommonDirName="../../../../portal-web/docroot/html/css/common"
+			portalCommonPath="../../../frontend-css/frontend-css-common/tmp/META-INF/resources"
 		/>
 	</target>
 </project>

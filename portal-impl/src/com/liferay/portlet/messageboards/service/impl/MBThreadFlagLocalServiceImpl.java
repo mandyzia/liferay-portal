@@ -14,17 +14,17 @@
 
 package com.liferay.portlet.messageboards.service.impl;
 
+import com.liferay.message.boards.kernel.model.MBThread;
+import com.liferay.message.boards.kernel.model.MBThreadFlag;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.SystemEventConstants;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.DateUtil;
-import com.liferay.portal.model.SystemEventConstants;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.messageboards.model.MBThread;
-import com.liferay.portlet.messageboards.model.MBThreadFlag;
 import com.liferay.portlet.messageboards.service.base.MBThreadFlagLocalServiceBaseImpl;
 
 import java.util.List;
@@ -85,8 +85,7 @@ public class MBThreadFlagLocalServiceImpl
 			}
 		}
 		else if (!DateUtil.equals(
-					threadFlag.getModifiedDate(), thread.getLastPostDate(),
-					true)) {
+					threadFlag.getModifiedDate(), thread.getLastPostDate())) {
 
 			threadFlag.setModifiedDate(thread.getLastPostDate());
 
@@ -158,7 +157,7 @@ public class MBThreadFlagLocalServiceImpl
 
 		if ((threadFlag != null) &&
 			DateUtil.equals(
-				threadFlag.getModifiedDate(), thread.getLastPostDate(), true)) {
+				threadFlag.getModifiedDate(), thread.getLastPostDate())) {
 
 			return true;
 		}

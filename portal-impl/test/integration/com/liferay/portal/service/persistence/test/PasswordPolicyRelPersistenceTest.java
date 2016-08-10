@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchPasswordPolicyRelException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchPasswordPolicyRelException;
+import com.liferay.portal.kernel.model.PasswordPolicyRel;
+import com.liferay.portal.kernel.service.PasswordPolicyRelLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.PasswordPolicyRelPersistence;
+import com.liferay.portal.kernel.service.persistence.PasswordPolicyRelUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -29,16 +33,13 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
-import com.liferay.portal.model.PasswordPolicyRel;
-import com.liferay.portal.service.PasswordPolicyRelLocalServiceUtil;
-import com.liferay.portal.service.persistence.PasswordPolicyRelPersistence;
-import com.liferay.portal.service.persistence.PasswordPolicyRelUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -55,8 +56,9 @@ import java.util.Set;
  * @generated
  */
 public class PasswordPolicyRelPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -115,6 +117,8 @@ public class PasswordPolicyRelPersistenceTest {
 
 		newPasswordPolicyRel.setMvccVersion(RandomTestUtil.nextLong());
 
+		newPasswordPolicyRel.setCompanyId(RandomTestUtil.nextLong());
+
 		newPasswordPolicyRel.setPasswordPolicyId(RandomTestUtil.nextLong());
 
 		newPasswordPolicyRel.setClassNameId(RandomTestUtil.nextLong());
@@ -129,6 +133,8 @@ public class PasswordPolicyRelPersistenceTest {
 			newPasswordPolicyRel.getMvccVersion());
 		Assert.assertEquals(existingPasswordPolicyRel.getPasswordPolicyRelId(),
 			newPasswordPolicyRel.getPasswordPolicyRelId());
+		Assert.assertEquals(existingPasswordPolicyRel.getCompanyId(),
+			newPasswordPolicyRel.getCompanyId());
 		Assert.assertEquals(existingPasswordPolicyRel.getPasswordPolicyId(),
 			newPasswordPolicyRel.getPasswordPolicyId());
 		Assert.assertEquals(existingPasswordPolicyRel.getClassNameId(),
@@ -176,8 +182,8 @@ public class PasswordPolicyRelPersistenceTest {
 
 	protected OrderByComparator<PasswordPolicyRel> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("PasswordPolicyRel",
-			"mvccVersion", true, "passwordPolicyRelId", true,
-			"passwordPolicyId", true, "classNameId", true, "classPK", true);
+			"mvccVersion", true, "passwordPolicyRelId", true, "companyId",
+			true, "passwordPolicyId", true, "classNameId", true, "classPK", true);
 	}
 
 	@Test
@@ -286,11 +292,9 @@ public class PasswordPolicyRelPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = PasswordPolicyRelLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<PasswordPolicyRel>() {
 				@Override
-				public void performAction(Object object) {
-					PasswordPolicyRel passwordPolicyRel = (PasswordPolicyRel)object;
-
+				public void performAction(PasswordPolicyRel passwordPolicyRel) {
 					Assert.assertNotNull(passwordPolicyRel);
 
 					count.increment();
@@ -384,11 +388,12 @@ public class PasswordPolicyRelPersistenceTest {
 
 		PasswordPolicyRel existingPasswordPolicyRel = _persistence.findByPrimaryKey(newPasswordPolicyRel.getPrimaryKey());
 
-		Assert.assertEquals(existingPasswordPolicyRel.getClassNameId(),
-			ReflectionTestUtil.invoke(existingPasswordPolicyRel,
+		Assert.assertEquals(Long.valueOf(
+				existingPasswordPolicyRel.getClassNameId()),
+			ReflectionTestUtil.<Long>invoke(existingPasswordPolicyRel,
 				"getOriginalClassNameId", new Class<?>[0]));
-		Assert.assertEquals(existingPasswordPolicyRel.getClassPK(),
-			ReflectionTestUtil.invoke(existingPasswordPolicyRel,
+		Assert.assertEquals(Long.valueOf(existingPasswordPolicyRel.getClassPK()),
+			ReflectionTestUtil.<Long>invoke(existingPasswordPolicyRel,
 				"getOriginalClassPK", new Class<?>[0]));
 	}
 
@@ -399,6 +404,8 @@ public class PasswordPolicyRelPersistenceTest {
 		PasswordPolicyRel passwordPolicyRel = _persistence.create(pk);
 
 		passwordPolicyRel.setMvccVersion(RandomTestUtil.nextLong());
+
+		passwordPolicyRel.setCompanyId(RandomTestUtil.nextLong());
 
 		passwordPolicyRel.setPasswordPolicyId(RandomTestUtil.nextLong());
 

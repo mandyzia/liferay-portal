@@ -14,28 +14,58 @@
 
 package com.liferay.portlet.documentlibrary.util;
 
+import com.liferay.document.library.kernel.model.DLFileEntryConstants;
+import com.liferay.document.library.kernel.model.DLFileEntryType;
+import com.liferay.document.library.kernel.model.DLFileEntryTypeConstants;
+import com.liferay.document.library.kernel.model.DLFileShortcut;
+import com.liferay.document.library.kernel.model.DLFileVersion;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFolderLocalServiceUtil;
+import com.liferay.document.library.kernel.util.DL;
+import com.liferay.document.library.kernel.util.ImageProcessorUtil;
+import com.liferay.document.library.kernel.util.PDFProcessorUtil;
+import com.liferay.document.library.kernel.util.VideoProcessorUtil;
+import com.liferay.document.library.kernel.util.comparator.RepositoryModelCreateDateComparator;
+import com.liferay.document.library.kernel.util.comparator.RepositoryModelModifiedDateComparator;
+import com.liferay.document.library.kernel.util.comparator.RepositoryModelReadCountComparator;
+import com.liferay.document.library.kernel.util.comparator.RepositoryModelSizeComparator;
+import com.liferay.document.library.kernel.util.comparator.RepositoryModelTitleComparator;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
-import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.Subscription;
+import com.liferay.portal.kernel.portlet.PortletLayoutFinder;
+import com.liferay.portal.kernel.portlet.PortletProvider;
+import com.liferay.portal.kernel.portlet.PortletProviderUtil;
+import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.repository.model.FileShortcut;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.SubscriptionLocalServiceUtil;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalServiceUtil;
+import com.liferay.portal.kernel.theme.PortletDisplay;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -47,37 +77,11 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
-import com.liferay.portal.model.Company;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.Subscription;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.SubscriptionLocalServiceUtil;
-import com.liferay.portal.service.WorkflowDefinitionLinkLocalServiceUtil;
-import com.liferay.portal.theme.PortletDisplay;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.PortletURLFactoryUtil;
-import com.liferay.portlet.documentlibrary.DLPortletInstanceSettings;
-import com.liferay.portlet.documentlibrary.action.EditFileEntryMVCActionCommand;
-import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
-import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
-import com.liferay.portlet.documentlibrary.model.DLFileEntryTypeConstants;
-import com.liferay.portlet.documentlibrary.model.DLFileShortcut;
-import com.liferay.portlet.documentlibrary.model.DLFileVersion;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
-import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
-import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelCreateDateComparator;
-import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelModifiedDateComparator;
-import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelReadCountComparator;
-import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelSizeComparator;
-import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelTitleComparator;
-import com.liferay.portlet.trash.util.TrashUtil;
+import com.liferay.portlet.documentlibrary.webdav.DLWebDAVUtil;
+import com.liferay.registry.collections.ServiceTrackerCollections;
+import com.liferay.registry.collections.ServiceTrackerList;
+import com.liferay.trash.kernel.util.TrashUtil;
 
 import java.io.Serializable;
 
@@ -89,13 +93,12 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
-import javax.portlet.RenderResponse;
-import javax.portlet.WindowStateException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -104,228 +107,6 @@ import javax.servlet.http.HttpServletRequest;
  * @author Julio Camarero
  */
 public class DLImpl implements DL {
-
-	@Override
-	public void addPortletBreadcrumbEntries(
-			FileEntry fileEntry, HttpServletRequest request,
-			RenderResponse renderResponse)
-		throws Exception {
-
-		Folder folder = fileEntry.getFolder();
-
-		if (folder.getFolderId() !=
-				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-
-			addPortletBreadcrumbEntries(folder, request, renderResponse);
-		}
-
-		PortletURL portletURL = renderResponse.createRenderURL();
-
-		FileEntry unescapedFileEntry = fileEntry.toUnescapedModel();
-
-		portletURL.setParameter(
-			"mvcRenderCommandName", "/document_library/view_file_entry");
-		portletURL.setParameter(
-			"fileEntryId", String.valueOf(fileEntry.getFileEntryId()));
-
-		PortalUtil.addPortletBreadcrumbEntry(
-			request, unescapedFileEntry.getTitle(), portletURL.toString());
-	}
-
-	@Override
-	public void addPortletBreadcrumbEntries(
-			FileShortcut fileShortcut, HttpServletRequest request,
-			RenderResponse renderResponse)
-		throws Exception {
-
-		Folder folder = fileShortcut.getFolder();
-
-		if (folder.getFolderId() !=
-				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-
-			addPortletBreadcrumbEntries(folder, request, renderResponse);
-		}
-
-		FileShortcut unescapedDLFileShortcut = fileShortcut.toUnescapedModel();
-
-		PortletURL portletURL = renderResponse.createRenderURL();
-
-		portletURL.setParameter(
-			"mvcRenderCommandName", "/document_library/view_file_entry");
-		portletURL.setParameter(
-			"fileEntryId", String.valueOf(fileShortcut.getToFileEntryId()));
-
-		PortalUtil.addPortletBreadcrumbEntry(
-			request, unescapedDLFileShortcut.getToTitle(),
-			portletURL.toString());
-	}
-
-	@Override
-	public void addPortletBreadcrumbEntries(
-			Folder folder, HttpServletRequest request,
-			LiferayPortletResponse liferayPortletResponse)
-		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		PortletURL portletURL = liferayPortletResponse.createRenderURL();
-
-		portletURL.setParameter(
-			"mvcRenderCommandName", "/document_library/view");
-
-		Map<String, Object> data = new HashMap<>();
-
-		data.put("direction-right", Boolean.TRUE.toString());
-
-		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
-
-		DLPortletInstanceSettings dlPortletInstanceSettings =
-			DLPortletInstanceSettings.getInstance(
-				themeDisplay.getLayout(), portletDisplay.getId());
-
-		data.put("folder-id", dlPortletInstanceSettings.getDefaultFolderId());
-
-		PortalUtil.addPortletBreadcrumbEntry(
-			request, themeDisplay.translate("home"), portletURL.toString(),
-			data);
-
-		addPortletBreadcrumbEntries(folder, request, portletURL);
-	}
-
-	@Override
-	public void addPortletBreadcrumbEntries(
-			Folder folder, HttpServletRequest request, PortletURL portletURL)
-		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
-
-		long defaultFolderId = DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
-
-		boolean ignoreRootFolder = ParamUtil.getBoolean(
-			request, "ignoreRootFolder");
-
-		if (!ignoreRootFolder) {
-			DLPortletInstanceSettings dlPortletInstanceSettings =
-				DLPortletInstanceSettings.getInstance(
-					themeDisplay.getLayout(), portletDisplay.getId());
-
-			defaultFolderId = dlPortletInstanceSettings.getDefaultFolderId();
-		}
-
-		List<Folder> ancestorFolders = Collections.emptyList();
-
-		if ((folder != null) && (folder.getFolderId() != defaultFolderId)) {
-			ancestorFolders = folder.getAncestors();
-
-			int indexOfRootFolder = -1;
-
-			for (int i = 0; i < ancestorFolders.size(); i++) {
-				Folder ancestorFolder = ancestorFolders.get(i);
-
-				if (defaultFolderId == ancestorFolder.getFolderId()) {
-					indexOfRootFolder = i;
-				}
-			}
-
-			if (indexOfRootFolder > -1) {
-				ancestorFolders = ancestorFolders.subList(0, indexOfRootFolder);
-			}
-		}
-
-		Collections.reverse(ancestorFolders);
-
-		for (Folder ancestorFolder : ancestorFolders) {
-			portletURL.setParameter(
-				"folderId", String.valueOf(ancestorFolder.getFolderId()));
-
-			Map<String, Object> data = new HashMap<>();
-
-			data.put("direction-right", Boolean.TRUE.toString());
-			data.put("folder-id", ancestorFolder.getFolderId());
-
-			PortalUtil.addPortletBreadcrumbEntry(
-				request, ancestorFolder.getName(), portletURL.toString(), data);
-		}
-
-		long folderId = DLFolderConstants.DEFAULT_PARENT_FOLDER_ID;
-
-		if (folder != null) {
-			folderId = folder.getFolderId();
-		}
-
-		portletURL.setParameter("folderId", String.valueOf(folderId));
-
-		if ((folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) &&
-			(folderId != defaultFolderId)) {
-
-			Folder unescapedFolder = folder.toUnescapedModel();
-
-			Map<String, Object> data = new HashMap<>();
-
-			data.put("direction-right", Boolean.TRUE.toString());
-			data.put("folder-id", folderId);
-
-			PortalUtil.addPortletBreadcrumbEntry(
-				request, unescapedFolder.getName(), portletURL.toString(),
-				data);
-		}
-	}
-
-	@Override
-	public void addPortletBreadcrumbEntries(
-			Folder folder, HttpServletRequest request,
-			RenderResponse renderResponse)
-		throws Exception {
-
-		String mvcRenderCommandName = ParamUtil.getString(
-			request, "mvcRenderCommandName");
-
-		long groupId = ParamUtil.getLong(request, "groupId");
-		boolean ignoreRootFolder = ParamUtil.getBoolean(
-			request, "ignoreRootFolder");
-
-		PortletURL portletURL = renderResponse.createRenderURL();
-
-		if (mvcRenderCommandName.equals(
-				"/document_library/select_file_entry") ||
-			mvcRenderCommandName.equals("/document_library/select_folder") ||
-			mvcRenderCommandName.equals(
-				"/document_library_display/select_folder") ||
-			mvcRenderCommandName.equals(
-				"/image_gallery_display/select_folder")) {
-
-			_addPortletBreadcrumbEntry(
-				request, "mvcRenderCommandName", mvcRenderCommandName, groupId,
-				ignoreRootFolder, portletURL);
-		}
-		else {
-			portletURL.setParameter(
-				"mvcRenderCommandName", "/document_library/view");
-		}
-
-		addPortletBreadcrumbEntries(folder, request, portletURL);
-	}
-
-	@Override
-	public void addPortletBreadcrumbEntries(
-			long folderId, HttpServletRequest request,
-			RenderResponse renderResponse)
-		throws Exception {
-
-		if (folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			Folder folder = DLAppLocalServiceUtil.getFolder(folderId);
-
-			if (folder.getFolderId() !=
-					DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-
-				addPortletBreadcrumbEntries(folder, request, renderResponse);
-			}
-		}
-	}
 
 	@Override
 	public int compareVersions(String version1, String version2) {
@@ -356,6 +137,10 @@ public class DLImpl implements DL {
 		}
 
 		return 0;
+	}
+
+	public void destroy() {
+		_serviceTrackerList.close();
 	}
 
 	@Override
@@ -443,16 +228,13 @@ public class DLImpl implements DL {
 
 	@Override
 	public String getDLFileEntryControlPanelLink(
-			PortletRequest portletRequest, long fileEntryId)
-		throws PortalException {
+		PortletRequest portletRequest, long fileEntryId) {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		String portletId = PortletProviderUtil.getPortletId(
+			FileEntry.class.getName(), PortletProvider.Action.MANAGE);
 
-		PortletURL portletURL = PortletURLFactoryUtil.create(
-			portletRequest, PortletKeys.DOCUMENT_LIBRARY_ADMIN,
-			PortalUtil.getControlPanelPlid(themeDisplay.getCompanyId()),
-			PortletRequest.RENDER_PHASE);
+		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
+			portletRequest, portletId, PortletRequest.RENDER_PHASE);
 
 		portletURL.setParameter(
 			"mvcRenderCommandName", "/document_library/view_file_entry");
@@ -463,19 +245,23 @@ public class DLImpl implements DL {
 
 	@Override
 	public String getDLFolderControlPanelLink(
-			PortletRequest portletRequest, long folderId)
-		throws PortalException {
+		PortletRequest portletRequest, long folderId) {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		String portletId = PortletProviderUtil.getPortletId(
+			Folder.class.getName(), PortletProvider.Action.MANAGE);
 
-		PortletURL portletURL = PortletURLFactoryUtil.create(
-			portletRequest, PortletKeys.DOCUMENT_LIBRARY_ADMIN,
-			PortalUtil.getControlPanelPlid(themeDisplay.getCompanyId()),
-			PortletRequest.RENDER_PHASE);
+		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
+			portletRequest, portletId, PortletRequest.RENDER_PHASE);
 
-		portletURL.setParameter(
-			"mvcRenderCommandName", "/document_library/view");
+		if (folderId == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+			portletURL.setParameter(
+				"mvcRenderCommandName", "/document_library/view");
+		}
+		else {
+			portletURL.setParameter(
+				"mvcRenderCommandName", "/document_library/view_folder");
+		}
+
 		portletURL.setParameter("folderId", String.valueOf(folderId));
 
 		return portletURL.toString();
@@ -701,50 +487,7 @@ public class DLImpl implements DL {
 
 	@Override
 	public String getFileIconCssClass(String extension) {
-		return "icon-file-alt";
-	}
-
-	@Override
-	public String getFileName(
-		long groupId, long folderId, String tempFileName) {
-
-		String extension = FileUtil.getExtension(tempFileName);
-
-		int pos = tempFileName.lastIndexOf(
-			EditFileEntryMVCActionCommand.TEMP_RANDOM_SUFFIX);
-
-		if (pos != -1) {
-			tempFileName = tempFileName.substring(0, pos);
-
-			if (Validator.isNotNull(extension)) {
-				tempFileName = tempFileName + StringPool.PERIOD + extension;
-			}
-		}
-
-		while (true) {
-			try {
-				DLAppLocalServiceUtil.getFileEntry(
-					groupId, folderId, tempFileName);
-
-				StringBundler sb = new StringBundler(5);
-
-				sb.append(FileUtil.stripExtension(tempFileName));
-				sb.append(StringPool.DASH);
-				sb.append(StringUtil.randomString());
-
-				if (Validator.isNotNull(extension)) {
-					sb.append(StringPool.PERIOD);
-					sb.append(extension);
-				}
-
-				tempFileName = sb.toString();
-			}
-			catch (Exception e) {
-				break;
-			}
-		}
-
-		return tempFileName;
+		return "documents-and-media";
 	}
 
 	@Override
@@ -800,31 +543,15 @@ public class DLImpl implements DL {
 			fileEntry, fileVersion, themeDisplay, queryString, true, true);
 	}
 
-	/**
-	 * @deprecated As of 6.2.0, replaced by {@link #getPreviewURL(FileEntry,
-	 *             FileVersion, ThemeDisplay, String, boolean, boolean)}
-	 */
-	@Deprecated
-	@Override
-	public String getPreviewURL(
-		FileEntry fileEntry, FileVersion fileVersion, ThemeDisplay themeDisplay,
-		String queryString, boolean appendToken) {
-
-		return getPreviewURL(
-			fileEntry, fileVersion, themeDisplay, queryString, true, true);
-	}
-
 	@Override
 	public String getPreviewURL(
 		FileEntry fileEntry, FileVersion fileVersion, ThemeDisplay themeDisplay,
 		String queryString, boolean appendVersion, boolean absoluteURL) {
 
-		StringBundler sb = new StringBundler(17);
+		StringBundler sb = new StringBundler(15);
 
-		if (themeDisplay != null) {
-			if (absoluteURL) {
-				sb.append(themeDisplay.getPortalURL());
-			}
+		if ((themeDisplay != null) && absoluteURL) {
+			sb.append(themeDisplay.getPortalURL());
 		}
 
 		sb.append(PortalUtil.getPathContext());
@@ -879,6 +606,14 @@ public class DLImpl implements DL {
 	public <T> OrderByComparator<T> getRepositoryModelOrderByComparator(
 		String orderByCol, String orderByType) {
 
+		return getRepositoryModelOrderByComparator(
+			orderByCol, orderByType, false);
+	}
+
+	@Override
+	public <T> OrderByComparator<T> getRepositoryModelOrderByComparator(
+		String orderByCol, String orderByType, boolean orderByModel) {
+
 		boolean orderByAsc = true;
 
 		if (orderByType.equals("desc")) {
@@ -889,22 +624,23 @@ public class DLImpl implements DL {
 
 		if (orderByCol.equals("creationDate")) {
 			orderByComparator = new RepositoryModelCreateDateComparator<>(
-				orderByAsc);
+				orderByAsc, orderByModel);
 		}
 		else if (orderByCol.equals("downloads")) {
 			orderByComparator = new RepositoryModelReadCountComparator<>(
-				orderByAsc);
+				orderByAsc, orderByModel);
 		}
 		else if (orderByCol.equals("modifiedDate")) {
 			orderByComparator = new RepositoryModelModifiedDateComparator<>(
-				orderByAsc);
+				orderByAsc, orderByModel);
 		}
 		else if (orderByCol.equals("size")) {
-			orderByComparator = new RepositoryModelSizeComparator<>(orderByAsc);
+			orderByComparator = new RepositoryModelSizeComparator<>(
+				orderByAsc, orderByModel);
 		}
 		else {
 			orderByComparator = new RepositoryModelTitleComparator<>(
-				orderByAsc);
+				orderByAsc, orderByModel);
 		}
 
 		return orderByComparator;
@@ -913,7 +649,7 @@ public class DLImpl implements DL {
 	@Override
 	public String getSanitizedFileName(String title, String extension) {
 		String fileName = StringUtil.replace(
-			title, StringPool.SLASH, StringPool.UNDERLINE);
+			title, CharPool.SLASH, CharPool.UNDERLINE);
 
 		if (Validator.isNotNull(extension) &&
 			!StringUtil.endsWith(fileName, StringPool.PERIOD + extension)) {
@@ -1039,7 +775,7 @@ public class DLImpl implements DL {
 	public String getThumbnailStyle(
 		boolean max, int margin, int height, int width) {
 
-		StringBundler sb = new StringBundler(7);
+		StringBundler sb = new StringBundler(5);
 
 		if (max) {
 			sb.append("max-height: ");
@@ -1090,6 +826,28 @@ public class DLImpl implements DL {
 	}
 
 	@Override
+	public String getUniqueFileName(
+		long groupId, long folderId, String fileName) {
+
+		String uniqueFileName = fileName;
+
+		for (int i = 1;; i++) {
+			try {
+				DLAppLocalServiceUtil.getFileEntry(
+					groupId, folderId, uniqueFileName);
+
+				uniqueFileName = FileUtil.appendParentheticalSuffix(
+					fileName, String.valueOf(i));
+			}
+			catch (Exception e) {
+				break;
+			}
+		}
+
+		return uniqueFileName;
+	}
+
+	@Override
 	public String getWebDavURL(
 			ThemeDisplay themeDisplay, Folder folder, FileEntry fileEntry)
 		throws PortalException {
@@ -1113,7 +871,7 @@ public class DLImpl implements DL {
 			boolean manualCheckInRequired, boolean openDocumentUrl)
 		throws PortalException {
 
-		StringBundler webDavURL = new StringBundler(8);
+		StringBundler webDavURL = new StringBundler(7);
 
 		boolean secure = false;
 
@@ -1135,13 +893,9 @@ public class DLImpl implements DL {
 			webDavURL.append(MANUAL_CHECK_IN_REQUIRED_PATH);
 		}
 
-		String fileEntryFileName = null;
-
 		Group group = null;
 
 		if (fileEntry != null) {
-			fileEntryFileName = HtmlUtil.unescape(fileEntry.getFileName());
-
 			group = GroupLocalServiceUtil.getGroup(fileEntry.getGroupId());
 		}
 		else {
@@ -1176,7 +930,7 @@ public class DLImpl implements DL {
 
 		if (fileEntry != null) {
 			sb.append(StringPool.SLASH);
-			sb.append(HttpUtil.encodeURL(fileEntryFileName, true));
+			sb.append(DLWebDAVUtil.escapeURLTitle(fileEntry.getTitle()));
 		}
 
 		webDavURL.append(sb.toString());
@@ -1332,9 +1086,8 @@ public class DLImpl implements DL {
 			DLFileVersion dlFileVersion, ServiceContext serviceContext)
 		throws PortalException {
 
-		if (Validator.equals(
-				serviceContext.getCommand(), Constants.ADD_WEBDAV) ||
-			Validator.equals(
+		if (Objects.equals(serviceContext.getCommand(), Constants.ADD_WEBDAV) ||
+			Objects.equals(
 				serviceContext.getCommand(), Constants.UPDATE_WEBDAV)) {
 
 			return serviceContext.getPortalURL() +
@@ -1349,28 +1102,44 @@ public class DLImpl implements DL {
 		}
 
 		HttpServletRequest request = serviceContext.getRequest();
+		ThemeDisplay themeDisplay = serviceContext.getThemeDisplay();
 
-		if ((request == null) || (serviceContext.getThemeDisplay() == null)) {
+		if ((request == null) || (themeDisplay == null)) {
 			return StringPool.BLANK;
 		}
 
-		long plid = serviceContext.getPlid();
+		PortletURL portletURL = null;
 
+		long plid = serviceContext.getPlid();
 		long controlPanelPlid = PortalUtil.getControlPanelPlid(
 			serviceContext.getCompanyId());
+		String portletId = PortletProviderUtil.getPortletId(
+			FileEntry.class.getName(), PortletProvider.Action.VIEW);
 
-		if (plid == controlPanelPlid) {
-			plid = PortalUtil.getPlidFromPortletId(
-				dlFileVersion.getGroupId(), PortletKeys.DOCUMENT_LIBRARY);
+		for (PortletLayoutFinder portletLayoutFinder : _serviceTrackerList) {
+			try {
+				PortletLayoutFinder.Result result = portletLayoutFinder.find(
+					themeDisplay, themeDisplay.getSiteGroupId());
+
+				portletId = result.getPortletId();
+				plid = result.getPlid();
+
+				break;
+			}
+			catch (PortalException pe) {
+			}
 		}
 
-		if (plid == LayoutConstants.DEFAULT_PLID) {
-			plid = controlPanelPlid;
-		}
+		if ((plid == controlPanelPlid) ||
+			(plid == LayoutConstants.DEFAULT_PLID)) {
 
-		PortletURL portletURL = PortletURLFactoryUtil.create(
-			request, PortletKeys.DOCUMENT_LIBRARY, plid,
-			PortletRequest.RENDER_PHASE);
+			portletURL = PortalUtil.getControlPanelPortletURL(
+				request, portletId, PortletRequest.RENDER_PHASE);
+		}
+		else {
+			portletURL = PortletURLFactoryUtil.create(
+				request, portletId, plid, PortletRequest.RENDER_PHASE);
+		}
 
 		portletURL.setParameter(
 			"mvcRenderCommandName", "/document_library/view_file_entry");
@@ -1385,14 +1154,7 @@ public class DLImpl implements DL {
 			ThemeDisplay themeDisplay, String queryString)
 		throws Exception {
 
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(themeDisplay.getPathThemeImages());
-		sb.append("/file_system/large/");
-		sb.append(getGenericName(fileEntry.getExtension()));
-		sb.append(".png");
-
-		String thumbnailSrc = sb.toString();
+		String thumbnailSrc = StringPool.BLANK;
 
 		if (Validator.isNotNull(queryString)) {
 			thumbnailSrc = getPreviewURL(
@@ -1409,25 +1171,6 @@ public class DLImpl implements DL {
 		for (String extension : extensions) {
 			_genericNames.put(extension, genericName);
 		}
-	}
-
-	private void _addPortletBreadcrumbEntry(
-			HttpServletRequest request, String parameterName,
-			String parameterValue, long groupId, boolean ignoreRootFolder,
-			PortletURL portletURL)
-		throws WindowStateException {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		portletURL.setParameter(parameterName, parameterValue);
-		portletURL.setParameter("groupId", String.valueOf(groupId));
-		portletURL.setParameter(
-			"ignoreRootFolder", String.valueOf(ignoreRootFolder));
-		portletURL.setWindowState(LiferayWindowState.POP_UP);
-
-		PortalUtil.addPortletBreadcrumbEntry(
-			request, themeDisplay.translate("home"), portletURL.toString());
 	}
 
 	private static final String _DEFAULT_FILE_ICON = "page";
@@ -1511,5 +1254,10 @@ public class DLImpl implements DL {
 			_populateGenericNamesMap(genericName);
 		}
 	}
+
+	private final ServiceTrackerList<PortletLayoutFinder> _serviceTrackerList =
+		ServiceTrackerCollections.openList(
+			PortletLayoutFinder.class,
+			"(model.class.name=" + FileEntry.class.getName() + ")");
 
 }

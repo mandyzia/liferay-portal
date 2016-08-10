@@ -9,6 +9,16 @@
 </thead>
 <tbody>
 <tr>
+	<td>PERMISSIONS_VIEW_ROLE</td>
+	<td>//select[contains(.,'${key_permissionsViewRole}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>AVAILABLE</td>
+	<td>//div[label[contains(.,'Available')]]/select</td>
+	<td></td>
+</tr>
+<tr>
 	<td>BULLET_STYLE</td>
 	<td>//div[label[contains(.,'Bullet Style')]]/select</td>
 	<td></td>
@@ -16,6 +26,16 @@
 <tr>
 	<td>COUNTRY</td>
 	<td>//div[label[contains(.,'Country')]]/select</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DEFAULT_LANGUAGE</td>
+	<td>//div[contains(.,'Default Language')]//select</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DEFAULT_VALUE_SELECT</td>
+	<td>//select[contains(@id,'defaultValue')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -34,6 +54,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>EXPORT_IMPORT_CONTENT</td>
+	<td>//select[contains(@id,'PORTLET_DATA')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>GENDER</td>
+	<td>//div[label[contains(.,'Gender')]]/select</td>
+	<td></td>
+</tr>
+<tr>
 	<td>HEADER</td>
 	<td>//div[label[contains(.,'Header')]]/select</td>
 	<td></td>
@@ -44,18 +74,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>KNOWLEDGE_BASE_RATING</td>
+	<td>//select[contains(@id,'knowledge-base')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>LANGUAGE</td>
 	<td>//div[label[contains(.,'Language')]]/select</td>
 	<td></td>
 </tr>
 <tr>
-	<td>LOCKOUT_DURATION</td>
-	<td>//div[label[contains(.,'Lockout Duration')]]/select</td>
+	<td>LENGTH</td>
+	<td>//select[contains(@id,'length')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>MAXIMUM_FAILURE</td>
-	<td>//div[label[contains(.,'Maximum Failure')]]/select</td>
+	<td>LOCKOUT_DURATION</td>
+	<td>//div[label[contains(.,'Lockout Duration')]]/select</td>
 	<td></td>
 </tr>
 <tr>
@@ -69,6 +104,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>NEW_NODE</td>
+	<td>//div[label[contains(.,'New Node')]]/select</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NEW_PARENT</td>
+	<td>//div[label[contains(.,'New Parent')]]/select</td>
+	<td></td>
+</tr>
+<tr>
 	<td>QUESTION</td>
 	<td>//div[label[contains(.,'Question')]]/select</td>
 	<td></td>
@@ -76,6 +121,11 @@
 <tr>
 	<td>REGION</td>
 	<td>//div[label[contains(.,'Region')]]/select</td>
+	<td></td>
+</tr>
+<tr>
+	<td>REMOTE_PORTLET</td>
+	<td>//div[label[contains(.,'Remote Portlet')]]/select</td>
 	<td></td>
 </tr>
 <tr>
@@ -104,6 +154,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SCOPE</td>
+	<td>//div[label[contains(.,'Scope')]]/select | //div/select[@title='Scope']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TIME_ZONE</td>
+	<td>//select[contains(@id,'timeZoneId')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>TYPE</td>
 	<td>//div[label[contains(.,'Type')]]/select</td>
 	<td></td>
@@ -111,6 +171,11 @@
 <tr>
 	<td>USER_STATUS</td>
 	<td>//select[contains(@id,'StatusSelect')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VERSION</td>
+	<td>//div[label[contains(.,'Version')]]/select</td>
 	<td></td>
 </tr>
 </tbody>

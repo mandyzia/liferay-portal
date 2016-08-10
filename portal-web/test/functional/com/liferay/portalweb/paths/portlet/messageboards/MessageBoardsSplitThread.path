@@ -21,7 +21,7 @@
 <!--THREAD_TABLE-->
 <tr>
 	<td>THREAD_TABLE_SUBJECT</td>
-	<td>//table[contains(@id,'message_boards_view_message_thread')]//tr[contains(.,'RE: ${key_threadSubject}')]/td/a/strong</td>
+	<td>//table[contains(@id,'message_boards_view_message_thread')]//tr[contains(.,'${key_threadSubject}')]/td//a/strong</td>
 	<td></td>
 </tr>
 <tr>
@@ -43,6 +43,11 @@
 <tr>
 	<td>ADD_EXPLANATION_POST_LABEL</td>
 	<td>//label[contains(@for,'addExplanationPost')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADD_EXPLANATION_SUBJECT_FIELD</td>
+	<td>//div[contains(@class,'form-group')]//input[contains(@id,'MBPortlet_subject')]</td>
 	<td></td>
 </tr>
 </tbody>

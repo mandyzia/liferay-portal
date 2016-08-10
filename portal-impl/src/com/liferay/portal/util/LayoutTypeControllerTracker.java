@@ -14,9 +14,9 @@
 
 package com.liferay.portal.util;
 
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.LayoutTypeController;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutTypeController;
 import com.liferay.portal.model.impl.LayoutTypeControllerImpl;
 import com.liferay.registry.Filter;
 import com.liferay.registry.Registry;
@@ -118,7 +118,7 @@ public class LayoutTypeControllerTracker {
 		_defaultLayoutTypeControllers = new ConcurrentHashMap<>();
 	private final ConcurrentMap<String, LayoutTypeController>
 		_layoutTypeControllers = new ConcurrentHashMap<>();
-	private final ServiceTracker <LayoutTypeController, LayoutTypeController>
+	private final ServiceTracker<LayoutTypeController, LayoutTypeController>
 		_serviceTracker;
 
 	private class LayoutTypeControllerServiceTrackerCustomizer

@@ -14,27 +14,30 @@
 
 package com.liferay.portal.service.permission;
 
+import com.liferay.exportimport.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutTypePortlet;
+import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.model.PortletConstants;
+import com.liferay.portal.kernel.model.impl.VirtualLayout;
+import com.liferay.portal.kernel.portlet.ControlPanelEntry;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
+import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
+import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
+import com.liferay.portal.kernel.service.permission.PortletPermission;
+import com.liferay.portal.kernel.util.PortletCategoryKeys;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutTypePortlet;
-import com.liferay.portal.model.Portlet;
-import com.liferay.portal.model.PortletConstants;
-import com.liferay.portal.model.impl.VirtualLayout;
-import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.ResourceActionsUtil;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.PortletLocalServiceUtil;
-import com.liferay.portal.util.PortletCategoryKeys;
-import com.liferay.portlet.ControlPanelEntry;
-import com.liferay.portlet.exportimport.staging.permission.StagingPermissionUtil;
-import com.liferay.portlet.sites.util.SitesUtil;
+import com.liferay.sites.kernel.util.SitesUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -279,25 +282,53 @@ public class PortletPermissionImpl implements PortletPermission {
 			boolean checkStagingPermission)
 		throws PortalException {
 
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			permissionChecker.getCompanyId(), portletId);
+
+		if ((portlet == null) || portlet.isUndeployedPortlet()) {
+			return false;
+		}
+
 		String name = null;
-		String primKey = null;
+		String resourcePermissionPrimKey = null;
 
 		if (layout == null) {
 			name = portletId;
-			primKey = portletId;
+			resourcePermissionPrimKey = portletId;
 
 			return permissionChecker.hasPermission(
-				groupId, name, primKey, actionId);
+				groupId, name, resourcePermissionPrimKey, actionId);
 		}
 
-		if (!actionId.equals(ActionKeys.VIEW) &&
-			(layout instanceof VirtualLayout)) {
+		Group group = GroupLocalServiceUtil.fetchGroup(groupId);
 
-			return hasCustomizePermission(
-				permissionChecker, layout, portletId, actionId);
+		if (group == null) {
+			group = layout.getGroup();
+
+			groupId = layout.getGroupId();
 		}
 
-		Group group = layout.getGroup();
+		if ((group.isControlPanel() || layout.isTypeControlPanel()) &&
+			actionId.equals(ActionKeys.VIEW)) {
+
+			return true;
+		}
+
+		if (layout instanceof VirtualLayout) {
+			if (layout.isCustomizable() && !actionId.equals(ActionKeys.VIEW)) {
+				if (actionId.equals(ActionKeys.ADD_TO_PAGE)) {
+					return hasAddToPagePermission(
+						permissionChecker, layout, portletId, actionId);
+				}
+
+				return hasCustomizePermission(
+					permissionChecker, layout, portletId, actionId);
+			}
+
+			VirtualLayout virtualLayout = (VirtualLayout)layout;
+
+			layout = virtualLayout.getSourceLayout();
+		}
 
 		if (!group.isLayoutSetPrototype() &&
 			actionId.equals(ActionKeys.CONFIGURATION) &&
@@ -306,28 +337,23 @@ public class PortletPermissionImpl implements PortletPermission {
 			return false;
 		}
 
-		groupId = layout.getGroupId();
-
-		name = PortletConstants.getRootPortletId(portletId);
+		String rootPortletId = PortletConstants.getRootPortletId(portletId);
 
 		if (checkStagingPermission) {
 			Boolean hasPermission = StagingPermissionUtil.hasPermission(
-				permissionChecker, groupId, name, groupId, name, actionId);
+				permissionChecker, groupId, rootPortletId, groupId,
+				rootPortletId, actionId);
 
 			if (hasPermission != null) {
 				return hasPermission.booleanValue();
 			}
 		}
 
-		if (group.isControlPanel() && actionId.equals(ActionKeys.VIEW)) {
-			return true;
-		}
-
-		primKey = getPrimaryKey(layout.getPlid(), portletId);
+		resourcePermissionPrimKey = getPrimaryKey(layout.getPlid(), portletId);
 
 		if (strict) {
 			return permissionChecker.hasPermission(
-				groupId, name, primKey, actionId);
+				groupId, rootPortletId, resourcePermissionPrimKey, actionId);
 		}
 
 		if (hasConfigurePermission(
@@ -339,7 +365,7 @@ public class PortletPermissionImpl implements PortletPermission {
 		}
 
 		return permissionChecker.hasPermission(
-			groupId, name, primKey, actionId);
+			groupId, rootPortletId, resourcePermissionPrimKey, actionId);
 	}
 
 	public boolean contains(
@@ -580,6 +606,21 @@ public class PortletPermissionImpl implements PortletPermission {
 
 			return false;
 		}
+	}
+
+	protected boolean hasAddToPagePermission(
+			PermissionChecker permissionChecker, Layout layout,
+			String portletId, String actionId)
+		throws PortalException {
+
+		if (LayoutPermissionUtil.contains(
+				permissionChecker, layout, ActionKeys.CUSTOMIZE)) {
+
+			return contains(
+				permissionChecker, portletId, ActionKeys.ADD_TO_PAGE);
+		}
+
+		return false;
 	}
 
 	protected boolean hasConfigurePermission(

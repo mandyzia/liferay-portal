@@ -17,14 +17,14 @@ package com.liferay.taglib.ui;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateManagerUtil;
 import com.liferay.portal.kernel.servlet.taglib.ui.LanguageEntry;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.taglib.aui.AUIUtil;
 import com.liferay.taglib.util.IncludeTag;
 
@@ -106,6 +106,17 @@ public class LanguageTag extends IncludeTag {
 		return null;
 	}
 
+	protected long getDisplayStyleGroupId() {
+		if (_ddmTemplateGroupId > 0) {
+			return _ddmTemplateGroupId;
+		}
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		return themeDisplay.getScopeGroupId();
+	}
+
 	protected String getFormAction() {
 		String formAction = _formAction;
 
@@ -117,8 +128,8 @@ public class LanguageTag extends IncludeTag {
 			WebKeys.THEME_DISPLAY);
 
 		formAction =
-			themeDisplay.getPathMain() +
-				"/portal/update_language?p_l_id=" + themeDisplay.getPlid();
+			themeDisplay.getPathMain() + "/portal/update_language?p_l_id=" +
+				themeDisplay.getPlid();
 		formAction = HttpUtil.setParameter(
 			formAction, "redirect", PortalUtil.getCurrentURL(request));
 
@@ -169,6 +180,7 @@ public class LanguageTag extends IncludeTag {
 		}
 
 		for (Locale locale : locales) {
+			boolean disabled = false;
 			String url = null;
 
 			if (!LocaleUtil.equals(locale, currentLocale)) {
@@ -176,12 +188,13 @@ public class LanguageTag extends IncludeTag {
 					formAction, parameterName, LocaleUtil.toLanguageId(locale));
 			}
 			else if (!displayCurrentLocale) {
-				continue;
+				disabled = true;
 			}
 
-			languageEntries.add(
-				new LanguageEntry(
-					duplicateLanguages, currentLocale, locale, url));
+			LanguageEntry languageEntry = new LanguageEntry(
+				duplicateLanguages, currentLocale, locale, url, disabled);
+
+			languageEntries.add(languageEntry);
 		}
 
 		return languageEntries;
@@ -233,7 +246,8 @@ public class LanguageTag extends IncludeTag {
 		request.setAttribute(
 			"liferay-ui:language:displayStyle", getDisplayStyle());
 		request.setAttribute(
-			"liferay-ui:language:displayStyleGroupId", _ddmTemplateGroupId);
+			"liferay-ui:language:displayStyleGroupId",
+			getDisplayStyleGroupId());
 		request.setAttribute("liferay-ui:language:formAction", getFormAction());
 		request.setAttribute("liferay-ui:language:formName", _formName);
 		request.setAttribute(

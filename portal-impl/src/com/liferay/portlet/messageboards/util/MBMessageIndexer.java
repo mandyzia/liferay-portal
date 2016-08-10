@@ -14,15 +14,25 @@
 
 package com.liferay.portlet.messageboards.util;
 
+import com.liferay.message.boards.kernel.model.MBCategory;
+import com.liferay.message.boards.kernel.model.MBCategoryConstants;
+import com.liferay.message.boards.kernel.model.MBDiscussion;
+import com.liferay.message.boards.kernel.model.MBMessage;
+import com.liferay.message.boards.kernel.service.MBCategoryLocalServiceUtil;
+import com.liferay.message.boards.kernel.service.MBCategoryServiceUtil;
+import com.liferay.message.boards.kernel.service.MBDiscussionLocalServiceUtil;
+import com.liferay.message.boards.kernel.service.MBMessageLocalServiceUtil;
 import com.liferay.portal.kernel.comment.Comment;
 import com.liferay.portal.kernel.comment.CommentManagerUtil;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.parsers.bbcode.BBCodeTranslatorUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.BaseIndexer;
@@ -30,30 +40,22 @@ import com.liferay.portal.kernel.search.BaseRelatedEntryIndexer;
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.RelatedEntryIndexer;
 import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.search.SearchEngineUtil;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.search.filter.TermsFilter;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portlet.messageboards.model.MBCategory;
-import com.liferay.portlet.messageboards.model.MBCategoryConstants;
-import com.liferay.portlet.messageboards.model.MBDiscussion;
-import com.liferay.portlet.messageboards.model.MBMessage;
-import com.liferay.portlet.messageboards.service.MBCategoryLocalServiceUtil;
-import com.liferay.portlet.messageboards.service.MBCategoryServiceUtil;
-import com.liferay.portlet.messageboards.service.MBDiscussionLocalServiceUtil;
-import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
 import com.liferay.portlet.messageboards.service.permission.MBMessagePermission;
 
 import java.util.List;
@@ -168,12 +170,20 @@ public class MBMessageIndexer
 		addStatus(contextBooleanFilter, searchContext);
 
 		boolean discussion = GetterUtil.getBoolean(
-			searchContext.getAttribute("discussion"), false);
+			searchContext.getAttribute("discussion"));
 
 		contextBooleanFilter.addRequiredTerm("discussion", discussion);
 
 		if (searchContext.isIncludeDiscussions()) {
 			addRelatedClassNames(contextBooleanFilter, searchContext);
+		}
+
+		String classNameId = GetterUtil.getString(
+			searchContext.getAttribute(Field.CLASS_NAME_ID));
+
+		if (Validator.isNotNull(classNameId)) {
+			contextBooleanFilter.addRequiredTerm(
+				Field.CLASS_NAME_ID, classNameId);
 		}
 
 		long threadId = GetterUtil.getLong(
@@ -237,7 +247,8 @@ public class MBMessageIndexer
 
 		document.addKeyword(Field.CATEGORY_ID, mbMessage.getCategoryId());
 		document.addText(Field.CONTENT, processContent(mbMessage));
-		document.addKeyword(Field.ENTRY_CLASS_PK, mbMessage.getRootMessageId());
+		document.addKeyword(
+			Field.ROOT_ENTRY_CLASS_PK, mbMessage.getRootMessageId());
 		document.addText(Field.TITLE, mbMessage.getSubject());
 
 		if (mbMessage.isAnonymous()) {
@@ -294,17 +305,15 @@ public class MBMessageIndexer
 
 	@Override
 	protected void doReindex(MBMessage mbMessage) throws Exception {
-		if (!mbMessage.isApproved() && !mbMessage.isInTrash()) {
-			return;
-		}
+		if ((!mbMessage.isApproved() && !mbMessage.isInTrash()) ||
+			(mbMessage.isDiscussion() && mbMessage.isRoot())) {
 
-		if (mbMessage.isDiscussion() && mbMessage.isRoot()) {
 			return;
 		}
 
 		Document document = getDocument(mbMessage);
 
-		SearchEngineUtil.updateDocument(
+		IndexWriterHelperUtil.updateDocument(
 			getSearchEngineId(), mbMessage.getCompanyId(), document,
 			isCommitImmediately());
 	}
@@ -365,13 +374,11 @@ public class MBMessageIndexer
 
 		actionableDynamicQuery.setCompanyId(companyId);
 		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+			new ActionableDynamicQuery.PerformActionMethod<MBCategory>() {
 
 				@Override
-				public void performAction(Object object)
+				public void performAction(MBCategory category)
 					throws PortalException {
-
-					MBCategory category = (MBCategory)object;
 
 					reindexMessages(
 						companyId, category.getGroupId(),
@@ -391,14 +398,10 @@ public class MBMessageIndexer
 
 		actionableDynamicQuery.setCompanyId(companyId);
 		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+			new ActionableDynamicQuery.PerformActionMethod<Group>() {
 
 				@Override
-				public void performAction(Object object)
-					throws PortalException {
-
-					Group group = (Group)object;
-
+				public void performAction(Group group) throws PortalException {
 					reindexMessages(
 						companyId, group.getGroupId(),
 						MBCategoryConstants.DISCUSSION_CATEGORY_ID);
@@ -413,10 +416,10 @@ public class MBMessageIndexer
 			long companyId, long groupId, final long categoryId)
 		throws PortalException {
 
-		final ActionableDynamicQuery actionableDynamicQuery =
-			MBMessageLocalServiceUtil.getActionableDynamicQuery();
+		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
+			MBMessageLocalServiceUtil.getIndexableActionableDynamicQuery();
 
-		actionableDynamicQuery.setAddCriteriaMethod(
+		indexableActionableDynamicQuery.setAddCriteriaMethod(
 			new ActionableDynamicQuery.AddCriteriaMethod() {
 
 				@Override
@@ -438,15 +441,13 @@ public class MBMessageIndexer
 				}
 
 			});
-		actionableDynamicQuery.setCompanyId(companyId);
-		actionableDynamicQuery.setGroupId(groupId);
-		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+		indexableActionableDynamicQuery.setCompanyId(companyId);
+		indexableActionableDynamicQuery.setGroupId(groupId);
+		indexableActionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod<MBMessage>() {
 
 				@Override
-				public void performAction(Object object) {
-					MBMessage message = (MBMessage)object;
-
+				public void performAction(MBMessage message) {
 					if (message.isDiscussion() && message.isRoot()) {
 						return;
 					}
@@ -454,7 +455,7 @@ public class MBMessageIndexer
 					try {
 						Document document = getDocument(message);
 
-						actionableDynamicQuery.addDocument(document);
+						indexableActionableDynamicQuery.addDocuments(document);
 					}
 					catch (PortalException pe) {
 						if (_log.isWarnEnabled()) {
@@ -467,9 +468,9 @@ public class MBMessageIndexer
 				}
 
 			});
-		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
+		indexableActionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
-		actionableDynamicQuery.performActions();
+		indexableActionableDynamicQuery.performActions();
 	}
 
 	protected void reindexRoot(final long companyId) throws PortalException {
@@ -478,14 +479,10 @@ public class MBMessageIndexer
 
 		actionableDynamicQuery.setCompanyId(companyId);
 		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+			new ActionableDynamicQuery.PerformActionMethod<Group>() {
 
 				@Override
-				public void performAction(Object object)
-					throws PortalException {
-
-					Group group = (Group)object;
-
+				public void performAction(Group group) throws PortalException {
 					reindexMessages(
 						companyId, group.getGroupId(),
 						MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID);

@@ -20,23 +20,21 @@
 	cssClass="portlet-options"
 	direction="<%= direction %>"
 	extended="<%= false %>"
-	icon="../aui/cog"
+	icon="ellipsis-v"
+	markupView="lexicon"
 	message="options"
-	showArrow="<%= showArrow %>"
+	showArrow="<%= false %>"
 	showWhenSingleIcon="<%= true %>"
-	view="<%= view %>"
+	triggerCssClass="icon-monospaced"
 >
 
 	<%
-	List<PortletConfigurationIconFactory> portletConfigurationIconFactories = ListUtil.copy(PortletConfigurationIconTracker.getPortletConfigurationIcons());
+	for (PortletConfigurationIcon portletConfigurationIcon : portletConfigurationIcons) {
+		boolean include = portletConfigurationIcon.include(request, new PipingServletResponse(pageContext));
 
-	portletConfigurationIconFactories = ListUtil.sort(portletConfigurationIconFactories, new PropertyComparator("weight", false, false));
-
-	for (PortletConfigurationIconFactory portletConfigurationIconFactory : portletConfigurationIconFactories) {
-		PortletConfigurationIcon portletConfigurationIcon = portletConfigurationIconFactory.create(request);
+		if (!include) {
 	%>
 
-		<c:if test="<%= portletConfigurationIcon.isShow() %>">
 			<liferay-ui:icon
 				alt="<%= portletConfigurationIcon.getAlt() %>"
 				ariaRole="<%= portletConfigurationIcon.getAriaRole() %>"
@@ -49,21 +47,20 @@
 				label="<%= portletConfigurationIcon.isLabel() %>"
 				lang="<%= portletConfigurationIcon.getLang() %>"
 				linkCssClass="<%= portletConfigurationIcon.getLinkCssClass() %>"
-				localizeMessage="<%= portletConfigurationIcon.isLocalizeMessage() %>"
-				message="<%= portletConfigurationIcon.getMessage() %>"
+				localizeMessage="<%= false %>"
+				message="<%= portletConfigurationIcon.getMessage(portletRequest) %>"
 				method="<%= portletConfigurationIcon.getMethod() %>"
-				onClick="<%= portletConfigurationIcon.getOnClick() %>"
+				onClick="<%= portletConfigurationIcon.getOnClick(portletRequest, portletResponse) %>"
 				src="<%= portletConfigurationIcon.getSrc() %>"
 				srcHover="<%= portletConfigurationIcon.getSrcHover() %>"
 				target="<%= portletConfigurationIcon.getTarget() %>"
 				toolTip="<%= portletConfigurationIcon.isToolTip() %>"
-				url="<%= portletConfigurationIcon.getURL() %>"
+				url="<%= portletConfigurationIcon.getURL(portletRequest, portletResponse) %>"
 				useDialog="<%= portletConfigurationIcon.isUseDialog() %>"
-				view="<%= view %>"
 			/>
-		</c:if>
 
 	<%
+		}
 	}
 	%>
 

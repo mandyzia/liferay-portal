@@ -18,10 +18,11 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.auth.HttpPrincipal;
+import com.liferay.portal.kernel.service.TeamServiceUtil;
+import com.liferay.portal.kernel.service.http.TunnelUtil;
 import com.liferay.portal.kernel.util.MethodHandler;
 import com.liferay.portal.kernel.util.MethodKey;
-import com.liferay.portal.security.auth.HttpPrincipal;
-import com.liferay.portal.service.TeamServiceUtil;
 
 /**
  * Provides the HTTP utility for the
@@ -53,7 +54,7 @@ import com.liferay.portal.service.TeamServiceUtil;
  */
 @ProviderType
 public class TeamServiceHttp {
-	public static com.liferay.portal.model.Team addTeam(
+	public static com.liferay.portal.kernel.model.Team addTeam(
 		HttpPrincipal httpPrincipal, long groupId, java.lang.String name,
 		java.lang.String description)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -77,7 +78,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (com.liferay.portal.model.Team)returnObj;
+			return (com.liferay.portal.kernel.model.Team)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -86,10 +87,10 @@ public class TeamServiceHttp {
 		}
 	}
 
-	public static com.liferay.portal.model.Team addTeam(
+	public static com.liferay.portal.kernel.model.Team addTeam(
 		HttpPrincipal httpPrincipal, long groupId, java.lang.String name,
 		java.lang.String description,
-		com.liferay.portal.service.ServiceContext serviceContext)
+		com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(TeamServiceUtil.class,
@@ -111,7 +112,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (com.liferay.portal.model.Team)returnObj;
+			return (com.liferay.portal.kernel.model.Team)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -146,7 +147,7 @@ public class TeamServiceHttp {
 		}
 	}
 
-	public static java.util.List<com.liferay.portal.model.Team> getGroupTeams(
+	public static java.util.List<com.liferay.portal.kernel.model.Team> getGroupTeams(
 		HttpPrincipal httpPrincipal, long groupId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
@@ -168,7 +169,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (java.util.List<com.liferay.portal.model.Team>)returnObj;
+			return (java.util.List<com.liferay.portal.kernel.model.Team>)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -177,7 +178,7 @@ public class TeamServiceHttp {
 		}
 	}
 
-	public static com.liferay.portal.model.Team getTeam(
+	public static com.liferay.portal.kernel.model.Team getTeam(
 		HttpPrincipal httpPrincipal, long teamId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
@@ -199,7 +200,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (com.liferay.portal.model.Team)returnObj;
+			return (com.liferay.portal.kernel.model.Team)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -208,7 +209,7 @@ public class TeamServiceHttp {
 		}
 	}
 
-	public static com.liferay.portal.model.Team getTeam(
+	public static com.liferay.portal.kernel.model.Team getTeam(
 		HttpPrincipal httpPrincipal, long groupId, java.lang.String name)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
@@ -231,7 +232,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (com.liferay.portal.model.Team)returnObj;
+			return (com.liferay.portal.kernel.model.Team)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -240,7 +241,7 @@ public class TeamServiceHttp {
 		}
 	}
 
-	public static java.util.List<com.liferay.portal.model.Team> getUserTeams(
+	public static java.util.List<com.liferay.portal.kernel.model.Team> getUserTeams(
 		HttpPrincipal httpPrincipal, long userId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
@@ -262,7 +263,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (java.util.List<com.liferay.portal.model.Team>)returnObj;
+			return (java.util.List<com.liferay.portal.kernel.model.Team>)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -271,7 +272,7 @@ public class TeamServiceHttp {
 		}
 	}
 
-	public static java.util.List<com.liferay.portal.model.Team> getUserTeams(
+	public static java.util.List<com.liferay.portal.kernel.model.Team> getUserTeams(
 		HttpPrincipal httpPrincipal, long userId, long groupId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
@@ -294,7 +295,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (java.util.List<com.liferay.portal.model.Team>)returnObj;
+			return (java.util.List<com.liferay.portal.kernel.model.Team>)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -334,13 +335,72 @@ public class TeamServiceHttp {
 		}
 	}
 
-	public static com.liferay.portal.model.Team updateTeam(
+	public static java.util.List<com.liferay.portal.kernel.model.Team> search(
+		HttpPrincipal httpPrincipal, long groupId, java.lang.String name,
+		java.lang.String description,
+		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portal.kernel.model.Team> obc) {
+		try {
+			MethodKey methodKey = new MethodKey(TeamServiceUtil.class,
+					"search", _searchParameterTypes9);
+
+			MethodHandler methodHandler = new MethodHandler(methodKey, groupId,
+					name, description, params, start, end, obc);
+
+			Object returnObj = null;
+
+			try {
+				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception e) {
+				throw new com.liferay.portal.kernel.exception.SystemException(e);
+			}
+
+			return (java.util.List<com.liferay.portal.kernel.model.Team>)returnObj;
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException se) {
+			_log.error(se, se);
+
+			throw se;
+		}
+	}
+
+	public static int searchCount(HttpPrincipal httpPrincipal, long groupId,
+		java.lang.String name, java.lang.String description,
+		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params) {
+		try {
+			MethodKey methodKey = new MethodKey(TeamServiceUtil.class,
+					"searchCount", _searchCountParameterTypes10);
+
+			MethodHandler methodHandler = new MethodHandler(methodKey, groupId,
+					name, description, params);
+
+			Object returnObj = null;
+
+			try {
+				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception e) {
+				throw new com.liferay.portal.kernel.exception.SystemException(e);
+			}
+
+			return ((Integer)returnObj).intValue();
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException se) {
+			_log.error(se, se);
+
+			throw se;
+		}
+	}
+
+	public static com.liferay.portal.kernel.model.Team updateTeam(
 		HttpPrincipal httpPrincipal, long teamId, java.lang.String name,
 		java.lang.String description)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			MethodKey methodKey = new MethodKey(TeamServiceUtil.class,
-					"updateTeam", _updateTeamParameterTypes9);
+					"updateTeam", _updateTeamParameterTypes11);
 
 			MethodHandler methodHandler = new MethodHandler(methodKey, teamId,
 					name, description);
@@ -358,7 +418,7 @@ public class TeamServiceHttp {
 				throw new com.liferay.portal.kernel.exception.SystemException(e);
 			}
 
-			return (com.liferay.portal.model.Team)returnObj;
+			return (com.liferay.portal.kernel.model.Team)returnObj;
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException se) {
 			_log.error(se, se);
@@ -373,7 +433,7 @@ public class TeamServiceHttp {
 		};
 	private static final Class<?>[] _addTeamParameterTypes1 = new Class[] {
 			long.class, java.lang.String.class, java.lang.String.class,
-			com.liferay.portal.service.ServiceContext.class
+			com.liferay.portal.kernel.service.ServiceContext.class
 		};
 	private static final Class<?>[] _deleteTeamParameterTypes2 = new Class[] {
 			long.class
@@ -396,7 +456,16 @@ public class TeamServiceHttp {
 	private static final Class<?>[] _hasUserTeamParameterTypes8 = new Class[] {
 			long.class, long.class
 		};
-	private static final Class<?>[] _updateTeamParameterTypes9 = new Class[] {
+	private static final Class<?>[] _searchParameterTypes9 = new Class[] {
+			long.class, java.lang.String.class, java.lang.String.class,
+			java.util.LinkedHashMap.class, int.class, int.class,
+			com.liferay.portal.kernel.util.OrderByComparator.class
+		};
+	private static final Class<?>[] _searchCountParameterTypes10 = new Class[] {
+			long.class, java.lang.String.class, java.lang.String.class,
+			java.util.LinkedHashMap.class
+		};
+	private static final Class<?>[] _updateTeamParameterTypes11 = new Class[] {
 			long.class, java.lang.String.class, java.lang.String.class
 		};
 }

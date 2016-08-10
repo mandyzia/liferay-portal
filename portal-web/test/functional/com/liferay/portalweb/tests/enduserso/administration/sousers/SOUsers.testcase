@@ -55,8 +55,8 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Roles" />
 		</execute>
 
 		<execute macro="Role#assignRegRoleCP">
@@ -87,8 +87,8 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Roles" />
 		</execute>
 
 		<execute macro="Role#addCP">
@@ -202,9 +202,12 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -216,9 +219,12 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#assignRoleCP">
@@ -274,9 +280,12 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -288,9 +297,12 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#assignRoleCP">
@@ -368,9 +380,12 @@
 			<var name="userScreenName" value="${userScreenName2}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName1}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName1}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -382,9 +397,12 @@
 			<var name="userScreenName" value="${userScreenName1}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName1}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName1}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -396,9 +414,12 @@
 			<var name="userScreenName" value="${userScreenName2}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Teams" />
-			<var name="siteScopeName" value="${siteName1}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName1}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Teams" />
 		</execute>
 
 		<execute macro="Team#addCP">
@@ -407,17 +428,20 @@
 			<var name="teamName" value="${teamName}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="ProductMenu#gotoControlPanelSites">
+			<var name="portlet" value="Sites" />
 		</execute>
 
 		<execute macro="Site#addBlankCP">
 			<var name="siteName" value="${siteName2}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Teams" />
-			<var name="siteScopeName" value="${siteName1}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName1}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Teams" />
 		</execute>
 
 		<execute macro="Team#viewCP">
@@ -425,22 +449,28 @@
 			<var name="teamName" value="${teamName}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Teams" />
-			<var name="siteScopeName" value="${siteName2}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName2}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Teams" />
 		</execute>
 
 		<var name="key_teamName" value="${teamName}" />
 
-		<execute function="AssertElementNotPresent" locator1="CPSiteteams#TEAM_TABLE_NAME" value1="${teamName}" />
-		<execute function="AssertElementNotPresent" locator1="CPSiteteams#TEAM_TABLE_DESCRIPTION" value1="${teamDescription}" />
-		<execute function="AssertElementNotPresent" locator1="CPSiteteams#TEAM_TABLE_ACTIONS" value1="Actions" />
+		<execute function="AssertElementNotPresent" locator1="SiteTeams#TEAM_TABLE_NAME" value1="${teamName}" />
+		<execute function="AssertElementNotPresent" locator1="SiteTeams#TEAM_TABLE_DESCRIPTION" value1="${teamDescription}" />
+		<execute function="AssertElementNotPresent" locator1="SiteTeams#TEAM_TABLE_ACTIONS" value1="Actions" />
 		<execute function="AssertTextNotPresent" value1="${teamName}" />
 		<execute function="AssertTextNotPresent" value1="${teamDescription}" />
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Teams" />
-			<var name="siteScopeName" value="${siteName1}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName1}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Teams" />
 		</execute>
 
 		<execute macro="Team#assignMembersCP">
@@ -449,9 +479,8 @@
 			<var name="userScreenName" value="${userScreenName1}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName1}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SOUserBar#addPage">
@@ -459,42 +488,48 @@
 			<var name="pageType" value="Blog" />
 		</execute>
 
-		<execute macro="PermissionsInline#gotoPagePG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="${pageName}" />
 			<var name="siteName" value="${siteName1}" />
-			<var name="siteURLTemp" value="true" />
+		</execute>
+
+		<execute macro="PermissionsInline#gotoPagePG">
+			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<for list="${permissionInLineCheckLists}" param="permissionsInLineCheckListsCount" >
-
 			<execute macro="Team#definePermissionPG">
 				<var name="permissionDefinitionKey" value="${permissionsInLineCheckListsCount}" />
 				<var name="teamName" value="${teamName}" />
 			</execute>
 		</for>
 
-		<execute macro="PermissionsInline#gotoPagePG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="${pageName}" />
 			<var name="siteName" value="${siteName1}" />
-			<var name="siteURLTemp" value="true" />
+		</execute>
+
+		<execute macro="PermissionsInline#gotoPagePG">
+			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<for list="${permissionInLineUncheckLists1}" param="permissionsInLineUncheckListsCount" >
-
 			<execute macro="Role#removePermissionPG">
 				<var name="permissionDefinitionKey" value="${permissionsInLineUncheckListsCount}" />
 				<var name="roleName" value="Site Member" />
 			</execute>
 		</for>
 
-		<execute macro="PermissionsInline#gotoPagePG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="${pageName}" />
 			<var name="siteName" value="${siteName1}" />
-			<var name="siteURLTemp" value="true" />
+		</execute>
+
+		<execute macro="PermissionsInline#gotoPagePG">
+			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<for list="${permissionInLineUncheckLists2}" param="permissionsInLineUncheckListsCount" >
-
 			<execute macro="Role#removePermissionPG">
 				<var name="permissionDefinitionKey" value="${permissionsInLineUncheckListsCount}" />
 				<var name="roleName" value="Guest" />
@@ -506,7 +541,7 @@
 			<var name="userLoginFullName" value="${userName1}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 			<var name="siteName" value="${siteName1}" />
 			<var name="siteURL" value="true" />
@@ -521,9 +556,8 @@
 			<var name="userLoginFullName" value="${userName2}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName1}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute function="AssertTextNotPresent" value1="${pageName}" />
@@ -557,8 +591,8 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Roles" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Roles" />
 		</execute>
 
 		<execute macro="Role#addCP">
@@ -566,9 +600,12 @@
 			<var name="roleType" value="Site" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<execute macro="Site#addMemberCP">
@@ -580,8 +617,8 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#assignSiteRoleCP">
@@ -608,12 +645,8 @@
 		</execute>
 
 		<execute macro="SOProfile#addInstantMessenger">
-			<var name="userInstantMessengerAIM" value="socialofficesn" />
-			<var name="userInstantMessengerICQ" value="socialofficesn" />
 			<var name="userInstantMessengerJabber" value="socialofficesn" />
 			<var name="userInstantMessengerSkype" value="socialofficesn" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="socialofficesn" />
-			<var name="userInstantMessengerYM" value="socialofficesn" />
 		</execute>
 
 		<execute macro="SOProfile#addIntroduction">
@@ -663,12 +696,8 @@
 		</execute>
 
 		<execute macro="SOProfile#editInstantMessenger">
-			<var name="userInstantMessengerAIM" value="socialofficesnedit" />
-			<var name="userInstantMessengerICQ" value="socialofficesnedit" />
 			<var name="userInstantMessengerJabber" value="socialofficesnedit" />
 			<var name="userInstantMessengerSkype" value="socialofficesnedit" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="socialofficesnedit" />
-			<var name="userInstantMessengerYM" value="socialofficesnedit" />
 		</execute>
 
 		<execute macro="SOProfile#editIntroduction">
@@ -709,16 +738,19 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoUsersCP">
-			<var name="portletName" value="Site Memberships" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesMembers">
+			<var name="portlet" value="Site Memberships" />
 		</execute>
 
 		<var name="key_userScreenName" value="${userScreenName}" />
 
-		<execute function="AssertTextEquals#assertPartialText" locator1="CPSitememberships#USER_TABLE_NAME" value1="${userName}" />
-		<execute function="AssertTextEquals" locator1="CPSitememberships#USER_TABLE_SCREEN_NAME" value1="${userScreenName}" />
-		<execute function="AssertTextEquals" locator1="CPSitememberships#USER_TABLE_SITE_ROLES_AND_TEAMS" value1="${siteRoleName}" />
-		<execute function="AssertTextEquals" locator1="CPSitememberships#USER_TABLE_ACTIONS" value1="Actions" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="SiteMemberships#USER_TABLE_NAME" value1="${userName}" />
+		<execute function="AssertTextEquals" locator1="SiteMemberships#USER_TABLE_SCREEN_NAME" value1="${userScreenName}" />
+		<execute function="AssertTextEquals" locator1="SiteMemberships#USER_TABLE_SITE_ROLES_AND_TEAMS" value1="${siteRoleName}" />
+		<execute function="AssertTextEquals" locator1="SiteMemberships#USER_TABLE_ACTIONS" value1="Actions" />
 	</command>
 </definition>

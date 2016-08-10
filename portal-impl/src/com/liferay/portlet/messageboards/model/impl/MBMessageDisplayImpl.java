@@ -14,15 +14,15 @@
 
 package com.liferay.portlet.messageboards.model.impl;
 
+import com.liferay.message.boards.kernel.model.MBCategory;
+import com.liferay.message.boards.kernel.model.MBMessage;
+import com.liferay.message.boards.kernel.model.MBMessageDisplay;
+import com.liferay.message.boards.kernel.model.MBThread;
+import com.liferay.message.boards.kernel.model.MBThreadConstants;
+import com.liferay.message.boards.kernel.model.MBTreeWalker;
+import com.liferay.message.boards.kernel.service.MBMessageLocalService;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.messageboards.model.MBCategory;
-import com.liferay.portlet.messageboards.model.MBMessage;
-import com.liferay.portlet.messageboards.model.MBMessageDisplay;
-import com.liferay.portlet.messageboards.model.MBThread;
-import com.liferay.portlet.messageboards.model.MBThreadConstants;
-import com.liferay.portlet.messageboards.model.MBTreeWalker;
-import com.liferay.portlet.messageboards.service.MBMessageLocalService;
 
 import java.util.Comparator;
 
@@ -32,6 +32,43 @@ import java.util.Comparator;
  */
 public class MBMessageDisplayImpl implements MBMessageDisplay {
 
+	public MBMessageDisplayImpl(
+		MBMessage message, MBMessage parentMessage, MBCategory category,
+		MBThread thread, int status, MBMessageLocalService messageLocalService,
+		Comparator<MBMessage> comparator) {
+
+		_message = message;
+		_parentMessage = parentMessage;
+		_category = category;
+		_thread = thread;
+
+		_treeWalker = new MBTreeWalkerImpl(
+			message.getThreadId(), status, messageLocalService, comparator);
+
+		_previousThread = null;
+		_nextThread = null;
+		_threadView = MBThreadConstants.THREAD_VIEW_TREE;
+
+		int dicussionMessagesCount = 0;
+
+		if (message.isDiscussion() &&
+			(PropsValues.DISCUSSION_MAX_COMMENTS > 0)) {
+
+			dicussionMessagesCount =
+				messageLocalService.getDiscussionMessagesCount(
+					message.getClassName(), message.getClassPK(),
+					WorkflowConstants.STATUS_APPROVED);
+		}
+
+		_discussionMessagesCount = dicussionMessagesCount;
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #MBMessageDisplayImpl(MBMessage, MBMessage, MBCategory,
+	 *             MBThread, int, MBMessageLocalService, Comparator)}
+	 */
+	@Deprecated
 	public MBMessageDisplayImpl(
 		MBMessage message, MBMessage parentMessage, MBCategory category,
 		MBThread thread, MBThread previousThread, MBThread nextThread,
@@ -80,6 +117,10 @@ public class MBMessageDisplayImpl implements MBMessageDisplay {
 		return _message;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public MBThread getNextThread() {
 		return _nextThread;
@@ -90,6 +131,10 @@ public class MBMessageDisplayImpl implements MBMessageDisplay {
 		return _parentMessage;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public MBThread getPreviousThread() {
 		return _previousThread;
@@ -100,6 +145,10 @@ public class MBMessageDisplayImpl implements MBMessageDisplay {
 		return _thread;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public String getThreadView() {
 		return _threadView;

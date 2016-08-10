@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -320,10 +321,16 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 		cacheKeyGenerator.append(StringPool.UNDERLINE);
 		cacheKeyGenerator.append(request.getRequestURI());
 
-		String queryString = request.getQueryString();
+		String requestURL = String.valueOf(request.getRequestURL());
 
-		if (queryString != null) {
-			cacheKeyGenerator.append(sterilizeQueryString(queryString));
+		if (requestURL != null) {
+			requestURL = HttpUtil.removeParameter(requestURL, "zx");
+
+			String queryString = HttpUtil.getQueryString(requestURL);
+
+			if (queryString != null) {
+				cacheKeyGenerator.append(sterilizeQueryString(queryString));
+			}
 		}
 
 		return String.valueOf(cacheKeyGenerator.finish());
@@ -355,6 +362,16 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 		if (!contextPath.equals(StringPool.SLASH)) {
 			resourcePath = resourcePath.substring(contextPath.length());
+		}
+
+		if (resourcePath.endsWith(_CSS_EXTENSION) &&
+			PortalUtil.isRightToLeft(request)) {
+
+			int pos = resourcePath.lastIndexOf(StringPool.PERIOD);
+
+			resourcePath =
+				resourcePath.substring(0, pos) + "_rtl" +
+					resourcePath.substring(pos);
 		}
 
 		URL resourceURL = _servletContext.getResource(resourcePath);
@@ -421,8 +438,8 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 				new BufferCacheServletResponse(response);
 
 			processFilter(
-				AggregateFilter.class, request, bufferCacheServletResponse,
-				filterChain);
+				AggregateFilter.class.getName(), request,
+				bufferCacheServletResponse, filterChain);
 
 			bufferCacheServletResponse.finishResponse(false);
 
@@ -462,15 +479,16 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 				cssServletContext =
 					PortalWebResourcesUtil.getPathServletContext(requestURI);
 			}
-			else {
+
+			if (cssServletContext == null) {
 				cssServletContext = _servletContext;
 			}
 
-			content = DynamicCSSUtil.parseSass(
-				cssServletContext, request, resourcePath, content);
+			content = DynamicCSSUtil.replaceToken(
+				cssServletContext, request, content);
 		}
 		catch (Exception e) {
-			_log.error("Unable to parse SASS on CSS " + resourcePath, e);
+			_log.error("Unable to replace tokens in CSS " + resourcePath, e);
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(content);
@@ -497,14 +515,28 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 			URL resourceURL, String resourcePath)
 		throws IOException {
 
+		ServletContext cssServletContext = null;
+		String resourcePathRoot = null;
+
+		String requestURI = request.getRequestURI();
+
+		if (PortalWebResourcesUtil.hasContextPath(requestURI)) {
+			cssServletContext = PortalWebResourcesUtil.getPathServletContext(
+				requestURI);
+			resourcePathRoot = "/";
+		}
+
+		if (cssServletContext == null) {
+			cssServletContext = _servletContext;
+			resourcePathRoot = ServletPaths.getParentPath(resourcePath);
+		}
+
 		URLConnection urlConnection = resourceURL.openConnection();
 
 		String content = StringUtil.read(urlConnection.getInputStream());
 
 		content = aggregateCss(
-			new ServletPaths(
-				_servletContext, ServletPaths.getParentPath(resourcePath)),
-			content);
+			new ServletPaths(cssServletContext, resourcePathRoot), content);
 
 		return getCssContent(request, response, resourcePath, content);
 	}
@@ -542,7 +574,8 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 		if (minifiedContent == null) {
 			processFilter(
-				AggregateFilter.class, request, response, filterChain);
+				AggregateFilter.class.getName(), request, response,
+				filterChain);
 		}
 		else {
 			if (minifiedContent instanceof File) {
@@ -556,8 +589,8 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 	protected String sterilizeQueryString(String queryString) {
 		return StringUtil.replace(
-			queryString, new String[] {StringPool.SLASH, StringPool.BACK_SLASH},
-			new String[] {StringPool.UNDERLINE, StringPool.UNDERLINE});
+			queryString, new char[] {CharPool.SLASH, CharPool.BACK_SLASH},
+			new char[] {CharPool.UNDERLINE, CharPool.UNDERLINE});
 	}
 
 	private static final String _BASE_URL = "@base_url@";

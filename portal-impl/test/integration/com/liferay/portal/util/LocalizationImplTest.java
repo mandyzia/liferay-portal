@@ -84,7 +84,7 @@ public class LocalizationImplTest {
 	public void setUp() throws Exception {
 		StringBundler sb = new StringBundler();
 
-		sb.append("<?xml version='1.0' encoding='UTF-8'?>");
+		sb.append("<?xml version=\"1.0\"?>");
 
 		sb.append("<root available-locales=\"en_US,es_ES\" ");
 		sb.append("default-locale=\"en_US\">");
@@ -124,12 +124,12 @@ public class LocalizationImplTest {
 		String[] documentAvailableLanguageIds =
 			LocalizationUtil.getAvailableLanguageIds(document);
 
-		Assert.assertEquals(documentAvailableLanguageIds.length, 2);
+		Assert.assertEquals(2, documentAvailableLanguageIds.length);
 
 		String[] xmlAvailableLanguageIds =
 			LocalizationUtil.getAvailableLanguageIds(_xml);
 
-		Assert.assertEquals(xmlAvailableLanguageIds.length, 2);
+		Assert.assertEquals(2, xmlAvailableLanguageIds.length);
 
 		Arrays.sort(documentAvailableLanguageIds);
 		Arrays.sort(xmlAvailableLanguageIds);
@@ -382,7 +382,7 @@ public class LocalizationImplTest {
 
 	@Test
 	public void testUpdateLocalization() {
-		Map<Locale, String>localizationMap = new HashMap<>();
+		Map<Locale, String> localizationMap = new HashMap<>();
 
 		localizationMap.put(LocaleUtil.US, _ENGLISH_HELLO);
 
@@ -409,6 +409,29 @@ public class LocalizationImplTest {
 		Assert.assertEquals(
 			StringPool.BLANK,
 			LocalizationUtil.getLocalization(xml, _GERMAN_LANGUAGE_ID, false));
+	}
+
+	@Test
+	public void testUpdateLocalizationWithAmpersand() {
+		Map<Locale, String> localizationMap = new HashMap<>();
+
+		String spanishValue = "bar&foo";
+
+		localizationMap.put(LocaleUtil.SPAIN, spanishValue);
+
+		String englishValue = "foo&bar";
+
+		localizationMap.put(LocaleUtil.US, englishValue);
+
+		String xml = LocalizationUtil.updateLocalization(
+			localizationMap, _xml, "static-content", "en_US");
+
+		Assert.assertEquals(
+			spanishValue,
+			LocalizationUtil.getLocalization(xml, _SPANISH_LANGUAGE_ID));
+		Assert.assertEquals(
+			englishValue,
+			LocalizationUtil.getLocalization(xml, _ENGLISH_LANGUAGE_ID));
 	}
 
 	private static final String _ENGLISH_HELLO = "Hello World";

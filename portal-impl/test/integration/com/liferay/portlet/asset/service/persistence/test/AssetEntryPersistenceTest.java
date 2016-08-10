@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.asset.service.persistence.test;
 
+import com.liferay.asset.kernel.exception.NoSuchEntryException;
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
+import com.liferay.asset.kernel.service.persistence.AssetEntryPersistence;
+import com.liferay.asset.kernel.service.persistence.AssetEntryUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -31,19 +37,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
-
-import com.liferay.portlet.asset.NoSuchEntryException;
-import com.liferay.portlet.asset.model.AssetEntry;
-import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
-import com.liferay.portlet.asset.service.persistence.AssetEntryPersistence;
-import com.liferay.portlet.asset.service.persistence.AssetEntryUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -54,14 +54,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class AssetEntryPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -325,10 +327,9 @@ public class AssetEntryPersistenceTest {
 			"classNameId", true, "classPK", true, "classUuid", true,
 			"classTypeId", true, "listable", true, "visible", true,
 			"startDate", true, "endDate", true, "publishDate", true,
-			"expirationDate", true, "mimeType", true, "title", true,
-			"description", true, "summary", true, "url", true, "layoutUuid",
-			true, "height", true, "width", true, "priority", true, "viewCount",
-			true);
+			"expirationDate", true, "mimeType", true, "title", true, "url",
+			true, "layoutUuid", true, "height", true, "width", true,
+			"priority", true, "viewCount", true);
 	}
 
 	@Test
@@ -437,11 +438,9 @@ public class AssetEntryPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = AssetEntryLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<AssetEntry>() {
 				@Override
-				public void performAction(Object object) {
-					AssetEntry assetEntry = (AssetEntry)object;
-
+				public void performAction(AssetEntry assetEntry) {
 					Assert.assertNotNull(assetEntry);
 
 					count.increment();
@@ -533,19 +532,19 @@ public class AssetEntryPersistenceTest {
 
 		AssetEntry existingAssetEntry = _persistence.findByPrimaryKey(newAssetEntry.getPrimaryKey());
 
-		Assert.assertEquals(existingAssetEntry.getGroupId(),
-			ReflectionTestUtil.invoke(existingAssetEntry, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingAssetEntry.getClassUuid(),
+		Assert.assertEquals(Long.valueOf(existingAssetEntry.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingAssetEntry,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertTrue(Objects.equals(existingAssetEntry.getClassUuid(),
 				ReflectionTestUtil.invoke(existingAssetEntry,
 					"getOriginalClassUuid", new Class<?>[0])));
 
-		Assert.assertEquals(existingAssetEntry.getClassNameId(),
-			ReflectionTestUtil.invoke(existingAssetEntry,
+		Assert.assertEquals(Long.valueOf(existingAssetEntry.getClassNameId()),
+			ReflectionTestUtil.<Long>invoke(existingAssetEntry,
 				"getOriginalClassNameId", new Class<?>[0]));
-		Assert.assertEquals(existingAssetEntry.getClassPK(),
-			ReflectionTestUtil.invoke(existingAssetEntry, "getOriginalClassPK",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingAssetEntry.getClassPK()),
+			ReflectionTestUtil.<Long>invoke(existingAssetEntry,
+				"getOriginalClassPK", new Class<?>[0]));
 	}
 
 	protected AssetEntry addAssetEntry() throws Exception {

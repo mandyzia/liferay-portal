@@ -14,7 +14,10 @@
 
 package com.liferay.portlet.blogs.util.test;
 
+import com.liferay.blogs.kernel.model.BlogsEntry;
+import com.liferay.blogs.kernel.service.BlogsEntryLocalServiceUtil;
 import com.liferay.portal.kernel.editor.EditorConstants;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -22,9 +25,6 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.blogs.model.BlogsEntry;
-import com.liferay.portlet.blogs.service.BlogsEntryLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -91,6 +91,9 @@ public class BlogsTestUtil {
 			expectedEntry.isAllowTrackbacks(), actualEntry.isAllowTrackbacks());
 		Assert.assertEquals(
 			expectedEntry.isSmallImage(), actualEntry.isSmallImage());
+		Assert.assertEquals(
+			expectedEntry.getCoverImageFileEntryId(),
+			actualEntry.getCoverImageFileEntryId());
 	}
 
 	public static String getTempBlogsEntryAttachmentFileEntryImgTag(

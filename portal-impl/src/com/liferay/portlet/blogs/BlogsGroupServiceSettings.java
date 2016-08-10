@@ -24,7 +24,7 @@ import com.liferay.portal.kernel.settings.SettingsFactoryUtil;
 import com.liferay.portal.kernel.settings.TypedSettings;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portlet.blogs.util.BlogsConstants;
+import com.liferay.portlet.blogs.constants.BlogsConstants;
 
 import java.util.Map;
 
@@ -54,6 +54,11 @@ public class BlogsGroupServiceSettings {
 
 		return new BlogsGroupServiceSettings(
 			new ParameterMapSettings(parameterMap, settings));
+	}
+
+	public static void registerSettingsMetadata() {
+		SettingsFactoryUtil.registerSettingsMetadata(
+			BlogsGroupServiceSettings.class, null, _getFallbackKeys());
 	}
 
 	public BlogsGroupServiceSettings(Settings settings) {
@@ -106,6 +111,10 @@ public class BlogsGroupServiceSettings {
 
 	public String getEmailFromName() {
 		return _typedSettings.getValue("emailFromName");
+	}
+
+	public int getSmallImageWidth() {
+		return _typedSettings.getIntegerValue("smallImageWidth");
 	}
 
 	public boolean isEmailEntryAddedEnabled() {

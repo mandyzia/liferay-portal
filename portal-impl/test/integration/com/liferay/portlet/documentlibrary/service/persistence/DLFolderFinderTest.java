@@ -14,29 +14,38 @@
 
 package com.liferay.portlet.documentlibrary.service.persistence;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileShortcut;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLTrashServiceUtil;
+import com.liferay.document.library.kernel.service.persistence.DLFolderFinderUtil;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileShortcut;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.service.RepositoryLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.rule.Sync;
+import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.repository.portletrepository.PortletRepository;
+import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
-import com.liferay.portlet.documentlibrary.model.DLFileEntry;
-import com.liferay.portlet.documentlibrary.model.DLFileShortcut;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
-import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
-import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 
 import java.util.List;
 
@@ -49,13 +58,15 @@ import org.junit.Test;
 /**
  * @author Zsolt Berentey
  */
+@Sync
 public class DLFolderFinderTest {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
-			new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+			new LiferayIntegrationTestRule(),
+			SynchronousDestinationTestRule.INSTANCE,
 			TransactionalTestRule.INSTANCE);
 
 	@Before
@@ -65,6 +76,15 @@ public class DLFolderFinderTest {
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId());
+
+		long classNameId = PortalUtil.getClassNameId(
+			PortletRepository.class.getName());
+
+		RepositoryLocalServiceUtil.addRepository(
+			TestPropsValues.getUserId(), _group.getGroupId(), classNameId,
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, "Test Repository",
+			StringUtil.randomString(), StringUtil.randomString(),
+			new UnicodeProperties(), false, serviceContext);
 
 		_folder = DLAppLocalServiceUtil.addFolder(
 			TestPropsValues.getUserId(), _group.getGroupId(),
@@ -81,7 +101,7 @@ public class DLFolderFinderTest {
 			_folder.getFolderId(), "Folder C", StringPool.BLANK,
 			serviceContext);
 
-		DLAppServiceUtil.moveFolderToTrash(folder.getFolderId());
+		DLTrashServiceUtil.moveFolderToTrash(folder.getFolderId());
 
 		FileEntry fileEntry = addFileEntry(
 			_group.getGroupId(), _folder.getFolderId(), "FE1.txt",
@@ -100,7 +120,7 @@ public class DLFolderFinderTest {
 			_group.getGroupId(), _folder.getFolderId(), "FE3.txt",
 			ContentTypes.TEXT_PLAIN);
 
-		DLAppServiceUtil.moveFileEntryToTrash(fileEntry.getFileEntryId());
+		DLTrashServiceUtil.moveFileEntryToTrash(fileEntry.getFileEntryId());
 	}
 
 	@Test
@@ -120,6 +140,16 @@ public class DLFolderFinderTest {
 				_group.getGroupId(), _folder.getFolderId(),
 				new String[] {ContentTypes.TEXT_PLAIN}, false,
 				queryDefinition));
+		Assert.assertEquals(
+			1,
+			DLFolderFinderUtil.filterCountF_FE_FS_ByG_F_M_M(
+				_group.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+				null, false, queryDefinition));
+		Assert.assertEquals(
+			2,
+			DLFolderFinderUtil.filterCountF_FE_FS_ByG_F_M_M(
+				_group.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+				null, true, queryDefinition));
 
 		queryDefinition.setStatus(WorkflowConstants.STATUS_APPROVED);
 
@@ -311,6 +341,36 @@ public class DLFolderFinderTest {
 				Assert.assertEquals("Folder B", dlFolder.getName());
 			}
 		}
+
+		results = DLFolderFinderUtil.filterFindF_FE_FS_ByG_F_M_M(
+			_group.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			null, true, queryDefinition);
+
+		Assert.assertEquals(2, results.size());
+
+		boolean assertMountPointFolder = false;
+		boolean assertRegularFolder = false;
+
+		for (Object result : results) {
+			Assert.assertTrue(
+				String.valueOf(result.getClass()), result instanceof DLFolder);
+
+			DLFolder dlFolder = (DLFolder)result;
+
+			if (dlFolder.isMountPoint()) {
+				Assert.assertEquals("Test Repository", dlFolder.getName());
+
+				assertMountPointFolder = true;
+			}
+			else {
+				Assert.assertEquals("Folder A", dlFolder.getName());
+
+				assertRegularFolder = true;
+			}
+		}
+
+		Assert.assertTrue(assertMountPointFolder);
+		Assert.assertTrue(assertRegularFolder);
 	}
 
 	protected FileEntry addFileEntry(
@@ -323,11 +383,15 @@ public class DLFolderFinderTest {
 
 		return DLAppLocalServiceUtil.addFileEntry(
 			TestPropsValues.getUserId(), groupId, folderId, sourceFileName,
-			mimeType, RandomTestUtil.randomBytes(), serviceContext);
+			mimeType,
+			RandomTestUtil.randomBytes(TikaSafeRandomizerBumper.INSTANCE),
+			serviceContext);
 	}
 
 	private FileShortcut _fileShortcut;
 	private Folder _folder;
+
+	@DeleteAfterTestRun
 	private Group _group;
 
 }

@@ -16,16 +16,16 @@ package com.liferay.portlet.social.service.impl;
 
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.social.model.SocialActivity;
-import com.liferay.portlet.social.model.SocialActivityInterpreter;
-import com.liferay.portlet.social.model.impl.SocialActivityInterpreterImpl;
 import com.liferay.portlet.social.service.base.SocialActivityServiceBaseImpl;
+import com.liferay.social.kernel.model.SocialActivity;
+import com.liferay.social.kernel.model.SocialActivityInterpreter;
+import com.liferay.social.kernel.model.impl.SocialActivityInterpreterImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +47,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -56,7 +55,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getActivities(
@@ -81,8 +79,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -92,7 +89,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getActivities(
@@ -118,8 +114,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -129,7 +124,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getActivities(
@@ -156,8 +150,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -165,7 +158,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getActivities(
@@ -249,7 +241,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 *
 	 * @param  activityId the primary key of the activity
 	 * @return Returns the activity
-	 * @throws PortalException if the activity could not be found
 	 */
 	@Override
 	public SocialActivity getActivity(long activityId) throws PortalException {
@@ -292,8 +283,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -301,7 +291,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getGroupActivities(
@@ -344,8 +333,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -353,7 +341,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getGroupUsersActivities(
@@ -389,7 +376,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 *
 	 * @param  mirrorActivityId the primary key of the mirror activity
 	 * @return Returns the mirror activity
-	 * @throws PortalException if the mirror activity could not be found
 	 */
 	@Override
 	public SocialActivity getMirrorActivity(long mirrorActivityId)
@@ -419,8 +405,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -428,7 +413,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getOrganizationActivities(
@@ -465,8 +449,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -474,7 +457,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getOrganizationUsersActivities(
@@ -511,16 +493,14 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <>0</code> refers
 	 * to the first result in the set. Setting both <code>start</code> and
-	 * <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
-	 * result set.
+	 * <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result
+	 * set.
 	 * </p>
 	 *
 	 * @param  userId the primary key of the user
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getRelationActivities(
@@ -545,8 +525,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -555,7 +534,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getRelationActivities(
@@ -605,8 +583,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -614,7 +591,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getUserActivities(
@@ -649,8 +625,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -658,7 +633,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getUserGroupsActivities(
@@ -694,8 +668,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -703,7 +676,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getUserGroupsAndOrganizationsActivities(
@@ -740,8 +712,7 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * start</code> instances. <code>start</code> and <code>end</code> are not
 	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
 	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link
-	 * com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full
+	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
 	 * result set.
 	 * </p>
 	 *
@@ -749,7 +720,6 @@ public class SocialActivityServiceImpl extends SocialActivityServiceBaseImpl {
 	 * @param  start the lower bound of the range of results
 	 * @param  end the upper bound of the range of results (not inclusive)
 	 * @return the range of matching activities
-	 * @throws PortalException if a permission checker was not initialized
 	 */
 	@Override
 	public List<SocialActivity> getUserOrganizationsActivities(

@@ -16,6 +16,19 @@ package com.liferay.portlet.service.persistence;
 
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.ResourceAction;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.ResourcePermission;
+import com.liferay.portal.kernel.model.ResourceTypePermission;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.RolePermissions;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourceTypePermissionLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.GroupFinderUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -23,23 +36,10 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ResourcePermissionTestUtil;
 import com.liferay.portal.kernel.test.util.ResourceTypePermissionTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.GroupConstants;
-import com.liferay.portal.model.ResourceAction;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.ResourcePermission;
-import com.liferay.portal.model.ResourceTypePermission;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.ResourceActionLocalServiceUtil;
-import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
-import com.liferay.portal.service.ResourceTypePermissionLocalServiceUtil;
-import com.liferay.portal.service.persistence.GroupFinderUtil;
+import com.liferay.portal.kernel.util.comparator.GroupNameComparator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.comparator.GroupNameComparator;
 import com.liferay.portal.util.test.LayoutTestUtil;
 
 import java.util.ArrayList;
@@ -63,8 +63,7 @@ public class GroupFinderTest {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
-			new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
-			TransactionalTestRule.INSTANCE);
+			new LiferayIntegrationTestRule(), TransactionalTestRule.INSTANCE);
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
@@ -233,12 +232,8 @@ public class GroupFinderTest {
 
 		LinkedHashMap<String, Object> groupParams = new LinkedHashMap<>();
 
-		List<Object> rolePermissions = new ArrayList<>();
-
-		rolePermissions.add(name);
-		rolePermissions.add(Integer.valueOf(ResourceConstants.SCOPE_GROUP));
-		rolePermissions.add(actionId);
-		rolePermissions.add(roleId);
+		RolePermissions rolePermissions = new RolePermissions(
+			name, ResourceConstants.SCOPE_GROUP, actionId, roleId);
 
 		groupParams.put("rolePermissions", rolePermissions);
 

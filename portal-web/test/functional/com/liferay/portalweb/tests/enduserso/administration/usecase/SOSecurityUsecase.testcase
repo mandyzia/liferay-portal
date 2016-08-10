@@ -29,7 +29,7 @@
 
 		<execute macro="SOSite#tearDownCP" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar Test Page" />
 		</execute>
 
@@ -83,23 +83,20 @@
 		<var name="userScreenName2" value="socialoffice02" />
 		<var name="userScreenName3" value="socialoffice03" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
-
-		<execute function="AssertClick" locator1="CPUsersandorganizations#SEARCH_ALL_USERS" value1="All Users" />
 
 		<var name="key_userScreenName" value="${adminScreenName}" />
 
-		<execute function="Type" locator1="CPUsersandorganizationsViewusers#BASIC_SEARCH_FIELD" value1="${adminScreenName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsViewusers#BASIC_SEARCH_BUTTON" value1="Search" />
-		<execute function="AssertTextEquals" locator1="CPUsersandorganizationsViewusers#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsViewusers#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
+		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${adminScreenName}" />
+		<execute function="AssertClick" locator1="NavBar#BASIC_SEARCH_BUTTON" value1="Search" />
+		<execute function="AssertTextEquals" locator1="UsersAndOrganizations#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
+		<execute function="AssertClick" locator1="UsersAndOrganizations#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
 
-		<execute function="Type" locator1="CPUsersandorganizationsUser#DETAILS_FIRST_NAME_FIELD" value1="${adminFirstName}" />
-		<execute function="Type" locator1="CPUsersandorganizationsUser#DETAILS_LAST_NAME_FIELD" value1="${adminLastName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsUser#SAVE_BUTTON" value1="Save" />
-		<execute function="AssertTextEquals" locator1="CPUsersandorganizationsUser#SUCCESS_MESSAGE" value1="Your request completed successfully." />
+		<execute function="Type" locator1="UsersAndOrganizationsEditUser#DETAILS_FIRST_NAME_FIELD" value1="${adminFirstName}" />
+		<execute function="Type" locator1="UsersAndOrganizationsEditUser#DETAILS_LAST_NAME_FIELD" value1="${adminLastName}" />
+		<execute macro="PortletEntry#save" />
 
 		<execute macro="SOContactsCenter#addConnection">
 			<var name="adminEmailAddress" value="${adminEmailAddress}" />
@@ -177,7 +174,7 @@
 			<var name="userScreenName" value="${userScreenName3}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Microblogs" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -272,7 +269,7 @@
 		<execute function="AssertClick" locator1="SOActivities#ACTIVITIES_COMMENT" value1="1 Comment" />
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Messages" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -298,7 +295,7 @@
 			<var name="senderName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Messages" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -320,7 +317,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Messages" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -345,7 +342,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Messages" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -368,7 +365,7 @@
 			<var name="senderName" value="${userName3}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Messages" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -380,7 +377,7 @@
 		<execute function="Confirm" value1="Are you sure you want to delete the selected messages?" />
 		<execute function="AssertTextEquals" locator1="SOMessages#INFO_MESSAGE" value1="No messages found." />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -392,16 +389,16 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#BREADCRUMB_HOME" value1="Home" />
+		<execute function="AssertTextEquals" locator1="DocumentsAndMedia#BREADCRUMB_HOME" value1="Home" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
@@ -415,14 +412,14 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
@@ -435,14 +432,14 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="My Documents" />
 			<var name="soDashboard" value="true" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
@@ -450,7 +447,9 @@
 
 		<var name="key_dmFolderName" value="${dmFolderName}" />
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#BREADCRUMB_FOLDER_NAME" value1="${dmFolderName}" />
+		<var method="StringUtil#upperCase('${dmFolderName}')" name="dmFolderNameUpperCase" />
+
+		<execute function="AssertTextEquals#assertPartialText" locator1="DocumentsAndMedia#BREADCRUMB_FOLDER_NAME" value1="${dmFolderNameUpperCase}" />
 
 		<execute macro="DMDocument#viewAllPG">
 			<var name="commentBody" value="${commentBody}" />
@@ -462,7 +461,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -477,7 +476,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -491,7 +490,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -507,7 +506,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -524,7 +523,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -540,7 +539,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -575,7 +574,7 @@
 		<execute function="Click" locator1="SOUserBar#NOTIFICATION_MENU_NOTIFICATION_ENTRY_SUBCONTENT" />
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -590,7 +589,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -616,7 +615,7 @@
 		<execute function="Click" locator1="SOUserBar#NOTIFICATION_MENU_NOTIFICATION_ENTRY_SUBCONTENT" />
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tasks" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -801,12 +800,8 @@
 		<var name="userAddressType" value="Personal" />
 		<var name="userEmailAddress" value="socialoffice01@liferay.com" />
 		<var name="userFirstName" value="&lt;script&gt;alert(&quot;Social01&quot;);&lt;/script&gt;" />
-		<var name="userInstantMessengerAIM" value="&lt;script&gt;alert(&quot;socialofficesn&quot;);&lt;/script&gt;" />
-		<var name="userInstantMessengerICQ" value="&lt;script&gt;alert(&quot;socialofficesn&quot;);&lt;/script&gt;" />
 		<var name="userInstantMessengerJabber" value="&lt;script&gt;alert(&quot;socialofficesn&quot;);&lt;/script&gt;" />
 		<var name="userInstantMessengerSkype" value="&lt;script&gt;alert(&quot;socialofficesn&quot;);&lt;/script&gt;" />
-		<var name="userInstantMessengerWindowsLiveMessenger" value="&lt;script&gt;alert(&quot;socialofficesn&quot;);&lt;/script&gt;" />
-		<var name="userInstantMessengerYM" value="&lt;script&gt;alert(&quot;socialofficesn&quot;);&lt;/script&gt;" />
 		<var name="userIntroduction" value="&lt;script&gt;alert(&quot;Introduction Content&quot;);&lt;/script&gt;" />
 		<var name="userLastName" value="&lt;script&gt;alert(&quot;User01&quot;);&lt;/script&gt;" />
 		<var name="userListName" value="&lt;script&gt;alert(&quot;User01&quot;);&lt;/script&gt;, &lt;script&gt;alert(&quot;Social01&quot;);&lt;/script&gt;" />
@@ -823,23 +818,20 @@
 		<var name="userSocialNetworkTwitter" value="&lt;script&gt;alert(&quot;socialoffice01&quot;);&lt;/script&gt;" />
 		<var name="userTag" value="tag1" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
-
-		<execute function="AssertClick" locator1="CPUsersandorganizations#SEARCH_ALL_USERS" value1="All Users" />
 
 		<var name="key_userScreenName" value="${adminScreenName}" />
 
-		<execute function="Type" locator1="CPUsersandorganizationsViewusers#BASIC_SEARCH_FIELD" value1="${adminScreenName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsViewusers#BASIC_SEARCH_BUTTON" value1="Search" />
-		<execute function="AssertTextEquals" locator1="CPUsersandorganizationsViewusers#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsViewusers#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
+		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${adminScreenName}" />
+		<execute function="AssertClick" locator1="NavBar#BASIC_SEARCH_BUTTON" value1="Search" />
+		<execute function="AssertTextEquals" locator1="UsersAndOrganizations#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
+		<execute function="AssertClick" locator1="UsersAndOrganizations#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
 
-		<execute function="Type" locator1="CPUsersandorganizationsUser#DETAILS_FIRST_NAME_FIELD" value1="${adminFirstName}" />
-		<execute function="Type" locator1="CPUsersandorganizationsUser#DETAILS_LAST_NAME_FIELD" value1="${adminLastName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsUser#SAVE_BUTTON" value1="Save" />
-		<execute function="AssertTextEquals" locator1="CPUsersandorganizationsUser#SUCCESS_MESSAGE" value1="Your request completed successfully." />
+		<execute function="Type" locator1="UsersAndOrganizationsEditUser#DETAILS_FIRST_NAME_FIELD" value1="${adminFirstName}" />
+		<execute function="Type" locator1="UsersAndOrganizationsEditUser#DETAILS_LAST_NAME_FIELD" value1="${adminLastName}" />
+		<execute macro="PortletEntry#save" />
 
 		<execute macro="SOContactsCenter#addConnection">
 			<var name="adminEmailAddress" value="${adminEmailAddress}" />
@@ -870,12 +862,8 @@
 		<execute function="AssertAlertNotPresent" />
 
 		<execute macro="SOProfile#addInstantMessenger">
-			<var name="userInstantMessengerAIM" value="${userInstantMessengerAIM}" />
-			<var name="userInstantMessengerICQ" value="${userInstantMessengerICQ}" />
 			<var name="userInstantMessengerJabber" value="${userInstantMessengerJabber}" />
 			<var name="userInstantMessengerSkype" value="${userInstantMessengerSkype}" />
-			<var name="userInstantMessengerWindowsLiveMessenger" value="${userInstantMessengerWindowsLiveMessenger}" />
-			<var name="userInstantMessengerYM" value="${userInstantMessengerYM}" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
@@ -920,7 +908,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Microblogs" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -934,7 +922,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Microblogs" />
 			<var name="soDashboard" value="true" />
 		</execute>
@@ -950,8 +938,8 @@
 			<var name="userLoginFullName" value="${userName}" />
 		</execute>
 
-		<execute function="Click" locator1="Dockbar#USER_NAME" />
-		<execute function="Click" locator1="Dockbar#USER_MY_PROFILE" value1="My Profile" />
+		<execute function="Click" locator1="ControlMenu#USER_NAME" />
+		<execute function="Click" locator1="UserBar#USER_PROFILE" value1="Profile" />
 
 		<execute function="AssertAlertNotPresent" />
 
@@ -1015,23 +1003,20 @@
 		<var name="userScreenName3" value="socialoffice03" />
 		<var name="wikiPageContent" value="Wiki FrontPage Content" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
-
-		<execute function="AssertClick" locator1="CPUsersandorganizations#SEARCH_ALL_USERS" value1="All Users" />
 
 		<var name="key_userScreenName" value="${adminScreenName}" />
 
-		<execute function="Type" locator1="CPUsersandorganizationsViewusers#BASIC_SEARCH_FIELD" value1="${adminScreenName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsViewusers#BASIC_SEARCH_BUTTON" value1="Search" />
-		<execute function="AssertTextEquals" locator1="CPUsersandorganizationsViewusers#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsViewusers#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
+		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${adminScreenName}" />
+		<execute function="AssertClick" locator1="NavBar#BASIC_SEARCH_BUTTON" value1="Search" />
+		<execute function="AssertTextEquals" locator1="UsersAndOrganizations#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
+		<execute function="AssertClick" locator1="UsersAndOrganizations#USER_TABLE_SCREEN_NAME" value1="${adminScreenName}" />
 
-		<execute function="Type" locator1="CPUsersandorganizationsUser#DETAILS_FIRST_NAME_FIELD" value1="${adminFirstName}" />
-		<execute function="Type" locator1="CPUsersandorganizationsUser#DETAILS_LAST_NAME_FIELD" value1="${adminLastName}" />
-		<execute function="AssertClick" locator1="CPUsersandorganizationsUser#SAVE_BUTTON" value1="Save" />
-		<execute function="AssertTextEquals" locator1="CPUsersandorganizationsUser#SUCCESS_MESSAGE" value1="Your request completed successfully." />
+		<execute function="Type" locator1="UsersAndOrganizationsEditUser#DETAILS_FIRST_NAME_FIELD" value1="${adminFirstName}" />
+		<execute function="Type" locator1="UsersAndOrganizationsEditUser#DETAILS_LAST_NAME_FIELD" value1="${adminLastName}" />
+		<execute macro="PortletEntry#save" />
 
 		<execute macro="SOUser#addUserWithSORole">
 			<var name="userEmailAddress" value="${userEmailAddress1}" />
@@ -1063,16 +1048,19 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Site Settings" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Site Settings" />
 		</execute>
 
 		<execute macro="Site#editFriendlyURLCP">
 			<var name="siteFriendlyURLEdit" value="${siteNameFriendly}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Calendar" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1092,7 +1080,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1106,7 +1094,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1115,9 +1103,9 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#BREADCRUMB_HOME" value1="Home" />
+		<execute function="AssertTextEquals" locator1="DocumentsAndMedia#BREADCRUMB_HOME" value1="Home" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
@@ -1132,7 +1120,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1141,7 +1129,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
@@ -1149,7 +1137,9 @@
 
 		<var name="key_dmFolderName" value="${dmFolderName}" />
 
-		<execute function="AssertTextEquals" locator1="PGDocumentsandmedia#BREADCRUMB_FOLDER_NAME" value1="${dmFolderName}" />
+		<var method="StringUtil#upperCase('${dmFolderName}')" name="dmFolderNameUpperCase" />
+
+		<execute function="AssertTextEquals#assertPartialText" locator1="DocumentsAndMedia#BREADCRUMB_FOLDER_NAME" value1="${dmFolderNameUpperCase}" />
 
 		<execute macro="DMDocument#viewAllPG">
 			<var name="dmDocumentAuthor" value="${adminName}" />
@@ -1160,7 +1150,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Forums" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1173,7 +1163,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Forums" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1195,7 +1185,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Forums" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1214,14 +1204,14 @@
 			<var name="userName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Blogs" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
 			<var name="soPage" value="true" />
 		</execute>
 
-		<execute macro="BlogsEntry#addPG">
+		<execute macro="Blogs#addEntry">
 			<var name="categoryName" value="${categoryName}" />
 			<var name="entryContent" value="${entryContent}" />
 			<var name="entryTitle" value="${entryTitle}" />
@@ -1236,7 +1226,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Blogs" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1255,7 +1245,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Wiki" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1268,7 +1258,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Members" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1318,7 +1308,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Members" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1338,7 +1328,7 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Members" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1385,7 +1375,7 @@
 			<var name="userLoginFullName" value="${adminName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Members" />
 			<var name="siteName" value="${siteNameFriendly}" />
 			<var name="siteURL" value="true" />
@@ -1433,10 +1423,8 @@
 			<var name="userLoginFullName" value="${admin}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteNameFriendly}" />
-			<var name="siteURL" value="true" />
-			<var name="soPage" value="true" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
@@ -1448,9 +1436,8 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteNameFriendly}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
@@ -1463,9 +1450,8 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteNameFriendly}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
@@ -1478,9 +1464,8 @@
 
 		<execute function="AssertAlertNotPresent" />
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteNameFriendly}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />

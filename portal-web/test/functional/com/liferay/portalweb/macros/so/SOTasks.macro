@@ -168,16 +168,7 @@
 		<execute function="AssertTextEquals" locator1="SOTasksTask#TASK_REPORTER" value1="Created by ${taskReporter}" />
 		<execute function="SelectFrame" value1="relative=top" />
 
-		<execute macro="Page#openURL">
-			<var name="friendlyURL" value="${friendlyURL}" />
-			<var name="pageAccess" value="${pageAccess}" />
-			<var name="pageStaging" value="${pageStaging}" />
-			<var name="siteName" value="${siteName}" />
-			<var name="siteNameURL" value="${siteNameURL}" />
-			<var name="siteURL" value="${siteURL}" />
-			<var name="specificURL" value="${specificURL}" />
-			<var name="virtualHostsURL" value="${virtualHostsURL}" />
-		</execute>
+		<execute macro="Navigator#openURL" />
 	</command>
 
 	<command name="completeTask">
@@ -341,7 +332,7 @@
 		<execute function="AssertTextNotPresent" value1="${taskComment}" />
 		<execute function="SelectFrame" value1="relative=top" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="Tasks" />
@@ -509,20 +500,11 @@
 
 		<execute function="SelectFrame" value1="relative=top" />
 
-		<execute macro="Page#openURL">
-			<var name="friendlyURL" value="${friendlyURL}" />
-			<var name="pageAccess" value="${pageAccess}" />
-			<var name="pageStaging" value="${pageStaging}" />
-			<var name="siteName" value="${siteName}" />
-			<var name="siteNameURL" value="${siteNameURL}" />
-			<var name="siteURL" value="${siteURL}" />
-			<var name="specificURL" value="${specificURL}" />
-			<var name="virtualHostsURL" value="${virtualHostsURL}" />
-		</execute>
+		<execute macro="Navigator#openURL" />
 	</command>
 
 	<command name="reopenTask">
-		<var locator="Dockbar#USER_NAME" name="currentUser" />
+		<var locator="ControlMenu#USER_NAME" name="currentUser" />
 		<var name="key_taskDescription" value="${taskDescription}" />
 
 		<execute function="AssertClick" locator1="SOTasks#ASSIGNED_TO_ME_LINK" value1="Assigned to Me" />
@@ -541,7 +523,7 @@
 	</command>
 
 	<command name="resolveTask">
-		<var locator="Dockbar#USER_NAME" name="currentUser" />
+		<var locator="ControlMenu#USER_NAME" name="currentUser" />
 		<var name="key_taskDescription" value="${taskDescription}" />
 
 		<execute function="AssertClick" locator1="SOTasks#ASSIGNED_TO_ME_LINK" value1="Assigned to Me" />
@@ -562,7 +544,7 @@
 	<command name="tearDownTask">
 		<execute macro="SOUser#firstLoginPG" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="Tasks" />
@@ -621,7 +603,7 @@
 	<command name="viewTask">
 		<var name="key_taskDescription" value="${taskDescription}" />
 
-		<var locator="Dockbar#USER_NAME" name="currentUser" />
+		<var locator="ControlMenu#USER_NAME" name="currentUser" />
 
 		<execute function="AssertClick" locator1="SOTasks#ASSIGNED_TO_ME_LINK" value1="Assigned to Me" />
 

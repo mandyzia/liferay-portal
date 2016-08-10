@@ -14,17 +14,25 @@
 
 package com.liferay.taglib.util;
 
+import com.liferay.exportimport.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.log.LogUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.PortletConstants;
+import com.liferay.portal.kernel.model.Theme;
 import com.liferay.portal.kernel.portlet.PortletBag;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.DirectRequestDispatcherFactoryUtil;
 import com.liferay.portal.kernel.servlet.TrackedServletRequest;
 import com.liferay.portal.kernel.servlet.taglib.TagDynamicIdFactory;
 import com.liferay.portal.kernel.servlet.taglib.TagDynamicIdFactoryRegistry;
 import com.liferay.portal.kernel.servlet.taglib.TagDynamicIncludeUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.CustomJspRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ServerDetector;
@@ -33,14 +41,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.PortletConstants;
-import com.liferay.portal.model.Theme;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.CustomJspRegistryUtil;
-import com.liferay.portlet.exportimport.staging.StagingUtil;
 import com.liferay.taglib.FileAvailabilityUtil;
-import com.liferay.taglib.servlet.JspWriterHttpServletResponse;
 import com.liferay.taglib.servlet.PipingServletResponse;
 
 import java.io.IOException;
@@ -92,18 +93,7 @@ public class IncludeTag extends AttributesTagSupport {
 			throw new JspException(e);
 		}
 		finally {
-			clearDynamicAttributes();
-			clearParams();
-			clearProperties();
-
-			cleanUpSetAttributes();
-
-			if (!ServerDetector.isResin()) {
-				setPage(null);
-				setUseCustomPage(true);
-
-				cleanUp();
-			}
+			doClearTag();
 		}
 	}
 
@@ -193,6 +183,21 @@ public class IncludeTag extends AttributesTagSupport {
 		}
 	}
 
+	protected void doClearTag() {
+		clearDynamicAttributes();
+		clearParams();
+		clearProperties();
+
+		cleanUpSetAttributes();
+
+		if (!ServerDetector.isResin()) {
+			setPage(null);
+			setUseCustomPage(true);
+
+			cleanUp();
+		}
+	}
+
 	protected void doInclude(
 			String page, boolean dynamicIncludeAscendingPriority)
 		throws JspException {
@@ -259,11 +264,16 @@ public class IncludeTag extends AttributesTagSupport {
 
 		Group group = null;
 
+		long scopeGroupId = themeDisplay.getScopeGroupId();
+
 		try {
-			group = StagingUtil.getLiveGroup(themeDisplay.getScopeGroupId());
+			group = StagingUtil.getLiveGroup(scopeGroupId);
 		}
 		catch (Exception e) {
-			return null;
+		}
+
+		if (group == null) {
+			group = GroupLocalServiceUtil.fetchGroup(scopeGroupId);
 		}
 
 		UnicodeProperties typeSettingsProperties =
@@ -303,7 +313,7 @@ public class IncludeTag extends AttributesTagSupport {
 	}
 
 	protected void include(String page, boolean doStartTag) throws Exception {
-		JspWriterHttpServletResponse jspWriterHttpServletResponse = null;
+		HttpServletResponse httpServletResponse = null;
 
 		Class<?> clazz = getClass();
 
@@ -324,15 +334,16 @@ public class IncludeTag extends AttributesTagSupport {
 			TagDynamicIdFactoryRegistry.getTagDynamicIdFactory(tagClassName);
 
 		if (tagDynamicIdFactory != null) {
-			jspWriterHttpServletResponse = new JspWriterHttpServletResponse(
-				pageContext);
+			httpServletResponse = new PipingServletResponse(
+				(HttpServletResponse)pageContext.getResponse(),
+				pageContext.getOut());
 
 			tagDynamicId = tagDynamicIdFactory.getTagDynamicId(
-				request, jspWriterHttpServletResponse, this);
+				request, httpServletResponse, this);
 
 			TagDynamicIncludeUtil.include(
-				request, jspWriterHttpServletResponse, tagClassName,
-				tagDynamicId, tagPointPrefix + "before", doStartTag);
+				request, httpServletResponse, tagClassName, tagDynamicId,
+				tagPointPrefix + "before", doStartTag);
 		}
 
 		if (_useCustomPage) {
@@ -354,8 +365,8 @@ public class IncludeTag extends AttributesTagSupport {
 
 		if (tagDynamicIdFactory != null) {
 			TagDynamicIncludeUtil.include(
-				request, jspWriterHttpServletResponse, tagClassName,
-				tagDynamicId, tagPointPrefix + "after", doStartTag);
+				request, httpServletResponse, tagClassName, tagDynamicId,
+				tagPointPrefix + "after", doStartTag);
 		}
 	}
 
@@ -393,31 +404,45 @@ public class IncludeTag extends AttributesTagSupport {
 			return;
 		}
 
+		StringBundler sb = new StringBundler(8);
+
+		sb.append("Unable to find ");
+		sb.append(page);
+		sb.append(" in the context ");
+
 		String contextPath = servletContext.getContextPath();
 
 		if (contextPath.equals(StringPool.BLANK)) {
 			contextPath = StringPool.SLASH;
 		}
 
-		StringBundler sb = new StringBundler(13);
-
-		sb.append("Unable to find ");
-		sb.append(page);
-		sb.append(" in the context ");
 		sb.append(contextPath);
+
 		sb.append(".");
 
+		boolean portalContext = false;
+
+		String portalContextPath = PortalUtil.getPathContext();
+
+		if (portalContextPath.equals(StringPool.BLANK)) {
+			portalContextPath = StringPool.SLASH;
+		}
+
+		if (contextPath.equals(portalContextPath)) {
+			portalContext = true;
+		}
+
 		if (isPortalPage(page)) {
-			if (contextPath.equals(StringPool.SLASH)) {
-				sb = null;
+			if (portalContext) {
+				return;
 			}
 			else {
-				sb.append(" You must not use a taglib from a module and ");
-				sb.append("set the attribute \"servletContext\". Inline the ");
+				sb.append(" You must not use a taglib from a module and set ");
+				sb.append("the attribute \"servletContext\". Inline the ");
 				sb.append("content directly where the taglib is invoked.");
 			}
 		}
-		else if (contextPath.equals(StringPool.SLASH)) {
+		else if (portalContext) {
 			Class<?> clazz = getClass();
 
 			if (clazz.equals(IncludeTag.class)) {
@@ -426,15 +451,13 @@ public class IncludeTag extends AttributesTagSupport {
 				sb.append("invoking a taglib from a module.");
 			}
 			else {
-				sb.append(" You must not use a taglib from a module and ");
-				sb.append("set the attribute \"file\". Inline the content ");
+				sb.append(" You must not use a taglib from a module and set ");
+				sb.append("the attribute \"file\". Inline the content ");
 				sb.append("directly where the taglib is invoked.");
 			}
 		}
 
-		if (sb != null) {
-			_log.warn(sb.toString());
-		}
+		_log.warn(sb.toString());
 	}
 
 	protected int processEndTag() throws Exception {

@@ -16,8 +16,9 @@ package com.liferay.portlet.ratings.transformer.bundle.ratingsdatatransformeruti
 
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery.PerformActionMethod;
 import com.liferay.portal.kernel.util.StackTraceUtil;
-import com.liferay.portlet.ratings.RatingsType;
-import com.liferay.portlet.ratings.transformer.RatingsDataTransformer;
+import com.liferay.ratings.kernel.RatingsType;
+import com.liferay.ratings.kernel.model.RatingsEntry;
+import com.liferay.ratings.kernel.transformer.RatingsDataTransformer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,7 +35,7 @@ import org.osgi.service.component.annotations.Reference;
 public class TestRatingsDataTransformer implements RatingsDataTransformer {
 
 	@Override
-	public PerformActionMethod transformRatingsData(
+	public PerformActionMethod<RatingsEntry> transformRatingsData(
 		RatingsType fromRatingsType, RatingsType toRatingsType) {
 
 		_atomicReference.set(StackTraceUtil.getCallerKey());

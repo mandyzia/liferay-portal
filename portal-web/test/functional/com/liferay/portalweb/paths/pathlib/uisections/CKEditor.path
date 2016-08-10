@@ -10,12 +10,12 @@
 <tbody>
 <tr>
 	<td>BODY_FIELD</td>
-	<td>//iframe[contains(@title,'Rich Text Editor')]</td>
+	<td>//div[contains(@id,'cke')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>BODY_FIELD_LOCALIZED</td>
-	<td>//iframe[contains(@title,'_editor')]</td>
+	<td>//div[contains(@id,'cke__')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -24,13 +24,13 @@
 	<td></td>
 </tr>
 <tr>
-	<td>IFRAME</td>
-	<td>//iframe[contains(@title,'Rich Text Editor')]</td>
+	<td>BODY_FIELD_IFRAME</td>
+	<td>//div[contains(@id,'cke')]//iframe</td>
 	<td></td>
 </tr>
 <tr>
-	<td>IFRAME_LOCALIZED</td>
-	<td>//iframe[contains(@title,'_editor')]</td>
+	<td>IFRAME</td>
+	<td>//iframe[contains(@class,'cke_panel')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -108,7 +108,7 @@
 </tr>
 <tr>
 	<td>TOOLBAR_FORMAT_BUTTON</td>
-	<td>//a[contains(@class,'cke_combo_button') and contains(.,'Format')]/span</td>
+	<td>//a[contains(@class,'cke_combo_button') and contains(@title,'Format')]/span</td>
 	<td></td>
 </tr>
 <tr>
@@ -153,7 +153,7 @@
 </tr>
 <tr>
 	<td>TOOLBAR_SIZE_BUTTON_PORTLET</td>
-	<td>//span[contains(@class,'portlet-title-text') and contains(.,'${key_portletName}')]/../../..//a[contains(@class,'cke_combo_button') and contains(.,'Size')]/span</td>
+	<td>//span[contains(@class,'portlet-title-text') and contains(.,'${key_portletName}')]/../../..//a[contains(@class,'cke_combo_button') and contains(.,'14')]/span</td>
 	<td></td>
 </tr>
 <tr>
@@ -240,6 +240,17 @@
 	<td></td>
 	<td></td>
 </tr>
+<!-- CONTENT_AUDIO_LINK -->
+<tr>
+	<td>CONTENT_AUDIO_LINK_URL_FIELD</td>
+	<td>//input[@id='cke_99_textInput']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CONTENT_AUDIO_LINK_IMAGE</td>
+	<td>//img[contains(@class,'audio')]</td>
+	<td></td>
+</tr>
 <!--CONTENT_IMAGE_LINK-->
 <tr>
 	<td>CONTENT_IMAGE_LINK</td>
@@ -253,12 +264,17 @@
 </tr>
 <tr>
 	<td>CONTENT_IMAGE_LINK_BROWSE_SERVER_BUTTON</td>
-	<td>//td/a[@title='Browse Server']</td>
+	<td>//td//a[@title='Browse Server']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>CONTENT_IMAGE_LINK_OK_BUTTON</td>
 	<td>//a/span[contains(.,'OK')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CONTENT_IMAGE_LINK_IMAGE</td>
+	<td>//img[contains(@src,'jpg')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -315,7 +331,7 @@
 </tr>
 <tr>
 	<td>LINK_IMAGE_BROWSE_SERVER_FOLDER_NAME</td>
-	<td>//tr/td/a[contains(.,'${key_folderName}')]</td>
+	<td>//tr/td//a[contains(.,'${key_folderName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -325,7 +341,7 @@
 </tr>
 <tr>
 	<td>LINK_IMAGE_BROWSE_SERVER_DOCUMENT_CHOOSE_BUTTON</td>
-	<td>//tr[contains(.,'${key_documentName}')]/td/button[contains(.,'Choose')]</td>
+	<td>//tr[contains(.,'${key_documentName}')]/td//button[contains(.,'Choose')]</td>
 	<td></td>
 </tr>
 </tbody>

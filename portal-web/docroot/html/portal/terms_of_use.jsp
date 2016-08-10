@@ -28,12 +28,6 @@ if (referer.equals(themeDisplay.getPathMain() + "/portal/update_terms_of_use")) 
 TermsOfUseContentProvider termsOfUseContentProvider = TermsOfUseContentProviderRegistryUtil.getTermsOfUseContentProvider();
 %>
 
-<style type="text/css">
-	.dockbar .container-fluid .nav.nav-add-controls {
-		display: none;
-	}
-</style>
-
 <aui:form action='<%= themeDisplay.getPathMain() + "/portal/update_terms_of_use" %>' name="fm">
 	<aui:input name="doAsUserId" type="hidden" value="<%= themeDisplay.getDoAsUserId() %>" />
 	<aui:input name="<%= WebKeys.REFERER %>" type="hidden" value="<%= referer %>" />
@@ -42,24 +36,24 @@ TermsOfUseContentProvider termsOfUseContentProvider = TermsOfUseContentProviderR
 		<c:when test="<%= termsOfUseContentProvider != null %>">
 
 			<%
-			termsOfUseContentProvider.includeView(request, response);
+			termsOfUseContentProvider.includeView(request, new PipingServletResponse(pageContext));
 			%>
 
 		</c:when>
 		<c:otherwise>
-			 <liferay-util:include page="/html/portal/terms_of_use_default.jsp" />
+			<liferay-util:include page="/html/portal/terms_of_use_default.jsp" />
 		</c:otherwise>
 	</c:choose>
 
 	<c:if test="<%= !user.isAgreedToTermsOfUse() %>">
 		<aui:button-row>
-			<aui:button type="submit" value="i-agree" />
+			<aui:button cssClass="btn-lg" type="submit" value="i-agree" />
 
 			<%
 			String taglibOnClick = "alert('" + UnicodeLanguageUtil.get(request, "you-must-agree-with-the-terms-of-use-to-continue") + "');";
 			%>
 
-			<aui:button onClick="<%= taglibOnClick %>" type="cancel" value="i-disagree" />
+			<aui:button cssClass="btn-lg" onClick="<%= taglibOnClick %>" type="cancel" value="i-disagree" />
 		</aui:button-row>
 	</c:if>
 </aui:form>

@@ -14,14 +14,18 @@
 
 package com.liferay.portal.security.access.control;
 
+import com.liferay.portal.kernel.security.access.control.AccessControlUtil;
 import com.liferay.portal.kernel.security.access.control.AccessControlled;
 import com.liferay.portal.kernel.security.access.control.BaseAccessControlPolicy;
-import com.liferay.portal.kernel.security.access.control.profile.ServiceAccessControlProfile;
-import com.liferay.portal.kernel.security.access.control.profile.ServiceAccessControlProfileManagerUtil;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.auth.AccessControlContext;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.service.access.policy.ServiceAccessPolicyManager;
+import com.liferay.portal.kernel.security.service.access.policy.ServiceAccessPolicyManagerUtil;
 
 import java.lang.reflect.Method;
+
+import java.util.Map;
 
 /**
  * @author Tomas Polesovsky
@@ -37,21 +41,27 @@ public class AuthenticatedAccessControlPolicy extends BaseAccessControlPolicy {
 			AccessControlled accessControlled)
 		throws SecurityException {
 
+		AccessControlContext accessControlContext =
+			AccessControlUtil.getAccessControlContext();
+
+		if (accessControlContext != null) {
+			Map<String, Object> settings = accessControlContext.getSettings();
+
+			int serviceDepth = (Integer)settings.get(
+				AccessControlContext.Settings.SERVICE_DEPTH.toString());
+
+			if (serviceDepth > 1) {
+				return;
+			}
+		}
+
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
-		ServiceAccessControlProfile defaultServiceAccessControlProfile = null;
+		ServiceAccessPolicyManager serviceAccessControlProfileManager =
+			ServiceAccessPolicyManagerUtil.getServiceAccessPolicyManager();
 
-		if (ServiceAccessControlProfileManagerUtil.
-				getServiceAccessControlProfileManager() != null) {
-
-			defaultServiceAccessControlProfile =
-				ServiceAccessControlProfileManagerUtil.
-					getDefaultServiceAccessControlProfile(
-						permissionChecker.getCompanyId());
-		}
-
-		if ((defaultServiceAccessControlProfile == null) &&
+		if ((serviceAccessControlProfileManager == null) &&
 			!accessControlled.guestAccessEnabled() &&
 			((permissionChecker == null) || !permissionChecker.isSignedIn())) {
 

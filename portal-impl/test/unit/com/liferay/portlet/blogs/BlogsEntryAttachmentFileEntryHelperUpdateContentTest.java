@@ -14,12 +14,12 @@
 
 package com.liferay.portlet.blogs;
 
+import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.blogs.util.test.BlogsTestUtil;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 /**
  * @author Sergio González
  */
-@PrepareForTest({PortletFileRepositoryUtil.class})
+@PrepareForTest(PortletFileRepositoryUtil.class)
 @RunWith(PowerMockRunner.class)
 public class BlogsEntryAttachmentFileEntryHelperUpdateContentTest
 	extends PowerMockito {

@@ -17,9 +17,9 @@ package com.liferay.portal.editor.configuration;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigContributor;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.registry.collections.ServiceReferenceMapper;
 import com.liferay.registry.collections.ServiceTrackerCollections;
 import com.liferay.registry.collections.ServiceTrackerMap;
@@ -38,7 +38,7 @@ public class EditorConfigProvider
 		String portletName, String editorConfigKey, String editorName,
 		Map<String, Object> inputEditorTaglibAttributes,
 		ThemeDisplay themeDisplay,
-		LiferayPortletResponse liferayPortletResponse) {
+		RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 		JSONObject configJSONObject = JSONFactoryUtil.createJSONObject();
 
@@ -53,7 +53,7 @@ public class EditorConfigProvider
 
 			editorConfigContributor.populateConfigJSONObject(
 				configJSONObject, inputEditorTaglibAttributes, themeDisplay,
-				liferayPortletResponse);
+				requestBackedPortletURLFactory);
 		}
 
 		return configJSONObject;
@@ -70,15 +70,11 @@ public class EditorConfigProvider
 		_serviceReferenceMapper = new EditorServiceReferenceMapper<>();
 	private static final ServiceTrackerMap
 		<String, List<EditorConfigContributor>>
-			_serviceTrackerMap = ServiceTrackerCollections.multiValueMap(
+			_serviceTrackerMap = ServiceTrackerCollections.openMultiValueMap(
 				EditorConfigContributor.class,
 				"(|(editor.config.key=*)(editor.name=*)" +
 					"(javax.portlet.name=*)(objectClass=" +
 						EditorConfigContributor.class.getName() + "))",
 				_serviceReferenceMapper);
-
-	static {
-		_serviceTrackerMap.open();
-	}
 
 }

@@ -16,26 +16,28 @@ package com.liferay.portlet.messageboards.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
+import com.liferay.message.boards.kernel.model.MBBan;
+import com.liferay.message.boards.kernel.model.MBBanModel;
+import com.liferay.message.boards.kernel.model.MBBanSoap;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.impl.BaseModelImpl;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
-
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
-import com.liferay.portlet.messageboards.model.MBBan;
-import com.liferay.portlet.messageboards.model.MBBanModel;
-import com.liferay.portlet.messageboards.model.MBBanSoap;
 
 import java.io.Serializable;
 
@@ -78,7 +80,8 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 			{ "userName", Types.VARCHAR },
 			{ "createDate", Types.TIMESTAMP },
 			{ "modifiedDate", Types.TIMESTAMP },
-			{ "banUserId", Types.BIGINT }
+			{ "banUserId", Types.BIGINT },
+			{ "lastPublishDate", Types.TIMESTAMP }
 		};
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
 
@@ -92,9 +95,10 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("banUserId", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table MBBan (uuid_ VARCHAR(75) null,banId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,banUserId LONG)";
+	public static final String TABLE_SQL_CREATE = "create table MBBan (uuid_ VARCHAR(75) null,banId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,banUserId LONG,lastPublishDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table MBBan";
 	public static final String ORDER_BY_JPQL = " ORDER BY mbBan.banId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY MBBan.banId ASC";
@@ -102,13 +106,13 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portlet.messageboards.model.MBBan"),
+				"value.object.entity.cache.enabled.com.liferay.message.boards.kernel.model.MBBan"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portlet.messageboards.model.MBBan"),
+				"value.object.finder.cache.enabled.com.liferay.message.boards.kernel.model.MBBan"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portlet.messageboards.model.MBBan"),
+				"value.object.column.bitmask.enabled.com.liferay.message.boards.kernel.model.MBBan"),
 			true);
 	public static final long BANUSERID_COLUMN_BITMASK = 1L;
 	public static final long COMPANYID_COLUMN_BITMASK = 2L;
@@ -139,6 +143,7 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 		model.setCreateDate(soapModel.getCreateDate());
 		model.setModifiedDate(soapModel.getModifiedDate());
 		model.setBanUserId(soapModel.getBanUserId());
+		model.setLastPublishDate(soapModel.getLastPublishDate());
 
 		return model;
 	}
@@ -164,7 +169,7 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portlet.messageboards.model.MBBan"));
+				"lock.expiration.time.com.liferay.message.boards.kernel.model.MBBan"));
 
 	public MBBanModelImpl() {
 	}
@@ -212,6 +217,7 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("banUserId", getBanUserId());
+		attributes.put("lastPublishDate", getLastPublishDate());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -273,6 +279,12 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 
 		if (banUserId != null) {
 			setBanUserId(banUserId);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 	}
 
@@ -479,6 +491,17 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 		return _originalBanUserId;
 	}
 
+	@JSON
+	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
+	}
+
 	@Override
 	public StagedModelType getStagedModelType() {
 		return new StagedModelType(PortalUtil.getClassNameId(
@@ -525,6 +548,7 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 		mbBanImpl.setCreateDate(getCreateDate());
 		mbBanImpl.setModifiedDate(getModifiedDate());
 		mbBanImpl.setBanUserId(getBanUserId());
+		mbBanImpl.setLastPublishDate(getLastPublishDate());
 
 		mbBanImpl.resetOriginalValues();
 
@@ -658,12 +682,21 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 
 		mbBanCacheModel.banUserId = getBanUserId();
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			mbBanCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			mbBanCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		return mbBanCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(19);
+		StringBundler sb = new StringBundler(21);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -683,6 +716,8 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 		sb.append(getModifiedDate());
 		sb.append(", banUserId=");
 		sb.append(getBanUserId());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append("}");
 
 		return sb.toString();
@@ -690,10 +725,10 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(31);
+		StringBundler sb = new StringBundler(34);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portlet.messageboards.model.MBBan");
+		sb.append("com.liferay.message.boards.kernel.model.MBBan");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -732,6 +767,10 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 			"<column><column-name>banUserId</column-name><column-value><![CDATA[");
 		sb.append(getBanUserId());
 		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
 
@@ -761,6 +800,7 @@ public class MBBanModelImpl extends BaseModelImpl<MBBan> implements MBBanModel {
 	private long _banUserId;
 	private long _originalBanUserId;
 	private boolean _setOriginalBanUserId;
+	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private MBBan _escapedModel;
 }

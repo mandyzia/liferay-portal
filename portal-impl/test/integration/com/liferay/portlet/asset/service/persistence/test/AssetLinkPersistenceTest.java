@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.asset.service.persistence.test;
 
+import com.liferay.asset.kernel.exception.NoSuchLinkException;
+import com.liferay.asset.kernel.model.AssetLink;
+import com.liferay.asset.kernel.service.AssetLinkLocalServiceUtil;
+import com.liferay.asset.kernel.service.persistence.AssetLinkPersistence;
+import com.liferay.asset.kernel.service.persistence.AssetLinkUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -32,15 +38,10 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.asset.NoSuchLinkException;
-import com.liferay.portlet.asset.model.AssetLink;
-import com.liferay.portlet.asset.service.AssetLinkLocalServiceUtil;
-import com.liferay.portlet.asset.service.persistence.AssetLinkPersistence;
-import com.liferay.portlet.asset.service.persistence.AssetLinkUtil;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,8 +58,9 @@ import java.util.Set;
  * @generated
  */
 public class AssetLinkPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -336,11 +338,9 @@ public class AssetLinkPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = AssetLinkLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<AssetLink>() {
 				@Override
-				public void performAction(Object object) {
-					AssetLink assetLink = (AssetLink)object;
-
+				public void performAction(AssetLink assetLink) {
 					Assert.assertNotNull(assetLink);
 
 					count.increment();
@@ -432,15 +432,15 @@ public class AssetLinkPersistenceTest {
 
 		AssetLink existingAssetLink = _persistence.findByPrimaryKey(newAssetLink.getPrimaryKey());
 
-		Assert.assertEquals(existingAssetLink.getEntryId1(),
-			ReflectionTestUtil.invoke(existingAssetLink, "getOriginalEntryId1",
-				new Class<?>[0]));
-		Assert.assertEquals(existingAssetLink.getEntryId2(),
-			ReflectionTestUtil.invoke(existingAssetLink, "getOriginalEntryId2",
-				new Class<?>[0]));
-		Assert.assertEquals(existingAssetLink.getType(),
-			ReflectionTestUtil.invoke(existingAssetLink, "getOriginalType",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingAssetLink.getEntryId1()),
+			ReflectionTestUtil.<Long>invoke(existingAssetLink,
+				"getOriginalEntryId1", new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingAssetLink.getEntryId2()),
+			ReflectionTestUtil.<Long>invoke(existingAssetLink,
+				"getOriginalEntryId2", new Class<?>[0]));
+		Assert.assertEquals(Integer.valueOf(existingAssetLink.getType()),
+			ReflectionTestUtil.<Integer>invoke(existingAssetLink,
+				"getOriginalType", new Class<?>[0]));
 	}
 
 	protected AssetLink addAssetLink() throws Exception {

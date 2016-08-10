@@ -17,26 +17,27 @@ package com.liferay.portal.struts;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutTypePortlet;
+import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutTypePortlet;
-import com.liferay.portal.model.Portlet;
-import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.service.PortletLocalServiceUtil;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.IOException;
 
@@ -70,6 +71,7 @@ import org.apache.struts.util.MessageResources;
 
 /**
  * @author Brian Wing Shun Chan
+ * @see    com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand
  */
 public class PortletAction extends Action {
 
@@ -274,17 +276,6 @@ public class PortletAction extends Action {
 				SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
 	}
 
-	/**
-	 * @deprecated As of 6.2.0 {@link
-	 *             #hideDefaultSuccessMessage(PortletRequest)}
-	 */
-	@Deprecated
-	protected void hideDefaultSuccessMessage(
-		PortletConfig portletConfig, PortletRequest portletRequest) {
-
-		hideDefaultSuccessMessage(portletRequest);
-	}
-
 	protected void hideDefaultSuccessMessage(PortletRequest portletRequest) {
 		SessionMessages.add(
 			portletRequest,
@@ -313,18 +304,11 @@ public class PortletAction extends Action {
 		String portletId = (String)portletRequest.getAttribute(
 			WebKeys.PORTLET_ID);
 
-		try {
-			LayoutTypePortlet layoutTypePortlet =
-				themeDisplay.getLayoutTypePortlet();
+		LayoutTypePortlet layoutTypePortlet =
+			themeDisplay.getLayoutTypePortlet();
 
-			if (layoutTypePortlet.hasPortletId(portletId)) {
-				return true;
-			}
-		}
-		catch (PortalException pe) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
+		if (layoutTypePortlet.hasPortletId(portletId)) {
+			return true;
 		}
 
 		Portlet portlet = PortletLocalServiceUtil.getPortletById(
@@ -425,7 +409,7 @@ public class PortletAction extends Action {
 			}
 
 			redirect = StringUtil.replace(
-				redirect, StringPool.POUND, redirectToken);
+				redirect, CharPool.POUND, redirectToken);
 		}
 
 		redirect = PortalUtil.escapeRedirect(redirect);

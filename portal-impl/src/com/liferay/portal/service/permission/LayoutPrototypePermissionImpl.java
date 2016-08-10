@@ -14,9 +14,10 @@
 
 package com.liferay.portal.service.permission;
 
-import com.liferay.portal.model.LayoutPrototype;
-import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.model.LayoutPrototype;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.permission.LayoutPrototypePermission;
 
 /**
  * @author Jorge Ferrer

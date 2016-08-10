@@ -14,24 +14,25 @@
 
 package com.liferay.portlet.documentlibrary.service.impl;
 
+import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
+import com.liferay.document.library.kernel.model.DLFileShortcut;
+import com.liferay.document.library.kernel.model.DLFileShortcutConstants;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.SystemEventConstants;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.SystemEventConstants;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
-import com.liferay.portlet.documentlibrary.model.DLFileShortcut;
-import com.liferay.portlet.documentlibrary.model.DLFileShortcutConstants;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
-import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.base.DLFileShortcutLocalServiceBaseImpl;
 
 import java.util.Date;
@@ -52,6 +53,7 @@ public class DLFileShortcutLocalServiceImpl
 		// File shortcut
 
 		User user = userPersistence.findByPrimaryKey(userId);
+
 		folderId = getFolderId(user.getCompanyId(), folderId);
 
 		validate(user, toFileEntryId);
@@ -89,8 +91,7 @@ public class DLFileShortcutLocalServiceImpl
 		}
 		else {
 			addFileShortcutResources(
-				fileShortcut, serviceContext.getGroupPermissions(),
-				serviceContext.getGuestPermissions());
+				fileShortcut, serviceContext.getModelPermissions());
 		}
 
 		// Folder
@@ -128,15 +129,13 @@ public class DLFileShortcutLocalServiceImpl
 
 	@Override
 	public void addFileShortcutResources(
-			DLFileShortcut fileShortcut, String[] groupPermissions,
-			String[] guestPermissions)
+			DLFileShortcut fileShortcut, ModelPermissions modelPermissions)
 		throws PortalException {
 
 		resourceLocalService.addModelResources(
 			fileShortcut.getCompanyId(), fileShortcut.getGroupId(),
 			fileShortcut.getUserId(), DLFileShortcutConstants.getClassName(),
-			fileShortcut.getFileShortcutId(), groupPermissions,
-			guestPermissions);
+			fileShortcut.getFileShortcutId(), modelPermissions);
 	}
 
 	@Override
@@ -154,15 +153,13 @@ public class DLFileShortcutLocalServiceImpl
 
 	@Override
 	public void addFileShortcutResources(
-			long fileShortcutId, String[] groupPermissions,
-			String[] guestPermissions)
+			long fileShortcutId, ModelPermissions modelPermissions)
 		throws PortalException {
 
 		DLFileShortcut fileShortcut =
 			dlFileShortcutPersistence.findByPrimaryKey(fileShortcutId);
 
-		addFileShortcutResources(
-			fileShortcut, groupPermissions, guestPermissions);
+		addFileShortcutResources(fileShortcut, modelPermissions);
 	}
 
 	@Override
@@ -243,26 +240,12 @@ public class DLFileShortcutLocalServiceImpl
 
 	@Override
 	public void disableFileShortcuts(long toFileEntryId) {
-		List<DLFileShortcut> fileShortcuts =
-			dlFileShortcutPersistence.findByToFileEntryId(toFileEntryId);
-
-		for (DLFileShortcut fileShortcut : fileShortcuts) {
-			fileShortcut.setActive(false);
-
-			dlFileShortcutPersistence.update(fileShortcut);
-		}
+		updateFileShortcutsActive(toFileEntryId, false);
 	}
 
 	@Override
 	public void enableFileShortcuts(long toFileEntryId) {
-		List<DLFileShortcut> fileShortcuts =
-			dlFileShortcutPersistence.findByToFileEntryId(toFileEntryId);
-
-		for (DLFileShortcut fileShortcut : fileShortcuts) {
-			fileShortcut.setActive(true);
-
-			dlFileShortcutPersistence.update(fileShortcut);
-		}
+		updateFileShortcutsActive(toFileEntryId, true);
 	}
 
 	@Override
@@ -332,12 +315,10 @@ public class DLFileShortcutLocalServiceImpl
 			});
 
 		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod() {
+			new ActionableDynamicQuery.PerformActionMethod<DLFileShortcut>() {
 
 				@Override
-				public void performAction(Object object) {
-					DLFileShortcut dlFileShortcut = (DLFileShortcut)object;
-
+				public void performAction(DLFileShortcut dlFileShortcut) {
 					dlFileShortcut.setTreePath(treePath);
 
 					updateDLFileShortcut(dlFileShortcut);
@@ -362,9 +343,10 @@ public class DLFileShortcutLocalServiceImpl
 			fileShortcut.getModifiedDate(),
 			DLFileShortcutConstants.getClassName(),
 			fileShortcut.getFileShortcutId(), fileShortcut.getUuid(), 0,
-			assetCategoryIds, assetTagNames, false, null, null, null,
-			fileEntry.getMimeType(), fileEntry.getTitle(),
-			fileEntry.getDescription(), null, null, null, 0, 0, null);
+			assetCategoryIds, assetTagNames, true, false, null, null,
+			fileShortcut.getCreateDate(), null, fileEntry.getMimeType(),
+			fileEntry.getTitle(), fileEntry.getDescription(), null, null, null,
+			0, 0, null);
 	}
 
 	@Override
@@ -417,6 +399,18 @@ public class DLFileShortcutLocalServiceImpl
 
 		for (DLFileShortcut fileShortcut : fileShortcuts) {
 			fileShortcut.setToFileEntryId(newToFileEntryId);
+
+			dlFileShortcutPersistence.update(fileShortcut);
+		}
+	}
+
+	@Override
+	public void updateFileShortcutsActive(long toFileEntryId, boolean active) {
+		List<DLFileShortcut> fileShortcuts =
+			dlFileShortcutPersistence.findByToFileEntryId(toFileEntryId);
+
+		for (DLFileShortcut fileShortcut : fileShortcuts) {
+			fileShortcut.setActive(active);
 
 			dlFileShortcutPersistence.update(fileShortcut);
 		}

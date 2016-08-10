@@ -21,22 +21,24 @@ import com.liferay.portal.kernel.editor.configuration.EditorConfigurationFactory
 import com.liferay.portal.kernel.editor.configuration.EditorOptions;
 import com.liferay.portal.kernel.editor.configuration.EditorOptionsContributor;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistration;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,8 +51,18 @@ public class EditorConfigTransformerTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
+
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		_editorConfigProviderSwapper = new EditorConfigProviderSwapper(
+			Arrays.<Class<?>>asList(BasicHTMLEditorConfigContributor.class));
+	}
+
+	@AfterClass
+	public static void tearDownClass() {
+		_editorConfigProviderSwapper.close();
+	}
 
 	@After
 	public void tearDown() {
@@ -161,7 +173,8 @@ public class EditorConfigTransformerTest {
 	}
 
 	@Test
-	public void testEditorConfigTransformedWhenEditorConfigTransformerIsRegistered()
+	public void
+			testEditorConfigTransformedWhenEditorConfigTransformerIsRegistered()
 		throws Exception {
 
 		Registry registry = RegistryUtil.getRegistry();
@@ -211,7 +224,8 @@ public class EditorConfigTransformerTest {
 	}
 
 	@Test
-	public void testEditorConfigTransformedWithMultipleEditorOptionsContributors()
+	public void
+			testEditorConfigTransformedWithMultipleEditorOptionsContributors()
 		throws Exception {
 
 		Registry registry = RegistryUtil.getRegistry();
@@ -279,6 +293,8 @@ public class EditorConfigTransformerTest {
 
 	private static final String _UNUSED_EDITOR_NAME = "testUnusedEditorName";
 
+	private static EditorConfigProviderSwapper _editorConfigProviderSwapper;
+
 	private ServiceRegistration<EditorConfigContributor>
 		_editorConfigContributorServiceRegistration;
 	private ServiceRegistration<EditorConfigTransformer>
@@ -288,7 +304,7 @@ public class EditorConfigTransformerTest {
 	private ServiceRegistration<EditorOptionsContributor>
 		_editorOptionsContributorServiceRegistration2;
 
-	private class BasicHTMLEditorConfigContributor
+	private static class BasicHTMLEditorConfigContributor
 		implements EditorConfigContributor {
 
 		@Override
@@ -296,7 +312,7 @@ public class EditorConfigTransformerTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put("textMode", "html");
 			jsonObject.put("toolbar", "HTMLToolbar");
@@ -305,16 +321,15 @@ public class EditorConfigTransformerTest {
 
 	}
 
-	private class TestEditorConfigTransformer
+	private static class TestEditorConfigTransformer
 		implements EditorConfigTransformer {
 
 		@Override
 		public void transform(
 			EditorOptions editorOptions,
 			Map<String, Object> inputEditorTaglibAttributes,
-			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse,
-			JSONObject configJSONObject) {
+			JSONObject configJSONObject, ThemeDisplay themeDisplay,
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			String uploadURL = editorOptions.getUploadURL();
 
@@ -332,7 +347,7 @@ public class EditorConfigTransformerTest {
 
 	}
 
-	private class TextEditorOptionsContributor
+	private static class TextEditorOptionsContributor
 		implements EditorOptionsContributor {
 
 		@Override
@@ -340,14 +355,14 @@ public class EditorConfigTransformerTest {
 			EditorOptions editorOptions,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			editorOptions.setTextMode(true);
 		}
 
 	}
 
-	private class UploadImagesEditorOptionsContributor
+	private static class UploadImagesEditorOptionsContributor
 		implements EditorOptionsContributor {
 
 		@Override
@@ -355,7 +370,7 @@ public class EditorConfigTransformerTest {
 			EditorOptions editorOptions,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			editorOptions.setUploadURL("http://upload.com");
 		}

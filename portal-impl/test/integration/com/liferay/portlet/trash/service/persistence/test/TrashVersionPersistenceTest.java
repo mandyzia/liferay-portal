@@ -31,15 +31,16 @@ import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.trash.NoSuchVersionException;
-import com.liferay.portlet.trash.model.TrashVersion;
-import com.liferay.portlet.trash.service.TrashVersionLocalServiceUtil;
-import com.liferay.portlet.trash.service.persistence.TrashVersionPersistence;
-import com.liferay.portlet.trash.service.persistence.TrashVersionUtil;
+import com.liferay.trash.kernel.exception.NoSuchVersionException;
+import com.liferay.trash.kernel.model.TrashVersion;
+import com.liferay.trash.kernel.service.TrashVersionLocalServiceUtil;
+import com.liferay.trash.kernel.service.persistence.TrashVersionPersistence;
+import com.liferay.trash.kernel.service.persistence.TrashVersionUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -56,8 +57,9 @@ import java.util.Set;
  * @generated
  */
 public class TrashVersionPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -114,6 +116,8 @@ public class TrashVersionPersistenceTest {
 
 		TrashVersion newTrashVersion = _persistence.create(pk);
 
+		newTrashVersion.setCompanyId(RandomTestUtil.nextLong());
+
 		newTrashVersion.setEntryId(RandomTestUtil.nextLong());
 
 		newTrashVersion.setClassNameId(RandomTestUtil.nextLong());
@@ -130,6 +134,8 @@ public class TrashVersionPersistenceTest {
 
 		Assert.assertEquals(existingTrashVersion.getVersionId(),
 			newTrashVersion.getVersionId());
+		Assert.assertEquals(existingTrashVersion.getCompanyId(),
+			newTrashVersion.getCompanyId());
 		Assert.assertEquals(existingTrashVersion.getEntryId(),
 			newTrashVersion.getEntryId());
 		Assert.assertEquals(existingTrashVersion.getClassNameId(),
@@ -189,8 +195,8 @@ public class TrashVersionPersistenceTest {
 
 	protected OrderByComparator<TrashVersion> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("TrashVersion", "versionId",
-			true, "entryId", true, "classNameId", true, "classPK", true,
-			"typeSettings", true, "status", true);
+			true, "companyId", true, "entryId", true, "classNameId", true,
+			"classPK", true, "status", true);
 	}
 
 	@Test
@@ -299,11 +305,9 @@ public class TrashVersionPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = TrashVersionLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<TrashVersion>() {
 				@Override
-				public void performAction(Object object) {
-					TrashVersion trashVersion = (TrashVersion)object;
-
+				public void performAction(TrashVersion trashVersion) {
 					Assert.assertNotNull(trashVersion);
 
 					count.increment();
@@ -395,11 +399,11 @@ public class TrashVersionPersistenceTest {
 
 		TrashVersion existingTrashVersion = _persistence.findByPrimaryKey(newTrashVersion.getPrimaryKey());
 
-		Assert.assertEquals(existingTrashVersion.getClassNameId(),
-			ReflectionTestUtil.invoke(existingTrashVersion,
+		Assert.assertEquals(Long.valueOf(existingTrashVersion.getClassNameId()),
+			ReflectionTestUtil.<Long>invoke(existingTrashVersion,
 				"getOriginalClassNameId", new Class<?>[0]));
-		Assert.assertEquals(existingTrashVersion.getClassPK(),
-			ReflectionTestUtil.invoke(existingTrashVersion,
+		Assert.assertEquals(Long.valueOf(existingTrashVersion.getClassPK()),
+			ReflectionTestUtil.<Long>invoke(existingTrashVersion,
 				"getOriginalClassPK", new Class<?>[0]));
 	}
 
@@ -407,6 +411,8 @@ public class TrashVersionPersistenceTest {
 		long pk = RandomTestUtil.nextLong();
 
 		TrashVersion trashVersion = _persistence.create(pk);
+
+		trashVersion.setCompanyId(RandomTestUtil.nextLong());
 
 		trashVersion.setEntryId(RandomTestUtil.nextLong());
 

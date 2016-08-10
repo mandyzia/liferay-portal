@@ -14,28 +14,29 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchUserGroupGroupRoleException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchUserGroupGroupRoleException;
+import com.liferay.portal.kernel.model.UserGroupGroupRole;
+import com.liferay.portal.kernel.service.UserGroupGroupRoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.UserGroupGroupRolePK;
+import com.liferay.portal.kernel.service.persistence.UserGroupGroupRolePersistence;
+import com.liferay.portal.kernel.service.persistence.UserGroupGroupRoleUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
-import com.liferay.portal.model.UserGroupGroupRole;
-import com.liferay.portal.service.UserGroupGroupRoleLocalServiceUtil;
-import com.liferay.portal.service.persistence.UserGroupGroupRolePK;
-import com.liferay.portal.service.persistence.UserGroupGroupRolePersistence;
-import com.liferay.portal.service.persistence.UserGroupGroupRoleUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -52,8 +53,9 @@ import java.util.Set;
  * @generated
  */
 public class UserGroupGroupRolePersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -114,6 +116,8 @@ public class UserGroupGroupRolePersistenceTest {
 
 		newUserGroupGroupRole.setMvccVersion(RandomTestUtil.nextLong());
 
+		newUserGroupGroupRole.setCompanyId(RandomTestUtil.nextLong());
+
 		_userGroupGroupRoles.add(_persistence.update(newUserGroupGroupRole));
 
 		UserGroupGroupRole existingUserGroupGroupRole = _persistence.findByPrimaryKey(newUserGroupGroupRole.getPrimaryKey());
@@ -126,6 +130,8 @@ public class UserGroupGroupRolePersistenceTest {
 			newUserGroupGroupRole.getGroupId());
 		Assert.assertEquals(existingUserGroupGroupRole.getRoleId(),
 			newUserGroupGroupRole.getRoleId());
+		Assert.assertEquals(existingUserGroupGroupRole.getCompanyId(),
+			newUserGroupGroupRole.getCompanyId());
 	}
 
 	@Test
@@ -292,11 +298,9 @@ public class UserGroupGroupRolePersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = UserGroupGroupRoleLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<UserGroupGroupRole>() {
 				@Override
-				public void performAction(Object object) {
-					UserGroupGroupRole userGroupGroupRole = (UserGroupGroupRole)object;
-
+				public void performAction(UserGroupGroupRole userGroupGroupRole) {
 					Assert.assertNotNull(userGroupGroupRole);
 
 					count.increment();
@@ -398,6 +402,8 @@ public class UserGroupGroupRolePersistenceTest {
 		UserGroupGroupRole userGroupGroupRole = _persistence.create(pk);
 
 		userGroupGroupRole.setMvccVersion(RandomTestUtil.nextLong());
+
+		userGroupGroupRole.setCompanyId(RandomTestUtil.nextLong());
 
 		_userGroupGroupRoles.add(_persistence.update(userGroupGroupRole));
 

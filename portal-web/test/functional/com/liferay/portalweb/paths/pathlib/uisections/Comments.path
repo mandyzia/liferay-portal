@@ -15,7 +15,7 @@
 </tr>
 <tr>
 	<td>PANEL_TOGGLE</td>
-	<td>//div[contains(.,'Comment')]//div[@class='panel-toggle']</td>
+	<td>//div[contains(.,'Comments')]//div[@class='panel-heading']</td>
 	<td></td>
 </tr>
 <tr>
@@ -24,8 +24,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>COMMENT_ACTIONS</td>
+	<td>//div[contains(@class,'card-row') and contains(.,'${key_entryComment}')]//div[contains(@class,'card-col-field')]//span/*[name()='svg'][contains(@class,'icon-ellipsis-v')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>COMMENT_BODY</td>
-	<td>//div[(@class='lfr-discussion-message-body')]/p[contains(.,'${key_entryComment}')]</td>
+	<td>//div[(@class='lfr-discussion-message-body')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COMMENT_BODY_SPECIFIC</td>
+	<td>//div[(@class='lfr-discussion-message-body') and contains(.,'${key_entryComment}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -44,6 +54,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DELETE_LINK_GENERIC</td>
+	<td>//ul[@class='lfr-discussion-actions']/li/span/a[contains(.,'Delete')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>EDIT_COMMENT_FIELD</td>
 	<td>//div[contains(@name,'editReplyBody')]</td>
 	<td></td>
@@ -55,7 +70,7 @@
 </tr>
 <tr>
 	<td>ENTRY_COUNT_PANEL</td>
-	<td>//div[@class='panel-toggle']/span[contains(.,'Comments')]</td>
+	<td>//h2[contains(.,'Comments')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -94,13 +109,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>REPLY_TO_COMMENT</td>
+	<td>//div[@class='lfr-discussion-body' and contains(.,'${key_entryComment}')]//span[contains(.,'Reply')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SUCCESS_MESSAGE</td>
 	<td>//div[contains(@class,'lfr-message-response') and contains(@class,'alert') and contains(@class,'alert-success')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>USER_NAME</td>
-	<td>//header[@class='lfr-discussion-message-author']/a | //span[@class='user-name']</td>
+	<td>//header[@class='lfr-discussion-message-author']/a | //header[@class='lfr-discussion-message-author']//span[contains(.,'${key_userFullName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>WORKFLOW_STATUS</td>
+	<td>//div[contains(@class,'lfr-discussion-body') and contains(.,'${key_commentBody}')]//span[contains(@class,'workflow-status')]/strong</td>
 	<td></td>
 </tr>
 </tbody>

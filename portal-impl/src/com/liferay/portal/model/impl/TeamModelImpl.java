@@ -16,25 +16,27 @@ package com.liferay.portal.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.Team;
+import com.liferay.portal.kernel.model.TeamModel;
+import com.liferay.portal.kernel.model.TeamSoap;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.Team;
-import com.liferay.portal.model.TeamModel;
-import com.liferay.portal.model.TeamSoap;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
-
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
 
 import java.io.Serializable;
 
@@ -79,7 +81,8 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 			{ "modifiedDate", Types.TIMESTAMP },
 			{ "groupId", Types.BIGINT },
 			{ "name", Types.VARCHAR },
-			{ "description", Types.VARCHAR }
+			{ "description", Types.VARCHAR },
+			{ "lastPublishDate", Types.TIMESTAMP }
 		};
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
 
@@ -95,9 +98,10 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 		TABLE_COLUMNS_MAP.put("groupId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("name", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("description", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table Team (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,teamId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,groupId LONG,name VARCHAR(75) null,description STRING null)";
+	public static final String TABLE_SQL_CREATE = "create table Team (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,teamId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,groupId LONG,name VARCHAR(75) null,description STRING null,lastPublishDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table Team";
 	public static final String ORDER_BY_JPQL = " ORDER BY team.name ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Team.name ASC";
@@ -105,13 +109,13 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portal.model.Team"),
+				"value.object.entity.cache.enabled.com.liferay.portal.kernel.model.Team"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portal.model.Team"),
+				"value.object.finder.cache.enabled.com.liferay.portal.kernel.model.Team"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portal.model.Team"),
+				"value.object.column.bitmask.enabled.com.liferay.portal.kernel.model.Team"),
 			true);
 	public static final long COMPANYID_COLUMN_BITMASK = 1L;
 	public static final long GROUPID_COLUMN_BITMASK = 2L;
@@ -142,6 +146,7 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 		model.setGroupId(soapModel.getGroupId());
 		model.setName(soapModel.getName());
 		model.setDescription(soapModel.getDescription());
+		model.setLastPublishDate(soapModel.getLastPublishDate());
 
 		return model;
 	}
@@ -168,22 +173,24 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 
 	public static final String MAPPING_TABLE_USERS_TEAMS_NAME = "Users_Teams";
 	public static final Object[][] MAPPING_TABLE_USERS_TEAMS_COLUMNS = {
+			{ "companyId", Types.BIGINT },
 			{ "teamId", Types.BIGINT },
 			{ "userId", Types.BIGINT }
 		};
-	public static final String MAPPING_TABLE_USERS_TEAMS_SQL_CREATE = "create table Users_Teams (teamId LONG not null,userId LONG not null,primary key (teamId, userId))";
+	public static final String MAPPING_TABLE_USERS_TEAMS_SQL_CREATE = "create table Users_Teams (companyId LONG not null,teamId LONG not null,userId LONG not null,primary key (teamId, userId))";
 	public static final boolean FINDER_CACHE_ENABLED_USERS_TEAMS = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
 				"value.object.finder.cache.enabled.Users_Teams"), true);
 	public static final String MAPPING_TABLE_USERGROUPS_TEAMS_NAME = "UserGroups_Teams";
 	public static final Object[][] MAPPING_TABLE_USERGROUPS_TEAMS_COLUMNS = {
+			{ "companyId", Types.BIGINT },
 			{ "teamId", Types.BIGINT },
 			{ "userGroupId", Types.BIGINT }
 		};
-	public static final String MAPPING_TABLE_USERGROUPS_TEAMS_SQL_CREATE = "create table UserGroups_Teams (teamId LONG not null,userGroupId LONG not null,primary key (teamId, userGroupId))";
+	public static final String MAPPING_TABLE_USERGROUPS_TEAMS_SQL_CREATE = "create table UserGroups_Teams (companyId LONG not null,teamId LONG not null,userGroupId LONG not null,primary key (teamId, userGroupId))";
 	public static final boolean FINDER_CACHE_ENABLED_USERGROUPS_TEAMS = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
 				"value.object.finder.cache.enabled.UserGroups_Teams"), true);
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portal.model.Team"));
+				"lock.expiration.time.com.liferay.portal.kernel.model.Team"));
 
 	public TeamModelImpl() {
 	}
@@ -233,6 +240,7 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 		attributes.put("groupId", getGroupId());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
+		attributes.put("lastPublishDate", getLastPublishDate());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -306,6 +314,12 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 
 		if (description != null) {
 			setDescription(description);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 	}
 
@@ -514,6 +528,17 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 		_description = description;
 	}
 
+	@JSON
+	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
+	}
+
 	@Override
 	public StagedModelType getStagedModelType() {
 		return new StagedModelType(PortalUtil.getClassNameId(
@@ -562,6 +587,7 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 		teamImpl.setGroupId(getGroupId());
 		teamImpl.setName(getName());
 		teamImpl.setDescription(getDescription());
+		teamImpl.setLastPublishDate(getLastPublishDate());
 
 		teamImpl.resetOriginalValues();
 
@@ -703,12 +729,21 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 			teamCacheModel.description = null;
 		}
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			teamCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			teamCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		return teamCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(23);
+		StringBundler sb = new StringBundler(25);
 
 		sb.append("{mvccVersion=");
 		sb.append(getMvccVersion());
@@ -732,6 +767,8 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 		sb.append(getName());
 		sb.append(", description=");
 		sb.append(getDescription());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append("}");
 
 		return sb.toString();
@@ -739,10 +776,10 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(37);
+		StringBundler sb = new StringBundler(40);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portal.model.Team");
+		sb.append("com.liferay.portal.kernel.model.Team");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -789,6 +826,10 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 			"<column><column-name>description</column-name><column-value><![CDATA[");
 		sb.append(getDescription());
 		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
 
@@ -817,6 +858,7 @@ public class TeamModelImpl extends BaseModelImpl<Team> implements TeamModel {
 	private String _name;
 	private String _originalName;
 	private String _description;
+	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private Team _escapedModel;
 }

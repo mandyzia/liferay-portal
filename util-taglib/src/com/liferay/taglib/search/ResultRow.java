@@ -15,6 +15,7 @@
 package com.liferay.taglib.search;
 
 import com.liferay.portal.kernel.dao.search.SearchEntry;
+import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,11 +54,22 @@ public class ResultRow
 	public ResultRow(
 		String rowId, Object obj, String primaryKey, int pos, boolean bold) {
 
+		this(
+			rowId, obj, primaryKey, pos, bold, StringPool.BLANK,
+			StringPool.BLANK);
+	}
+
+	public ResultRow(
+		String rowId, Object obj, String primaryKey, int pos, boolean bold,
+		String cssClass, String state) {
+
 		_rowId = rowId;
 		_obj = obj;
 		_primaryKey = primaryKey;
 		_pos = pos;
 		_bold = bold;
+		_cssClass = cssClass;
+		_state = state;
 		_searchEntries = new ArrayList<>();
 	}
 
@@ -142,6 +154,10 @@ public class ResultRow
 		_searchEntries.add(index, dateSearchEntry);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
 	public void addJSP(int index, String path) {
 		addJSP(
@@ -160,6 +176,10 @@ public class ResultRow
 			response);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
 	public void addJSP(
 		int index, String align, String valign, int colspan, String path) {
@@ -193,6 +213,10 @@ public class ResultRow
 		_searchEntries.add(index, jspSearchEntry);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
 	public void addJSP(String path) {
 		addJSP(_searchEntries.size(), path);
@@ -206,6 +230,10 @@ public class ResultRow
 		addJSP(_searchEntries.size(), path, servletContext, request, response);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
 	public void addJSP(String path, String cssClass) {
 		JSPSearchEntry jspSearchEntry = new JSPSearchEntry();
@@ -219,6 +247,10 @@ public class ResultRow
 		_searchEntries.add(_searchEntries.size(), jspSearchEntry);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
 	public void addJSP(String align, String valign, int colspan, String path) {
 		addJSP(_searchEntries.size(), align, valign, colspan, path);
@@ -254,6 +286,10 @@ public class ResultRow
 		_searchEntries.add(_searchEntries.size(), jspSearchEntry);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
 	public void addJSP(String align, String valign, String path) {
 		addJSP(
@@ -534,6 +570,11 @@ public class ResultRow
 	}
 
 	@Override
+	public String getCssClass() {
+		return _cssClass;
+	}
+
+	@Override
 	public Map<String, Object> getData() {
 		return _data;
 	}
@@ -573,6 +614,11 @@ public class ResultRow
 	}
 
 	@Override
+	public String getState() {
+		return _state;
+	}
+
+	@Override
 	public boolean isBold() {
 		return _bold;
 	}
@@ -605,6 +651,11 @@ public class ResultRow
 	@Override
 	public void setClassName(String className) {
 		_className = className;
+	}
+
+	@Override
+	public void setCssClass(String cssClass) {
+		_cssClass = cssClass;
 	}
 
 	@Override
@@ -646,9 +697,15 @@ public class ResultRow
 		_skip = skip;
 	}
 
+	@Override
+	public void setState(String state) {
+		_state = state;
+	}
+
 	private boolean _bold;
 	private String _classHoverName;
 	private String _className;
+	private String _cssClass;
 	private Map<String, Object> _data;
 	private Object _obj;
 	private Map<String, Object> _params;
@@ -658,5 +715,6 @@ public class ResultRow
 	private String _rowId;
 	private final List<SearchEntry> _searchEntries;
 	private boolean _skip;
+	private String _state;
 
 }

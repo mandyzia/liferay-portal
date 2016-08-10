@@ -26,7 +26,7 @@ import org.junit.runners.model.Statement;
 /**
  * @author Shuyang Zhou
  */
-public class AggregateTestRule implements TestRule {
+public class AggregateTestRule implements ArquillianClassRuleHandler, TestRule {
 
 	public AggregateTestRule(boolean sort, TestRule... testRules) {
 		if (testRules == null) {
@@ -58,17 +58,42 @@ public class AggregateTestRule implements TestRule {
 		return statement;
 	}
 
+	@Override
+	public void handleAfterClass(boolean enable) {
+		for (TestRule testRule : _testRules) {
+			if (testRule instanceof ArquillianClassRuleHandler) {
+				ArquillianClassRuleHandler arquillianTestRuleHandler =
+					(ArquillianClassRuleHandler)testRule;
+
+				arquillianTestRuleHandler.handleAfterClass(enable);
+			}
+		}
+	}
+
+	@Override
+	public void handleBeforeClass(boolean enable) {
+		for (TestRule testRule : _testRules) {
+			if (testRule instanceof ArquillianClassRuleHandler) {
+				ArquillianClassRuleHandler arquillianTestRuleHandler =
+					(ArquillianClassRuleHandler)testRule;
+
+				arquillianTestRuleHandler.handleBeforeClass(enable);
+			}
+		}
+	}
+
 	private static final String[] _ORDERED_RULE_CLASS_NAMES = new String[] {
 		HeapDumpTestRule.class.getName(), CodeCoverageAssertor.class.getName(),
 		NewEnvTestRule.class.getName(),
 		"com.liferay.portal.test.rule.PortalExecutorManagerTestRule",
+		AssumeTestRule.class.getName(),
 		"com.liferay.portal.test.rule.LiferayIntegrationTestRule",
-		"com.liferay.portal.test.rule.MainServletTestRule",
+		"com.liferay.portal.test.rule.HypersonicServerTestRule",
 		"com.liferay.portal.test.rule.PersistenceTestRule",
 		TransactionalTestRule.class.getName(),
 		SynchronousDestinationTestRule.class.getName(),
 		"com.liferay.portal.test.rule.SynchronousMailTestRule",
-		"com.liferay.portlet.documentlibrary.webdav." +
+		"com.liferay.document.library.webdav.test." +
 			"WebDAVEnvironmentConfigTestRule",
 		"com.liferay.portal.test.rule.SyntheticBundleRule"
 	};
@@ -78,11 +103,11 @@ public class AggregateTestRule implements TestRule {
 
 			@Override
 			public int compare(TestRule testRule1, TestRule testRule2) {
-				return getIndex(testRule1.getClass()) -
-					getIndex(testRule2.getClass());
+				return _getIndex(testRule1.getClass()) -
+					_getIndex(testRule2.getClass());
 			}
 
-			private int getIndex(Class<?> testRuleClass) {
+			private int _getIndex(Class<?> testRuleClass) {
 				Set<String> testRuleClassNames = new HashSet<>();
 
 				while (TestRule.class.isAssignableFrom(testRuleClass)) {

@@ -55,7 +55,7 @@ public class BufferedIncrementProcessor {
 
 		StringBundler sb = new StringBundler(parameterTypes.length * 2 + 5);
 
-		sb.append("BufferedIncreament-");
+		sb.append("BufferedIncrement-");
 
 		Class<?> clazz = method.getDeclaringClass();
 
@@ -90,7 +90,7 @@ public class BufferedIncrementProcessor {
 		if (_batchablePipe.put(bufferedIncreasableEntry)) {
 			Runnable runnable = new BufferedIncrementRunnable(
 				_bufferedIncrementConfiguration, _batchablePipe,
-					_queueLengthTracker, Thread.currentThread());
+				_queueLengthTracker, Thread.currentThread());
 
 			if (ProxyModeThreadLocal.isForceSync()) {
 				runnable.run();

@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.messageboards.service.persistence.test;
 
+import com.liferay.message.boards.kernel.exception.NoSuchThreadException;
+import com.liferay.message.boards.kernel.model.MBThread;
+import com.liferay.message.boards.kernel.service.MBThreadLocalServiceUtil;
+import com.liferay.message.boards.kernel.service.persistence.MBThreadPersistence;
+import com.liferay.message.boards.kernel.service.persistence.MBThreadUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -31,19 +37,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
-
-import com.liferay.portlet.messageboards.NoSuchThreadException;
-import com.liferay.portlet.messageboards.model.MBThread;
-import com.liferay.portlet.messageboards.service.MBThreadLocalServiceUtil;
-import com.liferay.portlet.messageboards.service.persistence.MBThreadPersistence;
-import com.liferay.portlet.messageboards.service.persistence.MBThreadUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -54,14 +54,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class MBThreadPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -150,6 +152,8 @@ public class MBThreadPersistenceTest {
 
 		newMBThread.setQuestion(RandomTestUtil.randomBoolean());
 
+		newMBThread.setLastPublishDate(RandomTestUtil.nextDate());
+
 		newMBThread.setStatus(RandomTestUtil.nextInt());
 
 		newMBThread.setStatusByUserId(RandomTestUtil.nextLong());
@@ -198,6 +202,9 @@ public class MBThreadPersistenceTest {
 			newMBThread.getPriority());
 		Assert.assertEquals(existingMBThread.getQuestion(),
 			newMBThread.getQuestion());
+		Assert.assertEquals(Time.getShortTimestamp(
+				existingMBThread.getLastPublishDate()),
+			Time.getShortTimestamp(newMBThread.getLastPublishDate()));
 		Assert.assertEquals(existingMBThread.getStatus(),
 			newMBThread.getStatus());
 		Assert.assertEquals(existingMBThread.getStatusByUserId(),
@@ -385,8 +392,8 @@ public class MBThreadPersistenceTest {
 			"categoryId", true, "rootMessageId", true, "rootMessageUserId",
 			true, "messageCount", true, "viewCount", true, "lastPostByUserId",
 			true, "lastPostDate", true, "priority", true, "question", true,
-			"status", true, "statusByUserId", true, "statusByUserName", true,
-			"statusDate", true);
+			"lastPublishDate", true, "status", true, "statusByUserId", true,
+			"statusByUserName", true, "statusDate", true);
 	}
 
 	@Test
@@ -495,11 +502,9 @@ public class MBThreadPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = MBThreadLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<MBThread>() {
 				@Override
-				public void performAction(Object object) {
-					MBThread mbThread = (MBThread)object;
-
+				public void performAction(MBThread mbThread) {
 					Assert.assertNotNull(mbThread);
 
 					count.increment();
@@ -591,15 +596,15 @@ public class MBThreadPersistenceTest {
 
 		MBThread existingMBThread = _persistence.findByPrimaryKey(newMBThread.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingMBThread.getUuid(),
+		Assert.assertTrue(Objects.equals(existingMBThread.getUuid(),
 				ReflectionTestUtil.invoke(existingMBThread, "getOriginalUuid",
 					new Class<?>[0])));
-		Assert.assertEquals(existingMBThread.getGroupId(),
-			ReflectionTestUtil.invoke(existingMBThread, "getOriginalGroupId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingMBThread.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingMBThread,
+				"getOriginalGroupId", new Class<?>[0]));
 
-		Assert.assertEquals(existingMBThread.getRootMessageId(),
-			ReflectionTestUtil.invoke(existingMBThread,
+		Assert.assertEquals(Long.valueOf(existingMBThread.getRootMessageId()),
+			ReflectionTestUtil.<Long>invoke(existingMBThread,
 				"getOriginalRootMessageId", new Class<?>[0]));
 	}
 
@@ -639,6 +644,8 @@ public class MBThreadPersistenceTest {
 		mbThread.setPriority(RandomTestUtil.nextDouble());
 
 		mbThread.setQuestion(RandomTestUtil.randomBoolean());
+
+		mbThread.setLastPublishDate(RandomTestUtil.nextDate());
 
 		mbThread.setStatus(RandomTestUtil.nextInt());
 

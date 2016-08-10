@@ -15,7 +15,17 @@
 </tr>
 <tr>
 	<td>PANEL_TOGGLE</td>
-	<td>//div[contains(@class,'panel-toggle') and contains(.,'Categorization')]</td>
+	<td>//div[contains(@class,'panel-default') and contains(.,'Categorization')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORIZATION_PANEL_COLLAPSED</td>
+	<td>//div[contains(@id,'categorizationTitle')]/a[contains(@aria-expanded,'false') and contains(.,'Categorization')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORIZATION_PANEL_EXPANDED</td>
+	<td>//div[contains(@id,'categorizationTitle')]/a[contains(@aria-expanded,'true') and contains(.,'Categorization')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -26,6 +36,11 @@
 <tr>
 	<td>CATEGORY_SELECT</td>
 	<td>//button[contains(@title,'Select') and contains(@title,'${key_vocabularyName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_SELECT_CHILD_SITE</td>
+	<td>//label[text()=' ${key_vocabularyName} ']/following-sibling::div//button[contains(@title,'Select')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -41,6 +56,11 @@
 <tr>
 	<td>VOCABULARY</td>
 	<td>//span[@class='field-content']/label</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VOCABULARY_LIST_ITEM</td>
+	<td>//span[@class='field-content'][${key_count}]/label</td>
 	<td></td>
 </tr>
 <tr>
@@ -74,13 +94,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CATEGORIES_CATEGORY_CHECKBOX_CHECKED</td>
+	<td>//li[contains(@id,'category') and contains(.,'${key_categoryName}')]/div[contains(@class,'checked')]//span[contains(@class,'tree-node-checkbox')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>CATEGORIES_CLOSE_BUTTON</td>
 	<td>//button[contains(@class,'btn-default close')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>TAG</td>
-	<td>//div[contains(@class,'lfr-tags-selector-content')]//span[contains(.,'${key_tagName}')]</td>
+	<td>//div[contains(@class,'lfr-tags-selector-content')]//span[contains(@class,'textboxlistentry-text') and contains(.,'${key_tagName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -99,8 +124,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>TAG_AUTOCOMPLETE_CONTAINER</td>
+	<td>//div[contains(@class,'autocomplete-results ') and not(contains(@class,'hidden'))]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>TAG_AUTOCOMPLETE</td>
-	<td>//div[contains(@class,'autocomplete-results-content')]//li[contains(.,'${key_tagName}')]</td>
+	<td>//div[contains(@class,'autocomplete-results-content')]//li[.='${key_tagName}']</td>
 	<td></td>
 </tr>
 <tr>

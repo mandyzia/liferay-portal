@@ -20,6 +20,9 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.mobile.device.Device;
 import com.liferay.portal.kernel.mobile.device.UnknownDevice;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.template.StringTemplateResource;
 import com.liferay.portal.kernel.template.Template;
 import com.liferay.portal.kernel.template.TemplateConstants;
@@ -28,6 +31,7 @@ import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.URLTemplateResource;
 import com.liferay.portal.kernel.templateparser.TransformException;
 import com.liferay.portal.kernel.templateparser.TransformerListener;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.InstanceFactory;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
@@ -36,10 +40,6 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Company;
-import com.liferay.portal.security.permission.PermissionThreadLocal;
-import com.liferay.portal.service.CompanyLocalServiceUtil;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PropsUtil;
 
 import java.net.URL;
@@ -109,16 +109,10 @@ public class Transformer {
 		try {
 			prepareTemplate(themeDisplay, template);
 
-			long classNameId = 0;
+			template.putAll(contextObjects);
 
-			if (contextObjects != null) {
-				for (String key : contextObjects.keySet()) {
-					template.put(key, contextObjects.get(key));
-				}
-
-				classNameId = GetterUtil.getLong(
-					contextObjects.get(TemplateConstants.CLASS_NAME_ID));
-			}
+			long classNameId = GetterUtil.getLong(
+				contextObjects.get(TemplateConstants.CLASS_NAME_ID));
 
 			template.put("company", getCompany(themeDisplay, companyId));
 			template.put("companyId", companyId);
@@ -181,7 +175,7 @@ public class Transformer {
 
 			ClassLoader classLoader = clazz.getClassLoader();
 
-			String errorTemplateId = _errorTemplateIds.get(langType);
+			String errorTemplateId = errorTemplateIds.get(langType);
 
 			URL url = classLoader.getResource(errorTemplateId);
 
@@ -275,7 +269,7 @@ public class Transformer {
 				errorTemplatePropertyKey, langType);
 
 			if (Validator.isNotNull(errorTemplateId)) {
-				_errorTemplateIds.put(langType, errorTemplateId);
+				errorTemplateIds.put(langType, errorTemplateId);
 			}
 		}
 	}
@@ -300,7 +294,7 @@ public class Transformer {
 					(TransformerListener)InstanceFactory.newInstance(
 						classLoader, transformerListenerClassName);
 
-				_transformerListeners.add(transformerListener);
+				transformerListeners.add(transformerListener);
 			}
 			catch (Exception e) {
 				_log.error(e, e);
@@ -308,8 +302,8 @@ public class Transformer {
 		}
 	}
 
-	protected final Map<String, String> _errorTemplateIds = new HashMap<>();
-	protected final Set<TransformerListener> _transformerListeners =
+	protected final Map<String, String> errorTemplateIds = new HashMap<>();
+	protected final Set<TransformerListener> transformerListeners =
 		new HashSet<>();
 
 	private static final Log _log = LogFactoryUtil.getLog(Transformer.class);

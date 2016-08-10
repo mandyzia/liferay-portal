@@ -14,33 +14,34 @@
 
 package com.liferay.portal.action;
 
-import com.liferay.portal.LayoutTypeException;
 import com.liferay.portal.events.EventsProcessorUtil;
+import com.liferay.portal.kernel.exception.LayoutTypeException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutPrototype;
+import com.liferay.portal.kernel.model.LayoutType;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.LayoutPrototypeServiceUtil;
+import com.liferay.portal.kernel.service.LayoutServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
+import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.LayoutPrototype;
-import com.liferay.portal.model.LayoutType;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.LayoutPrototypeServiceUtil;
-import com.liferay.portal.service.LayoutServiceUtil;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.ServiceContextFactory;
-import com.liferay.portal.service.permission.GroupPermissionUtil;
-import com.liferay.portal.service.permission.LayoutPermissionUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.struts.JSONAction;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.sites.util.SitesUtil;
+import com.liferay.sites.kernel.util.SitesUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -80,11 +81,17 @@ public class EditLayoutAction extends JSONAction {
 			else if (cmd.equals("delete")) {
 				SitesUtil.deleteLayout(request, response);
 			}
+			else if (cmd.equals("display_order")) {
+				updateDisplayOrder(request);
+			}
 			else if (cmd.equals("name")) {
 				updateName(request);
 			}
 			else if (cmd.equals("parent_layout_id")) {
 				updateParentLayoutId(request);
+			}
+			else if (cmd.equals("priority")) {
+				updatePriority(request);
 			}
 
 			jsonObject.put("status", HttpServletResponse.SC_OK);
@@ -219,6 +226,15 @@ public class EditLayoutAction extends JSONAction {
 							"be-the-first-page");
 			}
 
+			if ((cmd.equals("display_order") || cmd.equals("priority")) &&
+				(lte.getType() == LayoutTypeException.FIRST_LAYOUT)) {
+
+				return themeDisplay.translate(
+					"you-cannot-move-this-page-because-the-resulting-order-" +
+						"would-place-a-page-of-type-x-as-the-first-page",
+					"layout.types." + lte.getLayoutType());
+			}
+
 			if (cmd.equals("parent_layout_id") &&
 				(lte.getType() == LayoutTypeException.FIRST_LAYOUT)) {
 
@@ -229,7 +245,7 @@ public class EditLayoutAction extends JSONAction {
 			}
 		}
 
-		if (lte.getType() == LayoutTypeException.FIRST_LAYOUT ) {
+		if (lte.getType() == LayoutTypeException.FIRST_LAYOUT) {
 			return themeDisplay.translate(
 				"the-first-page-cannot-be-of-type-x",
 				"layout.types." + lte.getLayoutType());
@@ -241,6 +257,22 @@ public class EditLayoutAction extends JSONAction {
 		}
 
 		return StringPool.BLANK;
+	}
+
+	protected void updateDisplayOrder(HttpServletRequest request)
+		throws Exception {
+
+		long groupId = ParamUtil.getLong(request, "groupId");
+		boolean privateLayout = ParamUtil.getBoolean(request, "privateLayout");
+		long parentLayoutId = ParamUtil.getLong(request, "parentLayoutId");
+		long[] layoutIds = StringUtil.split(
+			ParamUtil.getString(request, "layoutIds"), 0L);
+
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(
+			request);
+
+		LayoutServiceUtil.setLayouts(
+			groupId, privateLayout, parentLayoutId, layoutIds, serviceContext);
 	}
 
 	protected void updateName(HttpServletRequest request) throws Exception {
@@ -270,6 +302,26 @@ public class EditLayoutAction extends JSONAction {
 
 		LayoutServiceUtil.updateParentLayoutIdAndPriority(
 			plid, parentPlid, priority);
+	}
+
+	protected void updatePriority(HttpServletRequest request) throws Exception {
+		long plid = ParamUtil.getLong(request, "plid");
+
+		long groupId = ParamUtil.getLong(request, "groupId");
+		boolean privateLayout = ParamUtil.getBoolean(request, "privateLayout");
+		long layoutId = ParamUtil.getLong(request, "layoutId");
+		long nextLayoutId = ParamUtil.getLong(request, "nextLayoutId");
+		long previousLayoutId = ParamUtil.getLong(request, "previousLayoutId");
+		int priority = ParamUtil.getInteger(request, "priority");
+
+		if (plid <= 0) {
+			LayoutServiceUtil.updatePriority(
+				groupId, privateLayout, layoutId, nextLayoutId,
+				previousLayoutId);
+		}
+		else {
+			LayoutServiceUtil.updatePriority(plid, priority);
+		}
 	}
 
 }

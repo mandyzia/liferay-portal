@@ -14,13 +14,13 @@
 
 package com.liferay.portal.kernel.test.util;
 
-import com.liferay.counter.service.CounterLocalServiceUtil;
+import com.liferay.counter.kernel.service.CounterLocalServiceUtil;
+import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.test.randomizerbumpers.RandomizerBumper;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import java.util.Arrays;
@@ -55,10 +55,38 @@ public class RandomTestUtil {
 		return _random.nextBoolean();
 	}
 
-	public static byte[] randomBytes() {
-		String string = randomString();
+	@SafeVarargs
+	public static byte[] randomBytes(
+		int size, RandomizerBumper<byte[]>... randomizerBumpers) {
 
-		return string.getBytes();
+		byte[] bytes = new byte[size];
+
+		generation:
+		for (int i = 0; i < _RANDOMIZER_BUMPER_TRIES_MAX; i++) {
+			_random.nextBytes(bytes);
+
+			for (RandomizerBumper<byte[]> randomizerBumper :
+					randomizerBumpers) {
+
+				if (!randomizerBumper.accept(bytes)) {
+					continue generation;
+				}
+			}
+
+			return bytes;
+		}
+
+		throw new IllegalStateException(
+			"Unable to generate a random byte array that is acceptable by " +
+				"all randomizer bumpers " + Arrays.toString(randomizerBumpers) +
+					" after " + _RANDOMIZER_BUMPER_TRIES_MAX + " tries");
+	}
+
+	@SafeVarargs
+	public static byte[] randomBytes(
+		RandomizerBumper<byte[]>... randomizerBumpers) {
+
+		return randomBytes(8, randomizerBumpers);
 	}
 
 	public static double randomDouble() {
@@ -75,8 +103,11 @@ public class RandomTestUtil {
 		}
 	}
 
-	public static InputStream randomInputStream() {
-		return new ByteArrayInputStream(randomBytes());
+	@SafeVarargs
+	public static InputStream randomInputStream(
+		RandomizerBumper<byte[]>... randomizerBumpers) {
+
+		return new UnsyncByteArrayInputStream(randomBytes(randomizerBumpers));
 	}
 
 	public static int randomInt() {

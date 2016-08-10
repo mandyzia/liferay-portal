@@ -69,7 +69,7 @@ public class RequiredPluginsUtil {
 		_unschedule(true);
 	}
 
-	protected synchronized static void checkRequiredPlugins() {
+	protected static synchronized void checkRequiredPlugins() {
 		List<String[]> levelsRequiredDeploymentContexts =
 			DeployManagerUtil.getLevelsRequiredDeploymentContexts();
 		List<String[]> levelsRequiredDeploymentWARFileNames =
@@ -108,8 +108,8 @@ public class RequiredPluginsUtil {
 					PortalClassLoaderUtil.getClassLoader();
 
 				InputStream inputStream = classLoader.getResourceAsStream(
-					"com/liferay/portal/deploy/dependencies/plugins" +
-						(i + 1) + "/" + levelRequiredDeploymentWARFileNames[j]);
+					"com/liferay/portal/deploy/dependencies/plugins" + (i + 1) +
+						"/" + levelRequiredDeploymentWARFileNames[j]);
 
 				AutoDeployDir autoDeployDir = AutoDeployUtil.getDir(
 					AutoDeployDir.DEFAULT_NAME);

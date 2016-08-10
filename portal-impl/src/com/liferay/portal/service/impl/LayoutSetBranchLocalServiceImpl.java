@@ -14,33 +14,34 @@
 
 package com.liferay.portal.service.impl;
 
-import com.liferay.portal.LayoutSetBranchNameException;
-import com.liferay.portal.NoSuchLayoutSetBranchException;
-import com.liferay.portal.RequiredLayoutSetBranchException;
+import com.liferay.exportimport.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.LayoutSetBranchNameException;
+import com.liferay.portal.kernel.exception.NoSuchLayoutSetBranchException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.RequiredLayoutSetBranchException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.model.Image;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutBranch;
+import com.liferay.portal.kernel.model.LayoutBranchConstants;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutRevision;
+import com.liferay.portal.kernel.model.LayoutRevisionConstants;
+import com.liferay.portal.kernel.model.LayoutSet;
+import com.liferay.portal.kernel.model.LayoutSetBranch;
+import com.liferay.portal.kernel.model.LayoutSetBranchConstants;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.comparator.LayoutSetBranchCreateDateComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.Image;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutBranch;
-import com.liferay.portal.model.LayoutBranchConstants;
-import com.liferay.portal.model.LayoutConstants;
-import com.liferay.portal.model.LayoutRevision;
-import com.liferay.portal.model.LayoutRevisionConstants;
-import com.liferay.portal.model.LayoutSet;
-import com.liferay.portal.model.LayoutSetBranch;
-import com.liferay.portal.model.LayoutSetBranchConstants;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.base.LayoutSetBranchLocalServiceBaseImpl;
-import com.liferay.portal.util.comparator.LayoutSetBranchCreateDateComparator;
-import com.liferay.portlet.exportimport.staging.StagingUtil;
 
 import java.text.Format;
 
@@ -73,8 +74,6 @@ public class LayoutSetBranchLocalServiceImpl
 		long logoId = 0;
 		String themeId = null;
 		String colorSchemeId = null;
-		String wapThemeId = null;
-		String wapColorSchemeId = null;
 		String css = null;
 		String settings = null;
 
@@ -86,8 +85,6 @@ public class LayoutSetBranchLocalServiceImpl
 			logoId = copyLayoutSetBranch.getLogoId();
 			themeId = copyLayoutSetBranch.getThemeId();
 			colorSchemeId = copyLayoutSetBranch.getColorSchemeId();
-			wapThemeId = copyLayoutSetBranch.getWapThemeId();
-			wapColorSchemeId = copyLayoutSetBranch.getWapColorSchemeId();
 			css = copyLayoutSetBranch.getCss();
 			settings = copyLayoutSetBranch.getSettings();
 		}
@@ -99,8 +96,6 @@ public class LayoutSetBranchLocalServiceImpl
 			logoId = layoutSet.getLogoId();
 			themeId = layoutSet.getThemeId();
 			colorSchemeId = layoutSet.getColorSchemeId();
-			wapThemeId = layoutSet.getWapThemeId();
-			wapColorSchemeId = layoutSet.getWapColorSchemeId();
 			css = layoutSet.getCss();
 			settings = layoutSet.getSettings();
 		}
@@ -135,8 +130,6 @@ public class LayoutSetBranchLocalServiceImpl
 
 		layoutSetBranch.setThemeId(themeId);
 		layoutSetBranch.setColorSchemeId(colorSchemeId);
-		layoutSetBranch.setWapThemeId(wapThemeId);
-		layoutSetBranch.setWapColorSchemeId(wapColorSchemeId);
 		layoutSetBranch.setCss(css);
 		layoutSetBranch.setSettings(settings);
 
@@ -150,6 +143,8 @@ public class LayoutSetBranchLocalServiceImpl
 			layoutSetBranch.getLayoutSetBranchId(), false, true, false);
 
 		// Layout revisions
+
+		serviceContext.setAttribute("major", Boolean.TRUE.toString());
 
 		if (layoutSetBranch.isMaster() ||
 			(copyLayoutSetBranchId == LayoutSetBranchConstants.ALL_BRANCHES)) {
@@ -189,8 +184,6 @@ public class LayoutSetBranchLocalServiceImpl
 						lastLayoutRevision.getIconImageId(),
 						lastLayoutRevision.getThemeId(),
 						lastLayoutRevision.getColorSchemeId(),
-						lastLayoutRevision.getWapThemeId(),
-						lastLayoutRevision.getWapColorSchemeId(),
 						lastLayoutRevision.getCss(), serviceContext);
 				}
 				else {
@@ -205,8 +198,7 @@ public class LayoutSetBranchLocalServiceImpl
 						layout.getKeywords(), layout.getRobots(),
 						layout.getTypeSettings(), layout.isIconImage(),
 						layout.getIconImageId(), layout.getThemeId(),
-						layout.getColorSchemeId(), layout.getWapThemeId(),
-						layout.getWapColorSchemeId(), layout.getCss(),
+						layout.getColorSchemeId(), layout.getCss(),
 						serviceContext);
 				}
 			}
@@ -236,10 +228,8 @@ public class LayoutSetBranchLocalServiceImpl
 					layoutRevision.isIconImage(),
 					layoutRevision.getIconImageId(),
 					layoutRevision.getThemeId(),
-					layoutRevision.getColorSchemeId(),
-					layoutRevision.getWapThemeId(),
-					layoutRevision.getWapColorSchemeId(),
-					layoutRevision.getCss(), serviceContext);
+					layoutRevision.getColorSchemeId(), layoutRevision.getCss(),
+					serviceContext);
 			}
 		}
 
@@ -288,6 +278,11 @@ public class LayoutSetBranchLocalServiceImpl
 		// Layout revisions
 
 		layoutRevisionLocalService.deleteLayoutSetBranchLayoutRevisions(
+			layoutSetBranch.getLayoutSetBranchId());
+
+		// Recent layout sets
+
+		recentLayoutSetBranchLocalService.deleteRecentLayoutSetBranches(
 			layoutSetBranch.getLayoutSetBranchId());
 
 		return layoutSetBranch;
@@ -356,21 +351,6 @@ public class LayoutSetBranchLocalServiceImpl
 
 		return layoutSetBranchPersistence.findByG_P_M_First(
 			groupId, privateLayout, true, null);
-	}
-
-	/**
-	 * @deprecated As of 6.2.0, replaced by {@link #getUserLayoutSetBranch(long,
-	 *             long, boolean, long, long)}
-	 */
-	@Deprecated
-	@Override
-	public LayoutSetBranch getUserLayoutSetBranch(
-			long userId, long groupId, boolean privateLayout,
-			long layoutSetBranchId)
-		throws PortalException {
-
-		return getUserLayoutSetBranch(
-			userId, groupId, privateLayout, 0, layoutSetBranchId);
 	}
 
 	@Override
@@ -463,9 +443,7 @@ public class LayoutSetBranchLocalServiceImpl
 				layoutRevision.getKeywords(), layoutRevision.getRobots(),
 				layoutRevision.getTypeSettings(), layoutRevision.getIconImage(),
 				layoutRevision.getIconImageId(), layoutRevision.getThemeId(),
-				layoutRevision.getColorSchemeId(),
-				layoutRevision.getWapThemeId(),
-				layoutRevision.getWapColorSchemeId(), layoutRevision.getCss(),
+				layoutRevision.getColorSchemeId(), layoutRevision.getCss(),
 				serviceContext);
 		}
 
@@ -505,15 +483,11 @@ public class LayoutSetBranchLocalServiceImpl
 			return mergeBranchName;
 		}
 
-		StringBundler sb = new StringBundler(5);
+		String defaultLayoutBranchName = StringUtil.appendParentheticalSuffix(
+			LanguageUtil.get(locale, mergeBranchName),
+			LanguageUtil.get(locale, mergeLayoutSetBranchName));
 
-		sb.append(LanguageUtil.get(locale, mergeBranchName));
-		sb.append(StringPool.SPACE);
-		sb.append(StringPool.OPEN_PARENTHESIS);
-		sb.append(LanguageUtil.get(locale, mergeLayoutSetBranchName));
-		sb.append(StringPool.CLOSE_PARENTHESIS);
-
-		String layoutBranchName = sb.toString();
+		String layoutBranchName = defaultLayoutBranchName;
 
 		for (int i = 1;; i++) {
 			layoutBranch = layoutBranchPersistence.fetchByL_P_N(
@@ -523,7 +497,7 @@ public class LayoutSetBranchLocalServiceImpl
 				break;
 			}
 
-			layoutBranchName = sb.toString() + StringPool.SPACE + i;
+			layoutBranchName = defaultLayoutBranchName + StringPool.SPACE + i;
 		}
 
 		return layoutBranchName;

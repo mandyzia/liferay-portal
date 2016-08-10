@@ -1,40 +1,59 @@
 <definition component-name="portal-business-productivity-ee">
+	<property name="portal.release" value="true" />
 	<property name="portlet.plugins.includes" value="reports-portlet" />
 	<property name="testray.main.component.name" value="Reports" />
 	<property name="web.plugins.includes" value="jasperreports-web" />
 
 	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+
 		<execute macro="User#firstLoginPG" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="ReportsAdmin#tearDownReports" />
-		<execute macro="ReportsAdmin#tearDownDefinitions" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="ServerAdministration#tearDownMailServerSettings" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="ReportsAdmin#tearDownReports" />
+				<execute macro="ReportsAdmin#tearDownDefinitions" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="ServerAdministration#tearDownMailServerSettings" />
+
+				<execute macro="Page#tearDownPG" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="AddDefinitionNoTemplate" priority="4">
 		<description message="This is a use case for LPS-51226." />
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Reports Admin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Reports Admin" />
 		</execute>
 
 		<execute macro="ReportsAdmin#gotoDefinitions" />
 
-		<execute function="AssertClick" locator1="CPReportsadmin#DEFINITIONS_ADD_REPORT_DEFINITION_BUTTON" value1="Add Report Definition" />
-		<execute function="Type" locator1="CPReportsadminAddreportdefinition#DEFINITION_NAME_FIELD" value1="Reports Definition Name" />
-		<execute function="AssertClick" locator1="CPReportsadminAddreportdefinition#SAVE_BUTTON" value1="Save" />
-		<execute function="AssertTextEquals" locator1="CPReportsadminAddreportdefinition#ERROR_MESSAGE_1" value1="Your request failed to complete." />
-		<execute function="AssertTextEquals" locator1="CPReportsadminAddreportdefinition#ERROR_MESSAGE_2" value1="Please enter a valid file." />
+		<execute function="AssertClick" locator1="ReportsAdmin#DEFINITIONS_ADD_REPORT_DEFINITION_BUTTON" value1="Add Report Definition" />
+		<execute function="Type" locator1="TextInput#NAME" value1="Reports Definition Name" />
+		<execute macro="Button#clickSave" />
+
+		<execute macro="Alert#viewRequestFailedToComplete" />
+
+		<execute function="AssertTextEquals" locator1="Message#ERROR_2" value1="Please enter a valid file." />
 	</command>
 
 	<command name="DownloadReportPG" priority="4">
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Reports Admin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Reports Admin" />
 		</execute>
 
 		<execute macro="ReportsAdmin#gotoDefinitions" />
@@ -53,7 +72,7 @@
 			<var name="reportsDefinitionName" value="Reports Definition Name" />
 		</execute>
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="Reports Page" />
 		</execute>
 
@@ -74,8 +93,10 @@
 	<command name="ViewDefinitionsPagination" priority="4">
 		<description message="This is a use case for LPS-50501." />
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Reports Admin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Reports Admin" />
 		</execute>
 
 		<for list="1,2,3,4,5,6" param="number">
@@ -91,36 +112,36 @@
 
 		<execute macro="ReportsAdmin#gotoDefinitions" />
 
-		<execute function="AssertTextEquals" locator1="CPReportsadmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_BUTTON" value1="20 Items per Page" />
-		<execute function="Click" locator1="CPReportsadmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_BUTTON" />
+		<execute function="AssertTextEquals" locator1="ReportsAdmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_BUTTON" value1="20 Items per Page" />
+		<execute function="Click" locator1="ReportsAdmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_BUTTON" />
 
 		<var name="key_itemsPerPage" value="5" />
 
-		<execute function="Click" locator1="CPReportsadmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_MENU_ITEM" />
-		<execute function="AssertTextEquals" locator1="CPReportsadmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_BUTTON" value1="5 Items per Page" />
-		<execute function="AssertTextEquals" locator1="CPReportsadmin#DEFINITIONS_PAGINATION_PAGE_NUMBER_DROPDOWN_BUTTON" value1="Page 1 of 2" />
+		<execute function="Click" locator1="ReportsAdmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_MENU_ITEM" />
+		<execute function="AssertTextEquals" locator1="ReportsAdmin#DEFINITIONS_PAGINATION_ITEMS_PER_PAGE_DROPDOWN_BUTTON" value1="5 Items per Page" />
+		<execute function="AssertTextEquals" locator1="ReportsAdmin#DEFINITIONS_PAGINATION_PAGE_NUMBER_DROPDOWN_BUTTON" value1="Page 1 of 2" />
 
 		<var name="key_reportsDefinitionName" value="Reports Definition 6" />
 
-		<execute function="AssertElementNotPresent" locator1="CPReportsadmin#DEFINITIONS_DEFINITION_TABLE_DEFINITION_NAME" />
-		<execute function="AssertClick" locator1="CPReportsadmin#DEFINITIONS_PAGINATION_NEXT_BUTTON" value1="Next" />
-		<execute function="AssertTextEquals" locator1="CPReportsadmin#DEFINITIONS_DEFINITION_TABLE_DEFINITION_NAME" value1="Reports Definition 6" />
-		<execute function="AssertClick" locator1="CPReportsadmin#DEFINITIONS_PAGINATION_PREVIOUS_BUTTON" value1="Previous" />
-		<execute function="AssertElementNotPresent" locator1="CPReportsadmin#DEFINITIONS_DEFINITION_TABLE_DEFINITION_NAME" />
+		<execute function="AssertElementNotPresent" locator1="ReportsAdmin#DEFINITIONS_DEFINITION_TABLE_DEFINITION_NAME" />
+		<execute function="AssertClick" locator1="Pagination#NEXT_LINK" value1="Next" />
+		<execute function="AssertTextEquals" locator1="ReportsAdmin#DEFINITIONS_DEFINITION_TABLE_DEFINITION_NAME" value1="Reports Definition 6" />
+		<execute function="AssertClick" locator1="Pagination#PREVIOUS_LINK" value1="Previous" />
+		<execute function="AssertElementNotPresent" locator1="ReportsAdmin#DEFINITIONS_DEFINITION_TABLE_DEFINITION_NAME" />
 	</command>
 
-	<command known-issues="LRQA-13709" name="ViewReportEmailNewConfiguration" priority="4">
+	<command name="ViewReportEmailNewConfiguration" priority="4">
 		<description message="This is a use case for LPS-51009." />
 
-		<var name="emailAddress1" property-value="email.address.1" />
-		<var name="emailAddress2" property-value="email.address.2" />
-		<var name="emailAddress4" property-value="email.address.4" />
-		<var name="emailPassword1" property-value="email.password.1" />
-		<var name="emailPassword2" property-value="email.password.2" />
-		<var name="emailPassword4" property-value="email.password.4" />
+		<var method="TestPropsUtil#get('email.address.1')" name="emailAddress1" />
+		<var method="TestPropsUtil#get('email.address.2')" name="emailAddress2" />
+		<var method="TestPropsUtil#get('email.address.4')" name="emailAddress4" />
+		<var method="TestPropsUtil#get('email.password.1')" name="emailPassword1" />
+		<var method="TestPropsUtil#get('email.password.2')" name="emailPassword2" />
+		<var method="TestPropsUtil#get('email.password.4')" name="emailPassword4" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Server Administration" />
+		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+			<var name="portlet" value="Server Administration" />
 		</execute>
 
 		<execute macro="ServerAdministration#configureMailServerSettings">
@@ -128,8 +149,10 @@
 			<var name="userPassword" value="${emailPassword1}" />
 		</execute>
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Reports Admin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Reports Admin" />
 		</execute>
 
 		<execute macro="ReportsAdmin#gotoConfiguration" />
@@ -163,8 +186,10 @@ Thanks,<br/>
 [$FROM_ADDRESS$]			<br/>]]>			</var>
 		</execute>
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Reports Admin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Reports Admin" />
 		</execute>
 
 		<execute macro="ReportsAdmin#gotoDefinitions" />
@@ -232,16 +257,20 @@ Thanks,<br/>
 
 		<execute function="Open" locator1="http://localhost:8080" />
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Reports Admin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Reports Admin" />
 		</execute>
 
 		<execute macro="ReportsAdmin#tearDownConfiguration" />
 	</command>
 
 	<command name="ViewReportPG" priority="4">
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Reports Admin" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Reports Admin" />
 		</execute>
 
 		<execute macro="ReportsAdmin#gotoDefinitions" />
@@ -260,7 +289,7 @@ Thanks,<br/>
 			<var name="reportsDefinitionName" value="Reports Definition Name" />
 		</execute>
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="Reports Page" />
 		</execute>
 

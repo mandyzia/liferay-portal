@@ -16,27 +16,29 @@ package com.liferay.portal.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.Website;
+import com.liferay.portal.kernel.model.WebsiteModel;
+import com.liferay.portal.kernel.model.WebsiteSoap;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.Website;
-import com.liferay.portal.model.WebsiteModel;
-import com.liferay.portal.model.WebsiteSoap;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
-
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
 
 import java.io.Serializable;
 
@@ -84,7 +86,8 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 			{ "classPK", Types.BIGINT },
 			{ "url", Types.VARCHAR },
 			{ "typeId", Types.BIGINT },
-			{ "primary_", Types.BOOLEAN }
+			{ "primary_", Types.BOOLEAN },
+			{ "lastPublishDate", Types.TIMESTAMP }
 		};
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
 
@@ -102,9 +105,10 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 		TABLE_COLUMNS_MAP.put("url", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("typeId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("primary_", Types.BOOLEAN);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table Website (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,websiteId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,url STRING null,typeId LONG,primary_ BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table Website (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,websiteId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,url STRING null,typeId LONG,primary_ BOOLEAN,lastPublishDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table Website";
 	public static final String ORDER_BY_JPQL = " ORDER BY website.createDate ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Website.createDate ASC";
@@ -112,13 +116,13 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portal.model.Website"),
+				"value.object.entity.cache.enabled.com.liferay.portal.kernel.model.Website"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portal.model.Website"),
+				"value.object.finder.cache.enabled.com.liferay.portal.kernel.model.Website"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portal.model.Website"),
+				"value.object.column.bitmask.enabled.com.liferay.portal.kernel.model.Website"),
 			true);
 	public static final long CLASSNAMEID_COLUMN_BITMASK = 1L;
 	public static final long CLASSPK_COLUMN_BITMASK = 2L;
@@ -154,6 +158,7 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 		model.setUrl(soapModel.getUrl());
 		model.setTypeId(soapModel.getTypeId());
 		model.setPrimary(soapModel.getPrimary());
+		model.setLastPublishDate(soapModel.getLastPublishDate());
 
 		return model;
 	}
@@ -179,7 +184,7 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portal.model.Website"));
+				"lock.expiration.time.com.liferay.portal.kernel.model.Website"));
 
 	public WebsiteModelImpl() {
 	}
@@ -231,6 +236,7 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 		attributes.put("url", getUrl());
 		attributes.put("typeId", getTypeId());
 		attributes.put("primary", getPrimary());
+		attributes.put("lastPublishDate", getLastPublishDate());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -316,6 +322,12 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 
 		if (primary != null) {
 			setPrimary(primary);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 	}
 
@@ -572,6 +584,7 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 		return _primary;
 	}
 
+	@JSON
 	@Override
 	public boolean isPrimary() {
 		return _primary;
@@ -592,6 +605,17 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 
 	public boolean getOriginalPrimary() {
 		return _originalPrimary;
+	}
+
+	@JSON
+	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
 	}
 
 	@Override
@@ -644,6 +668,7 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 		websiteImpl.setUrl(getUrl());
 		websiteImpl.setTypeId(getTypeId());
 		websiteImpl.setPrimary(getPrimary());
+		websiteImpl.setLastPublishDate(getLastPublishDate());
 
 		websiteImpl.resetOriginalValues();
 
@@ -793,12 +818,21 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 
 		websiteCacheModel.primary = getPrimary();
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			websiteCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			websiteCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		return websiteCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(27);
+		StringBundler sb = new StringBundler(29);
 
 		sb.append("{mvccVersion=");
 		sb.append(getMvccVersion());
@@ -826,6 +860,8 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 		sb.append(getTypeId());
 		sb.append(", primary=");
 		sb.append(getPrimary());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append("}");
 
 		return sb.toString();
@@ -833,10 +869,10 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(43);
+		StringBundler sb = new StringBundler(46);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portal.model.Website");
+		sb.append("com.liferay.portal.kernel.model.Website");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -891,6 +927,10 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 			"<column><column-name>primary</column-name><column-value><![CDATA[");
 		sb.append(getPrimary());
 		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
 
@@ -926,6 +966,7 @@ public class WebsiteModelImpl extends BaseModelImpl<Website>
 	private boolean _primary;
 	private boolean _originalPrimary;
 	private boolean _setOriginalPrimary;
+	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private Website _escapedModel;
 }

@@ -14,9 +14,9 @@
 
 package com.liferay.portal.util;
 
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutTypeAccessPolicy;
-import com.liferay.portal.model.impl.DefaultLayoutTypeAccessPolicyImpl;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutTypeAccessPolicy;
+import com.liferay.portal.kernel.model.impl.DefaultLayoutTypeAccessPolicyImpl;
 import com.liferay.registry.ServiceReference;
 import com.liferay.registry.collections.ServiceReferenceMapper;
 import com.liferay.registry.collections.ServiceTrackerCollections;
@@ -39,10 +39,6 @@ public class LayoutTypeAccessPolicyTracker {
 		return _instance._getLayoutTypeAccessPolicy(type);
 	}
 
-	private LayoutTypeAccessPolicyTracker() {
-		_serviceTrackerMap.open();
-	}
-
 	private LayoutTypeAccessPolicy _getLayoutTypeAccessPolicy(String type) {
 		LayoutTypeAccessPolicy layoutTypeAccessPolicy =
 			_serviceTrackerMap.getService(type);
@@ -58,7 +54,7 @@ public class LayoutTypeAccessPolicyTracker {
 		new LayoutTypeAccessPolicyTracker();
 
 	private final ServiceTrackerMap<String, LayoutTypeAccessPolicy>
-		_serviceTrackerMap = ServiceTrackerCollections.singleValueMap(
+		_serviceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			LayoutTypeAccessPolicy.class,
 			"(&(layout.type=*)(objectClass=" +
 				LayoutTypeAccessPolicy.class.getName() + "))",

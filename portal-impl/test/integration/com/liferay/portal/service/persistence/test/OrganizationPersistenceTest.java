@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchOrganizationException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchOrganizationException;
+import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.OrganizationPersistence;
+import com.liferay.portal.kernel.service.persistence.OrganizationUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -31,17 +35,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
-import com.liferay.portal.service.persistence.OrganizationPersistence;
-import com.liferay.portal.service.persistence.OrganizationUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -52,14 +52,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class OrganizationPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -398,11 +400,9 @@ public class OrganizationPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = OrganizationLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<Organization>() {
 				@Override
-				public void performAction(Object object) {
-					Organization organization = (Organization)object;
-
+				public void performAction(Organization organization) {
 					Assert.assertNotNull(organization);
 
 					count.increment();
@@ -496,10 +496,10 @@ public class OrganizationPersistenceTest {
 
 		Organization existingOrganization = _persistence.findByPrimaryKey(newOrganization.getPrimaryKey());
 
-		Assert.assertEquals(existingOrganization.getCompanyId(),
-			ReflectionTestUtil.invoke(existingOrganization,
+		Assert.assertEquals(Long.valueOf(existingOrganization.getCompanyId()),
+			ReflectionTestUtil.<Long>invoke(existingOrganization,
 				"getOriginalCompanyId", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingOrganization.getName(),
+		Assert.assertTrue(Objects.equals(existingOrganization.getName(),
 				ReflectionTestUtil.invoke(existingOrganization,
 					"getOriginalName", new Class<?>[0])));
 	}

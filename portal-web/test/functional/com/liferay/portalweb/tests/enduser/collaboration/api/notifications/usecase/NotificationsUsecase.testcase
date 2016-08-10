@@ -1,26 +1,37 @@
 <definition component-name="portal-collaboration">
-	<property name="portlet.plugins.includes" value="notifications-portlet" />
+	<property name="portal.release" value="true" />
+	<property name="custom.properties" value="default.layout.template.id=1_column" />
 	<property name="testray.main.component.name" value="Notifications" />
 
 	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+
 		<execute macro="User#firstLoginPG" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="Site#tearDownCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="BlogsEntry#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="Site#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="BlogsEntry#tearDownCP" />
 
-		<execute macro="User#tearDownCP" />
+				<execute macro="Page#tearDownPG" />
+
+				<execute macro="User#tearDownCP" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="MarkNotificationAsReadAndAcceptRequest" priority="4">
-		<property name="portlet.plugins.includes" value="contacts-portlet,microblogs-portlet,notifications-portlet,private-messaging-portlet,so-portlet" />
-
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#addCP">
@@ -30,8 +41,8 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#editPasswordCP">
@@ -40,8 +51,8 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#assignRegularRoleCP">
@@ -49,11 +60,11 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="Blogs Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Blogs Page" />
 		</execute>
 
@@ -61,12 +72,12 @@
 			<var name="portletName" value="Blogs" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Blogs Page" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Sites" />
+		<execute macro="ProductMenu#gotoControlPanelSites">
+			<var name="portlet" value="Sites" />
 		</execute>
 
 		<execute macro="Site#addCP">
@@ -74,52 +85,40 @@
 			<var name="siteType" value="Community" />
 		</execute>
 
-		<execute macro="Page#gotoPagesCP">
-			<var name="portletName" value="Site Pages" />
-			<var name="siteScopeName" value="Community Site Name" />
-		</execute>
-
-		<execute macro="SitePage#addCP">
+		<execute macro="Navigator#gotoSitePage">
+			<var name="pageName" value="Home" />
 			<var name="siteName" value="Community Site Name" />
-			<var name="sitePageName" value="Blank Page" />
-			<var name="sitePagePrivacy" value="Public" />
-			<var name="siteScopeSelected" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPagesCP">
-			<var name="portletName" value="Site Pages" />
-			<var name="siteScopeName" value="Community Site Name" />
-			<var name="siteURL" value="true" />
+		<execute macro="Page#add">
+			<var name="pageName" value="Blank Page" />
 		</execute>
 
-		<execute macro="SitePage#addCP">
-			<var name="sitePageName" value="Invite Members Page" />
-			<var name="sitePagePrivacy" value="Public" />
-			<var name="siteScopeSelected" value="true" />
+		<execute macro="Navigator#gotoSitePage">
+			<var name="pageName" value="Home" />
+			<var name="siteName" value="Community Site Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Page#add">
+			<var name="pageName" value="Invite Members Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Invite Members Page" />
 			<var name="siteName" value="Community Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="Invite Members" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Invite Members Page" />
 			<var name="siteName" value="Community Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute macro="SOMembersPortlet#inviteMember">
-			<var name="userEmailAddress" value="userea@liferay.com" />
-			<var name="userFirstName" value="userfn" />
-			<var name="userLastName" value="userln" />
-			<var name="userMiddleName" value="" />
-			<var name="userName" value="userfn userln" />
+		<execute macro="InviteMembers#inviteMembers">
+			<var name="inviteUserFullName" value="userfn userln" />
 		</execute>
 
 		<execute macro="User#logoutPG" />
@@ -129,7 +128,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Blogs Page" />
 		</execute>
 
@@ -142,11 +141,11 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Blogs Page" />
 		</execute>
 
-		<execute macro="BlogsEntry#addPG">
+		<execute macro="Blogs#addEntry">
 			<var name="entryContent" value="Blogs Entry Content" />
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
@@ -158,11 +157,11 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCountAlert">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="2" />
 		</execute>
 
-		<execute macro="Notifications#gotoDockbar" />
+		<execute macro="Notifications#gotoNotifications" />
 
 		<execute macro="Notifications#viewNewContent">
 			<var name="assetType" value="Blogs Entry" />
@@ -171,32 +170,18 @@
 		</execute>
 
 		<execute macro="Notifications#viewRequest">
-			<var name="requestsContent" value="Test Test invited you to join Community Site Name." />
-		</execute>
-
-		<execute macro="Notifications#markAllAsRead" />
-
-		<execute macro="Notifications#viewRequestCount" >
-			<var name="requestsLink" value="Requests (1)" />
-		</execute>
-
-		<execute macro="Notifications#viewRequest">
-			<var name="requestsContent" value="Test Test invited you to join Community Site Name." />
+			<var name="requestsTitle" value="Test Test invited you to join Community Site Name." />
 		</execute>
 
 		<execute macro="Notifications#acceptRequest" >
-			<var name="requestsContent" value="Test Test invited you to join Community Site Name." />
+			<var name="requestsTitle" value="Test Test invited you to join Community Site Name." />
 		</execute>
 
-		<execute macro="Notifications#viewRequestCount" >
-			<var name="requestsLink" value="Requests (0)" />
-		</execute>
+		<execute function="Refresh" />
 
 		<execute macro="Notifications#viewNoRequest" />
 
-		<execute macro="Notifications#viewCount" >
-			<var name="notificationCount" value="0" />
-		</execute>
+		<execute macro="Notifications#viewNoNotifications" />
 
 		<execute macro="User#logoutPG" />
 
@@ -206,12 +191,14 @@
 		</execute>
 	</command>
 
-	<command name="ViewDefaultNotificationsPortletDeliveryOptions" priority="4">
-		<execute macro="Notifications#gotoDockbar" />
-
-		<execute macro="Notifications#navigateToViewAllNotifications" />
+	<command name="ViewDefaultNotificationsPortletDeliveryOptions" priority="3">
+		<execute macro="Page#gotoMyAccount">
+			<var name="portletName" value="Notifications" />
+		</execute>
 
 		<execute macro="NotificationsPortlet#gotoNotificationDelivery" />
+
+		<execute macro="IFrame#selectConfigurationFrame" />
 
 		<execute macro="NotificationsPortlet#viewDefaultNotificationDeliveries" />
 	</command>

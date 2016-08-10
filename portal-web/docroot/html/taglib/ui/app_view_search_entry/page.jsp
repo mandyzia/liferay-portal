@@ -21,9 +21,10 @@ String actionJsp = (String)request.getAttribute("liferay-ui:app-view-search-entr
 ServletContext actionJspServletContext = (ServletContext)request.getAttribute("liferay-ui:app-view-entry:actionJspServletContext");
 List<RelatedSearchResult<Comment>> commentRelatedSearchResults = (List<RelatedSearchResult<Comment>>)request.getAttribute("liferay-ui:app-view-search-entry:commentRelatedSearchResults");
 String containerName = (String)request.getAttribute("liferay-ui:app-view-search-entry:containerName");
-String containerType = GetterUtil.getString(request.getAttribute("liferay-ui:app-view-search-entry:containerType"), LanguageUtil.get(request, "folder"));
+String containerType = GetterUtil.getString(request.getAttribute("liferay-ui:app-view-search-entry:containerType"), LanguageUtil.get(resourceBundle, "folder"));
 String cssClass = GetterUtil.getString((String)request.getAttribute("liferay-ui:app-view-search-entry:cssClass"));
 String description = (String)request.getAttribute("liferay-ui:app-view-search-entry:description");
+boolean escape = GetterUtil.getBoolean(request.getAttribute("liferay-ui:app-view-search-entry:escape"));
 List<RelatedSearchResult<FileEntry>> fileEntryRelatedSearchResults = (List<RelatedSearchResult<FileEntry>>)request.getAttribute("liferay-ui:app-view-search-entry:fileEntryRelatedSearchResults");
 boolean highlightEnabled = GetterUtil.getBoolean(request.getAttribute("liferay-ui:app-view-search-entry:highlightEnabled"));
 boolean locked = GetterUtil.getBoolean(request.getAttribute("liferay-ui:app-view-search-entry:locked"));
@@ -37,14 +38,21 @@ String title = (String)request.getAttribute("liferay-ui:app-view-search-entry:ti
 String url = (String)request.getAttribute("liferay-ui:app-view-search-entry:url");
 List<String> versions = (List<String>)request.getAttribute("liferay-ui:app-view-search-entry:versions");
 
+String linkTitle = title;
+
+if (Validator.isNotNull(description)) {
+	linkTitle += " - " + description;
+}
+
 Summary summary = new Summary(title, description);
 
+summary.setEscape(escape);
 summary.setHighlight(highlightEnabled);
 summary.setQueryTerms(queryTerms);
 %>
 
 <div class="app-view-entry app-view-search-entry-taglib entry-display-style <%= showCheckbox ? "selectable" : StringPool.BLANK %> <%= cssClass %>" data-title="<%= HtmlUtil.escapeAttribute(StringUtil.shorten(title, 60)) %>">
-	<a class="entry-link" href="<%= HtmlUtil.escapeAttribute(url) %>" title="<%= HtmlUtil.escapeAttribute(title + " - " + description) %>">
+	<a class="entry-link" href="<%= HtmlUtil.escapeAttribute(url) %>" title="<%= HtmlUtil.escapeAttribute(linkTitle) %>">
 		<c:if test="<%= Validator.isNotNull(thumbnailSrc) %>">
 			<div class="entry-thumbnail">
 				<img alt="" class="img-thumbnail" src="<%= HtmlUtil.escapeAttribute(thumbnailSrc) %>" />
@@ -72,9 +80,7 @@ summary.setQueryTerms(queryTerms);
 								<liferay-ui:message key="versions" />:
 							</dt>
 							<dd>
-
 								<%= StringUtil.merge(versions, StringPool.COMMA_AND_SPACE) %>
-
 							</dd>
 						</c:if>
 
@@ -83,9 +89,7 @@ summary.setQueryTerms(queryTerms);
 								<liferay-ui:message key="<%= containerType %>" />:
 							</dt>
 							<dd>
-
 								<%= HtmlUtil.escape(containerName) %>
-
 							</dd>
 						</c:if>
 					</dl>
@@ -104,9 +108,9 @@ summary.setQueryTerms(queryTerms);
 		for (RelatedSearchResult<FileEntry> fileEntryRelatedSearchResult : fileEntryRelatedSearchResults) {
 			FileEntry fileEntry = fileEntryRelatedSearchResult.getModel();
 
-			AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(DLFileEntry.class.getName());
+			AssetRendererFactory<?> assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(DLFileEntry.class.getName());
 
-			AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(fileEntry.getFileEntryId());
+			AssetRenderer<?> assetRenderer = assetRendererFactory.getAssetRenderer(fileEntry.getFileEntryId());
 
 			summary = fileEntryRelatedSearchResult.getSummary();
 
@@ -117,17 +121,24 @@ summary.setQueryTerms(queryTerms);
 			<div class="entry-attachment">
 				<aui:a class="lfr-discussion-details" href="<%= url %>">
 					<div class="image">
-						<img alt="<%= HtmlUtil.escapeAttribute(fileEntry.getTitle()) %>" class="attachment" src="<%= DLUtil.getThumbnailSrc(fileEntry, themeDisplay) %>" />
+
+						<%
+						String fileEntryThumbnailSrc = DLUtil.getThumbnailSrc(fileEntry, themeDisplay);
+						%>
+
+						<c:if test="<%= Validator.isNotNull(fileEntryThumbnailSrc) %>">
+							<img alt="<%= HtmlUtil.escapeAttribute(fileEntry.getTitle()) %>" class="attachment" src="<%= fileEntryThumbnailSrc %>" />
+						</c:if>
 					</div>
 
 					<span class="title">
 						<liferay-ui:icon
-							iconCssClass="<%= assetRenderer.getIconCssClass() %>"
+							icon="<%= assetRenderer.getIconCssClass() %>"
 							label="<%= true %>"
+							markupView="lexicon"
 							message='<%= LanguageUtil.format(locale, "attachment-added-by-x", HtmlUtil.escape(fileEntry.getUserName()), false) %>'
 						/>
 					</span>
-
 					<span class="body">
 						<%= summary.getHighlightedContent() %>
 					</span>
@@ -157,7 +168,9 @@ summary.setQueryTerms(queryTerms);
 			<div class="entry-discussion">
 				<aui:a class="lfr-discussion-details" href="<%= url %>">
 					<div class="image">
-						<img alt="<%= HtmlUtil.escapeAttribute(userDisplay.getFullName()) %>" class="avatar" src="<%= HtmlUtil.escape(userDisplay.getPortraitURL(themeDisplay)) %>" />
+						<liferay-ui:user-portrait
+							userId="<%= userDisplay.getUserId() %>"
+						/>
 					</div>
 
 					<span class="title">
@@ -167,7 +180,6 @@ summary.setQueryTerms(queryTerms);
 							message='<%= LanguageUtil.format(locale, "comment-by-x", HtmlUtil.escape(userDisplay.getFullName()), false) %>'
 						/>
 					</span>
-
 					<span class="body">
 						<%= summary.getHighlightedContent() %>
 					</span>

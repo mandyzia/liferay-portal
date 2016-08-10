@@ -15,7 +15,7 @@
 </tr>
 <tr>
 	<td>TITLE</td>
-	<td>//span[contains(@class,'portlet-title') and contains(.,'${key_portletName}')]</td>
+	<td>//h2[contains(@class,'portlet-title') and contains(.,'${key_portletName}')]</td>
 	<td>Portlet Header</td>
 </tr>
 <tr>
@@ -35,7 +35,7 @@
 </tr>
 <tr>
 	<td>SPECIFIC_TITLE</td>
-	<td>//div[@id='main-content']//h1[@class='portlet-title']//span[contains(@class,'portlet-title-text') and contains(.,'${key_portletTitleName}')]</td>
+	<td>//div[@id='main-content']//h2[contains(@class,'portlet-title') and (.='${key_portletTitleName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -54,18 +54,18 @@
 	<td></td>
 </tr>
 <tr>
-	<td>SPECIFIC_PORTLET_OPTIONS_ICON</td>
-	<td>//div[@id='main-content']//h1/span[contains(.,'${key_portletName}')]/../../menu/div[contains(@class,'portlet-options')]/a</td>
+	<td>SPECIFIC_PORTLET_ELLIPSIS_ICON</td>
+	<td>//div[@id='main-content']//h2[contains(.,'${key_portletName}')]/../../header/menu/div[contains(@class,'portlet-options')]/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SPECIFIC_PORTLET_BORDERLESS_BAR</td>
-	<td>//div[contains(.,'${key_portletName}') and contains(@class,'portlet-borderless')]//span[contains(@class,'portlet-actions')]</td>
+	<td>//div[contains(@class,'portlet-title-default')]/span[contains(.,'${key_portletName}')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>SPECIFIC_PORTLET_BORDERLESS_OPTIONS_ICON</td>
-	<td>//div[@class='portlet-borderless-container']/div[contains(.,'${key_portletName}')]//a[@title='Options']</td>
+	<td>SPECIFIC_PORTLET_BORDERLESS_ELLIPSIS_ICON</td>
+	<td>//header[@class='portlet-topper' and contains(.,'${key_portletName}')]//div[contains(@class,'portlet-options')]/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -86,11 +86,6 @@
 <tr>
 	<td>REMOVE</td>
 	<td>//li[contains(@class,'portlet-close-icon')]/a</td>
-	<td></td>
-</tr>
-<tr>
-	<td>IFRAME</td>
-	<td>//iframe[@class='dialog-iframe-node ']</td>
 	<td></td>
 </tr>
 <tr>
@@ -124,11 +119,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>PORTLET_CONTENT</td>
-	<td>//div[@class='portlet-content']</td>
-	<td></td>
-</tr>
-<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -145,13 +135,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>OPTIONS_MENULIST_CONFIGURATION_TEMPLATES</td>
+	<td>//a[contains(@id,'_menu_configuration-templates')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>OPTIONS_MENULIST_PREFERENCES</td>
 	<td>//a[contains(@id,'_menu_preferences')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>OPTIONS_MENULIST_EXPORT_IMPORT</td>
-	<td>//a[contains(@id,'_menu_export-import')]</td>
+	<td>//a[contains(@id,'_menu_export') and contains(@id,'import')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>OPTIONS_MENULIST_PERMISSIONS</td>
+	<td>//a[contains(@id,'_menu_permissions')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -164,35 +164,25 @@
 	<td></td>
 	<td></td>
 </tr>
-<!--NAVIGATION_LOOK_AND_FEEL-->
+<!--LOOK_AND_FEEL-->
 <tr>
-	<td>NAVIGATION_LOOK_AND_FEEL_PORTLET_CONFIGURATION</td>
-	<td>//ul[contains(@class,'nav-tabs')]/li/a[contains(.,'Portlet Configuration')]</td>
+	<td>TEXT_FONT_SELECT</td>
+	<td>//div[contains(@class,'form-group') and contains(.,'Font')]//select</td>
 	<td></td>
 </tr>
 <tr>
-	<td>NAVIGATION_LOOK_AND_FEEL_TEXT_STYLES</td>
-	<td>//ul[contains(@class,'nav-tabs')]/li/a[contains(.,'Text Styles')]</td>
+	<td>TEXT_FONT_SIZE_SELECT</td>
+	<td>//div[contains(@class,'form-group') and contains(.,'Size')]//select</td>
 	<td></td>
 </tr>
 <tr>
-	<td>NAVIGATION_LOOK_AND_FEEL_BACKGROUND_STYLES</td>
-	<td>//ul[contains(@class,'nav-tabs')]/li/a[contains(.,'Background Styles')]</td>
+	<td>BORDER_WIDTH_TOP_INPUT</td>
+	<td>//div[contains(@class,'form-group') and contains(.,'Top')]//input</td>
 	<td></td>
 </tr>
 <tr>
-	<td>NAVIGATION_LOOK_AND_FEEL_BORDER_STYLES</td>
-	<td>//ul[contains(@class,'nav-tabs')]/li/a[contains(.,'Border Styles')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>NAVIGATION_LOOK_AND_FEEL_MARGIN_AND_PADDING</td>
-	<td>//ul[contains(@class,'nav-tabs')]/li/a[contains(.,'Margin and Padding')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>NAVIGATION_LOOK_AND_FEEL_ADVANCED_STYLING</td>
-	<td>//ul[contains(@class,'nav-tabs')]/li/a[contains(.,'Advanced Styling')]</td>
+	<td>SIGN_IN_CUSTOM_LOOK_AND_FEEL</td>
+	<td>portal/screenshots/home/sign_in_custom_look_and_feel.png</td>
 	<td></td>
 </tr>
 <tr>

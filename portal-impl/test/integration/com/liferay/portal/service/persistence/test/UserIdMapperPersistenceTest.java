@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchUserIdMapperException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchUserIdMapperException;
+import com.liferay.portal.kernel.model.UserIdMapper;
+import com.liferay.portal.kernel.service.UserIdMapperLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.UserIdMapperPersistence;
+import com.liferay.portal.kernel.service.persistence.UserIdMapperUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -30,17 +34,13 @@ import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.UserIdMapper;
-import com.liferay.portal.service.UserIdMapperLocalServiceUtil;
-import com.liferay.portal.service.persistence.UserIdMapperPersistence;
-import com.liferay.portal.service.persistence.UserIdMapperUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,14 +51,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class UserIdMapperPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -117,6 +119,8 @@ public class UserIdMapperPersistenceTest {
 
 		newUserIdMapper.setMvccVersion(RandomTestUtil.nextLong());
 
+		newUserIdMapper.setCompanyId(RandomTestUtil.nextLong());
+
 		newUserIdMapper.setUserId(RandomTestUtil.nextLong());
 
 		newUserIdMapper.setType(RandomTestUtil.randomString());
@@ -133,6 +137,8 @@ public class UserIdMapperPersistenceTest {
 			newUserIdMapper.getMvccVersion());
 		Assert.assertEquals(existingUserIdMapper.getUserIdMapperId(),
 			newUserIdMapper.getUserIdMapperId());
+		Assert.assertEquals(existingUserIdMapper.getCompanyId(),
+			newUserIdMapper.getCompanyId());
 		Assert.assertEquals(existingUserIdMapper.getUserId(),
 			newUserIdMapper.getUserId());
 		Assert.assertEquals(existingUserIdMapper.getType(),
@@ -192,8 +198,9 @@ public class UserIdMapperPersistenceTest {
 
 	protected OrderByComparator<UserIdMapper> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("UserIdMapper",
-			"mvccVersion", true, "userIdMapperId", true, "userId", true,
-			"type", true, "description", true, "externalUserId", true);
+			"mvccVersion", true, "userIdMapperId", true, "companyId", true,
+			"userId", true, "type", true, "description", true,
+			"externalUserId", true);
 	}
 
 	@Test
@@ -302,11 +309,9 @@ public class UserIdMapperPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = UserIdMapperLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<UserIdMapper>() {
 				@Override
-				public void performAction(Object object) {
-					UserIdMapper userIdMapper = (UserIdMapper)object;
-
+				public void performAction(UserIdMapper userIdMapper) {
 					Assert.assertNotNull(userIdMapper);
 
 					count.increment();
@@ -400,17 +405,17 @@ public class UserIdMapperPersistenceTest {
 
 		UserIdMapper existingUserIdMapper = _persistence.findByPrimaryKey(newUserIdMapper.getPrimaryKey());
 
-		Assert.assertEquals(existingUserIdMapper.getUserId(),
-			ReflectionTestUtil.invoke(existingUserIdMapper,
+		Assert.assertEquals(Long.valueOf(existingUserIdMapper.getUserId()),
+			ReflectionTestUtil.<Long>invoke(existingUserIdMapper,
 				"getOriginalUserId", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingUserIdMapper.getType(),
+		Assert.assertTrue(Objects.equals(existingUserIdMapper.getType(),
 				ReflectionTestUtil.invoke(existingUserIdMapper,
 					"getOriginalType", new Class<?>[0])));
 
-		Assert.assertTrue(Validator.equals(existingUserIdMapper.getType(),
+		Assert.assertTrue(Objects.equals(existingUserIdMapper.getType(),
 				ReflectionTestUtil.invoke(existingUserIdMapper,
 					"getOriginalType", new Class<?>[0])));
-		Assert.assertTrue(Validator.equals(
+		Assert.assertTrue(Objects.equals(
 				existingUserIdMapper.getExternalUserId(),
 				ReflectionTestUtil.invoke(existingUserIdMapper,
 					"getOriginalExternalUserId", new Class<?>[0])));
@@ -422,6 +427,8 @@ public class UserIdMapperPersistenceTest {
 		UserIdMapper userIdMapper = _persistence.create(pk);
 
 		userIdMapper.setMvccVersion(RandomTestUtil.nextLong());
+
+		userIdMapper.setCompanyId(RandomTestUtil.nextLong());
 
 		userIdMapper.setUserId(RandomTestUtil.nextLong());
 

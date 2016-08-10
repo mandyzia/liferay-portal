@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchPasswordPolicyException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchPasswordPolicyException;
+import com.liferay.portal.kernel.model.PasswordPolicy;
+import com.liferay.portal.kernel.service.PasswordPolicyLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.PasswordPolicyPersistence;
+import com.liferay.portal.kernel.service.persistence.PasswordPolicyUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -31,17 +35,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.PasswordPolicy;
-import com.liferay.portal.service.PasswordPolicyLocalServiceUtil;
-import com.liferay.portal.service.persistence.PasswordPolicyPersistence;
-import com.liferay.portal.service.persistence.PasswordPolicyUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -52,14 +52,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class PasswordPolicyPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -448,11 +450,9 @@ public class PasswordPolicyPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = PasswordPolicyLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<PasswordPolicy>() {
 				@Override
-				public void performAction(Object object) {
-					PasswordPolicy passwordPolicy = (PasswordPolicy)object;
-
+				public void performAction(PasswordPolicy passwordPolicy) {
 					Assert.assertNotNull(passwordPolicy);
 
 					count.increment();
@@ -546,17 +546,18 @@ public class PasswordPolicyPersistenceTest {
 
 		PasswordPolicy existingPasswordPolicy = _persistence.findByPrimaryKey(newPasswordPolicy.getPrimaryKey());
 
-		Assert.assertEquals(existingPasswordPolicy.getCompanyId(),
-			ReflectionTestUtil.invoke(existingPasswordPolicy,
+		Assert.assertEquals(Long.valueOf(existingPasswordPolicy.getCompanyId()),
+			ReflectionTestUtil.<Long>invoke(existingPasswordPolicy,
 				"getOriginalCompanyId", new Class<?>[0]));
-		Assert.assertEquals(existingPasswordPolicy.getDefaultPolicy(),
-			ReflectionTestUtil.invoke(existingPasswordPolicy,
+		Assert.assertEquals(Boolean.valueOf(
+				existingPasswordPolicy.getDefaultPolicy()),
+			ReflectionTestUtil.<Boolean>invoke(existingPasswordPolicy,
 				"getOriginalDefaultPolicy", new Class<?>[0]));
 
-		Assert.assertEquals(existingPasswordPolicy.getCompanyId(),
-			ReflectionTestUtil.invoke(existingPasswordPolicy,
+		Assert.assertEquals(Long.valueOf(existingPasswordPolicy.getCompanyId()),
+			ReflectionTestUtil.<Long>invoke(existingPasswordPolicy,
 				"getOriginalCompanyId", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingPasswordPolicy.getName(),
+		Assert.assertTrue(Objects.equals(existingPasswordPolicy.getName(),
 				ReflectionTestUtil.invoke(existingPasswordPolicy,
 					"getOriginalName", new Class<?>[0])));
 	}

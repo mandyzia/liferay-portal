@@ -1,17 +1,6 @@
 <definition>
 	<command name="gotoPG">
-		<execute macro="Page#openURL">
-			<var name="friendlyURL" value="${friendlyURL}" />
-			<var name="pageAccess" value="${pageAccess}" />
-			<var name="pageAccessURL" value="${pageAccessURL}" />
-			<var name="pageStaging" value="${pageStaging}" />
-			<var name="pageStagingURL" value="${pageStagingURL}" />
-			<var name="siteName" value="${siteName}" />
-			<var name="siteNameURL" value="${siteNameURL}" />
-			<var name="siteURL" value="true" />
-			<var name="specificURL" value="${specificURL}" />
-			<var name="virtualHostsURL" value="${virtualHostsURL}" />
-		</execute>
+		<execute macro="Navigator#openURL" />
 
 		<var name="key_pageName" value="${pageName}" />
 
@@ -37,17 +26,8 @@
 	</command>
 
 	<command name="viewLocalizedPG">
-		<execute macro="Page#openURL">
-			<var name="friendlyURL" value="${friendlyURL}" />
-			<var name="pageAccess" value="${pageAccess}" />
-			<var name="pageAccessURL" value="${pageAccessURL}" />
-			<var name="pageStaging" value="${pageStaging}" />
-			<var name="pageStagingURL" value="${pageStagingURL}" />
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteNameURL" value="${siteNameURL}" />
-			<var name="siteURL" value="true" />
-			<var name="specificURL" value="${specificURL}" />
-			<var name="virtualHostsURL" value="${virtualHostsURL}" />
 		</execute>
 
 		<execute macro="SOUserBar#showEditControls" />
@@ -249,22 +229,25 @@
 			</else>
 		</if>
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Site Settings" />
-			<var name="siteScopeName" value="${siteName}" />
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Site Settings" />
 		</execute>
 
 		<if>
 			<contains string="${siteType}" substring="Private" />
 			<then>
-				<execute function="AssertChecked" locator1="CPSitesettings#PRIVATE_PAGE_PROPAGATION_CHECKBOX" />
+				<execute function="AssertChecked" locator1="Checkbox#ENABLE_PROPAGATION" />
 			</then>
 			<else>
-				<execute function="AssertChecked" locator1="CPSitesettings#PUBLIC_PAGE_PROPAGATION_CHECKBOX" />
+				<execute function="AssertChecked" locator1="Checkbox#ENABLE_PROPAGATION" />
 			</else>
 		</if>
 
-		<execute function="AssertSelectedLabel" locator1="CPSitesettings#APPLICATION_ADAPTER_SELECT" value1="Social Office EE Hook" />
+		<execute function="AssertSelectedLabel" locator1="SitesEditSite#APPLICATION_ADAPTER_SELECT" value1="Social Office EE Hook" />
 	</command>
 
 	<command name="viewSOSiteDeleted">
@@ -389,8 +372,8 @@
 				<if>
 					<condition function="IsElementPresent" locator1="SOUserBar#EDIT_CONTROLS_NOT_FLAGGED" />
 					<then>
-						<execute function="MouseOver" locator1="Dockbar#EDIT_CONTROLS" />
-						<execute function="Click" locator1="Dockbar#EDIT_CONTROLS" />
+						<execute function="MouseOver" locator1="Icon#EDIT_CONTROLS" />
+						<execute function="Click" locator1="Icon#EDIT_CONTROLS" />
 					</then>
 				</if>
 
@@ -405,7 +388,7 @@
 			<else>
 				<execute function="AssertElementNotPresent" locator1="SOUserBar#TOGGLE_DOCKBAR" />
 
-				<execute function="AssertElementNotPresent" locator1="Dockbar#EDIT_CONTROLS" />
+				<execute function="AssertElementNotPresent" locator1="Icon#EDIT_CONTROLS" />
 
 				<execute function="AssertElementNotPresent" locator1="SOAnnouncements#ANNOUNCEMENTS_OPTIONS" />
 				<execute function="AssertElementNotPresent" locator1="SOActivities#ACTIVITIES_OPTIONS" />
@@ -453,7 +436,7 @@
 		<execute function="AssertTextEquals" locator1="SOSite#NAVIGATION_WIKI" value1="Wiki" />
 		<execute function="Click" locator1="SOSite#NAVIGATION_MEMBERS" value1="Members" />
 
-		<execute macro="Page#gotoMyProfile" />
+		<execute macro="UserBar#gotoProfile" />
 
 		<execute function="AssertClick" locator1="SOProfile#PROFILE_INFO_SITES" value1="${siteName}" />
 
@@ -602,7 +585,7 @@
 			</then>
 		</if>
 
-		<execute macro="Page#gotoMyProfile" />
+		<execute macro="UserBar#gotoProfile" />
 
 		<execute function="AssertTextNotPresent" value1="${siteName}" />
 	</command>

@@ -14,12 +14,10 @@
 
 package com.liferay.portlet.messageboards.model;
 
-import com.liferay.portal.ModelListenerException;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.BaseModelListener;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
+import com.liferay.portal.kernel.comment.CommentManagerUtil;
+import com.liferay.portal.kernel.exception.ModelListenerException;
+import com.liferay.portal.kernel.model.BaseModelListener;
+import com.liferay.portal.kernel.model.Layout;
 
 /**
  * @author Eduardo Garcia
@@ -28,23 +26,13 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 
 	@Override
 	public void onAfterCreate(Layout layout) throws ModelListenerException {
-		if (PropsValues.LAYOUT_COMMENTS_ENABLED) {
-			try {
-				MBMessageLocalServiceUtil.addDiscussionMessage(
-					layout.getUserId(), layout.getUserName(),
-					layout.getGroupId(), Layout.class.getName(),
-					layout.getPlid(), WorkflowConstants.ACTION_PUBLISH);
-			}
-			catch (Exception e) {
-				throw new ModelListenerException(e);
-			}
-		}
+		super.onAfterCreate(layout);
 	}
 
 	@Override
 	public void onBeforeRemove(Layout layout) throws ModelListenerException {
 		try {
-			MBMessageLocalServiceUtil.deleteDiscussionMessages(
+			CommentManagerUtil.deleteDiscussion(
 				Layout.class.getName(), layout.getPlid());
 		}
 		catch (Exception e) {

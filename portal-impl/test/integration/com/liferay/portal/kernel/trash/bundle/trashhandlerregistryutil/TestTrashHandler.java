@@ -14,20 +14,20 @@
 
 package com.liferay.portal.kernel.trash.bundle.trashhandlerregistryutil;
 
+import com.liferay.portal.kernel.model.ContainerModel;
+import com.liferay.portal.kernel.model.SystemEvent;
+import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.filter.Filter;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashRenderer;
-import com.liferay.portal.model.ContainerModel;
-import com.liferay.portal.model.SystemEvent;
-import com.liferay.portal.model.TrashedModel;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portlet.trash.model.TrashEntry;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.trash.kernel.model.TrashEntry;
 
 import java.util.List;
-import java.util.Locale;
 
 import javax.portlet.PortletRequest;
 
@@ -103,17 +103,8 @@ public class TestTrashHandler implements TrashHandler {
 		return null;
 	}
 
-	/**
-	 * @deprecated As of 7.0.0
-	 */
-	@Deprecated
 	@Override
 	public String getContainerModelName() {
-		return null;
-	}
-
-	@Override
-	public String getContainerModelName(long classPK) {
 		return null;
 	}
 
@@ -189,34 +180,7 @@ public class TestTrashHandler implements TrashHandler {
 	}
 
 	@Override
-	public String getRootContainerModelClassName() {
-		return null;
-	}
-
-	@Override
-	public long getRootContainerModelId(long classPK) {
-		return 0;
-	}
-
-	@Override
 	public String getRootContainerModelName() {
-		return null;
-	}
-
-	@Override
-	public List<ContainerModel> getRootContainerModels(long groupId) {
-		return null;
-	}
-
-	@Override
-	public int getRootContainerModelsCount(long groupId) {
-		return 0;
-	}
-
-	@Override
-	public String getRootContainerModelTitle(
-		long containerModelId, Locale locale) {
-
 		return null;
 	}
 
@@ -270,6 +234,18 @@ public class TestTrashHandler implements TrashHandler {
 	}
 
 	@Override
+	public int getTrashModelsCount(long classPK) {
+		return 0;
+	}
+
+	@Override
+	public List<TrashRenderer> getTrashModelTrashRenderers(
+		long classPK, int start, int end, OrderByComparator<?> obc) {
+
+		return null;
+	}
+
+	@Override
 	public TrashRenderer getTrashRenderer(long classPK) {
 		return null;
 	}
@@ -309,11 +285,6 @@ public class TestTrashHandler implements TrashHandler {
 
 	@Override
 	public boolean isRestorable(long classPK) {
-		return false;
-	}
-
-	@Override
-	public boolean isRootContainerModelMovable() {
 		return false;
 	}
 

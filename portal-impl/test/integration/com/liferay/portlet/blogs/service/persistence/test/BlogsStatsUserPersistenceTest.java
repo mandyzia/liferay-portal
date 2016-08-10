@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.blogs.service.persistence.test;
 
+import com.liferay.blogs.kernel.exception.NoSuchStatsUserException;
+import com.liferay.blogs.kernel.model.BlogsStatsUser;
+import com.liferay.blogs.kernel.service.BlogsStatsUserLocalServiceUtil;
+import com.liferay.blogs.kernel.service.persistence.BlogsStatsUserPersistence;
+import com.liferay.blogs.kernel.service.persistence.BlogsStatsUserUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -33,15 +39,10 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.blogs.NoSuchStatsUserException;
-import com.liferay.portlet.blogs.model.BlogsStatsUser;
-import com.liferay.portlet.blogs.service.BlogsStatsUserLocalServiceUtil;
-import com.liferay.portlet.blogs.service.persistence.BlogsStatsUserPersistence;
-import com.liferay.portlet.blogs.service.persistence.BlogsStatsUserUtil;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -58,8 +59,9 @@ import java.util.Set;
  * @generated
  */
 public class BlogsStatsUserPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -339,11 +341,9 @@ public class BlogsStatsUserPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = BlogsStatsUserLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<BlogsStatsUser>() {
 				@Override
-				public void performAction(Object object) {
-					BlogsStatsUser blogsStatsUser = (BlogsStatsUser)object;
-
+				public void performAction(BlogsStatsUser blogsStatsUser) {
 					Assert.assertNotNull(blogsStatsUser);
 
 					count.increment();
@@ -435,11 +435,11 @@ public class BlogsStatsUserPersistenceTest {
 
 		BlogsStatsUser existingBlogsStatsUser = _persistence.findByPrimaryKey(newBlogsStatsUser.getPrimaryKey());
 
-		Assert.assertEquals(existingBlogsStatsUser.getGroupId(),
-			ReflectionTestUtil.invoke(existingBlogsStatsUser,
+		Assert.assertEquals(Long.valueOf(existingBlogsStatsUser.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingBlogsStatsUser,
 				"getOriginalGroupId", new Class<?>[0]));
-		Assert.assertEquals(existingBlogsStatsUser.getUserId(),
-			ReflectionTestUtil.invoke(existingBlogsStatsUser,
+		Assert.assertEquals(Long.valueOf(existingBlogsStatsUser.getUserId()),
+			ReflectionTestUtil.<Long>invoke(existingBlogsStatsUser,
 				"getOriginalUserId", new Class<?>[0]));
 	}
 

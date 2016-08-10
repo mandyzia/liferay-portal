@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchPortletPreferencesException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchPortletPreferencesException;
+import com.liferay.portal.kernel.model.PortletPreferences;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.PortletPreferencesPersistence;
+import com.liferay.portal.kernel.service.persistence.PortletPreferencesUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -30,17 +34,13 @@ import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.PortletPreferences;
-import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
-import com.liferay.portal.service.persistence.PortletPreferencesPersistence;
-import com.liferay.portal.service.persistence.PortletPreferencesUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,14 +51,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class PortletPreferencesPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -117,6 +119,8 @@ public class PortletPreferencesPersistenceTest {
 
 		newPortletPreferences.setMvccVersion(RandomTestUtil.nextLong());
 
+		newPortletPreferences.setCompanyId(RandomTestUtil.nextLong());
+
 		newPortletPreferences.setOwnerId(RandomTestUtil.nextLong());
 
 		newPortletPreferences.setOwnerType(RandomTestUtil.nextInt());
@@ -135,6 +139,8 @@ public class PortletPreferencesPersistenceTest {
 			newPortletPreferences.getMvccVersion());
 		Assert.assertEquals(existingPortletPreferences.getPortletPreferencesId(),
 			newPortletPreferences.getPortletPreferencesId());
+		Assert.assertEquals(existingPortletPreferences.getCompanyId(),
+			newPortletPreferences.getCompanyId());
 		Assert.assertEquals(existingPortletPreferences.getOwnerId(),
 			newPortletPreferences.getOwnerId());
 		Assert.assertEquals(existingPortletPreferences.getOwnerType(),
@@ -244,9 +250,9 @@ public class PortletPreferencesPersistenceTest {
 
 	protected OrderByComparator<PortletPreferences> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("PortletPreferences",
-			"mvccVersion", true, "portletPreferencesId", true, "ownerId", true,
-			"ownerType", true, "plid", true, "portletId", true, "preferences",
-			true);
+			"mvccVersion", true, "portletPreferencesId", true, "companyId",
+			true, "ownerId", true, "ownerType", true, "plid", true,
+			"portletId", true);
 	}
 
 	@Test
@@ -355,11 +361,9 @@ public class PortletPreferencesPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = PortletPreferencesLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<PortletPreferences>() {
 				@Override
-				public void performAction(Object object) {
-					PortletPreferences portletPreferences = (PortletPreferences)object;
-
+				public void performAction(PortletPreferences portletPreferences) {
 					Assert.assertNotNull(portletPreferences);
 
 					count.increment();
@@ -454,16 +458,18 @@ public class PortletPreferencesPersistenceTest {
 
 		PortletPreferences existingPortletPreferences = _persistence.findByPrimaryKey(newPortletPreferences.getPrimaryKey());
 
-		Assert.assertEquals(existingPortletPreferences.getOwnerId(),
-			ReflectionTestUtil.invoke(existingPortletPreferences,
+		Assert.assertEquals(Long.valueOf(
+				existingPortletPreferences.getOwnerId()),
+			ReflectionTestUtil.<Long>invoke(existingPortletPreferences,
 				"getOriginalOwnerId", new Class<?>[0]));
-		Assert.assertEquals(existingPortletPreferences.getOwnerType(),
-			ReflectionTestUtil.invoke(existingPortletPreferences,
+		Assert.assertEquals(Integer.valueOf(
+				existingPortletPreferences.getOwnerType()),
+			ReflectionTestUtil.<Integer>invoke(existingPortletPreferences,
 				"getOriginalOwnerType", new Class<?>[0]));
-		Assert.assertEquals(existingPortletPreferences.getPlid(),
-			ReflectionTestUtil.invoke(existingPortletPreferences,
+		Assert.assertEquals(Long.valueOf(existingPortletPreferences.getPlid()),
+			ReflectionTestUtil.<Long>invoke(existingPortletPreferences,
 				"getOriginalPlid", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(
+		Assert.assertTrue(Objects.equals(
 				existingPortletPreferences.getPortletId(),
 				ReflectionTestUtil.invoke(existingPortletPreferences,
 					"getOriginalPortletId", new Class<?>[0])));
@@ -476,6 +482,8 @@ public class PortletPreferencesPersistenceTest {
 		PortletPreferences portletPreferences = _persistence.create(pk);
 
 		portletPreferences.setMvccVersion(RandomTestUtil.nextLong());
+
+		portletPreferences.setCompanyId(RandomTestUtil.nextLong());
 
 		portletPreferences.setOwnerId(RandomTestUtil.nextLong());
 

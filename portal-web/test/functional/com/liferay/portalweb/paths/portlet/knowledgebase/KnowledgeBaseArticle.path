@@ -10,13 +10,22 @@
 <tbody>
 <tr>
 	<td>TITLE</td>
-	<td>//h3[@class='header-title']/span</td>
+	<td>//div[contains(@class,'panel-body')]/h1</td>
 	<td></td>
 </tr>
-
 <tr>
 	<td>CONTENT</td>
-	<td>//div[@class='kb-article-body']</td>
+	<td>//div[contains(@class,'panel-body')]//p</td>
+	<td></td>
+</tr>
+<tr>
+	<td>HTML_BOLD_CONTENT</td>
+	<td>//div[contains(@class,'panel-body')]//b</td>
+	<td></td>
+</tr>
+<tr>
+	<td>HEADER_TITLE</td>
+	<td>//h3[@class='header-title']/span</td>
 	<td></td>
 </tr>
 <tr>
@@ -25,18 +34,64 @@
 	<td></td>
 </tr>
 <tr>
-	<td>CONTENT_IMAGE_CAPTION</td>
-	<td>//p[@class='caption']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>EDIT_ON_GITHUB_LINK</td>
+	<td>EDIT_ON_GITHUB</td>
 	<td>//span[contains(.,'Edit on GitHub')]</td>
 	<td></td>
 </tr>
 <tr>
-	<td>RELATED_ASSETS_LINKS</td>
-	<td>//ul[@class='asset-links-list']/li/span/a[contains(.,'${key_kbArticleRelatedAssetTitle}')]</td>
+	<td>ARTICLE_TITLE</td>
+	<td>//div[@class='kb-article-container']//h1[@class='kb-title']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ARTICLE_CONTENT</td>
+	<td>//div[@class='kb-article-container']//div[@class='kb-article-body']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SUBSCRIBE</td>
+	<td>//div[@class='kb-article-container']//div//a/span[contains(.,'Subscribe')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>HISTORY</td>
+	<td>//div[@class='kb-article-container']//div//a/span[contains(.,'History')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PRINT</td>
+	<td>//div[@class='kb-article-container']//div//a/span[contains(.,'Print')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREVIOUS</td>
+	<td>//div[@class='kb-article-container']//div/span[@class='kb-article-previous']/a/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NEXT</td>
+	<td>//div[@class='kb-article-container']//div/span[@class='kb-article-next']/a/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DO_YOU_HAVE_ANY_SUGGESTIONS</td>
+	<td>//div[contains(.,'Do you have any suggestions?')]/h5</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--ADMIN_VIEW-->
+<tr>
+	<td>ADMIN_VIEW_CHILD_ARTICLE_TITLE</td>
+	<td>//div[@class='kb-elements']//a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADMIN_VIEW_CHILD_ARTICLE_CONTENT</td>
+	<td>//div[@class='kb-element-body']//p</td>
 	<td></td>
 </tr>
 <tr>
@@ -46,18 +101,18 @@
 </tr>
 <!--ATTACHMENTS-->
 <tr>
-	<td>ATTACHMENTS_ADD_LINK</td>
-	<td>//a[contains(.,'Add Attachments')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>ATTACHMENTS_HEADER_COLLAPSED</td>
-	<td>//div[contains(@class,'toggler-header-collapsed') and contains(.,'Attachments')]/div/span</td>
+	<td>//a[contains(@class,'collapse-icon') and contains(@aria-expanded,'false') and contains(.,'Attachments')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ATTACHMENTS_HEADER_EXPANDED</td>
-	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,'Attachments')]/div/span</td>
+	<td>//a[contains(@class,'collapse-icon') and contains(@aria-expanded,'true') and contains(.,'Attachments')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ATTACHMENTS_INVALID_SIZE_ERROR</td>
+	<td>//li[contains(@class,'upload-error')]//span[@class='error-message']</td>
 	<td></td>
 </tr>
 <tr>
@@ -78,7 +133,7 @@
 <!--EDIT-->
 <tr>
 	<td>EDIT_FRIENDLY_URL_FIELD</td>
-	<td>//input[contains(@id,'knowledgebaseportlet_urlTitle')]</td>
+	<td>//input[contains(@id,'knowledge_base_web') and contains(@id, 'AdminPortlet_urlTitle')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -103,33 +158,43 @@
 </tr>
 <!--HISTORY-->
 <tr>
+	<td>HISTORY_TITLE</td>
+	<td>//div[contains(@class,'taglib-diff')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>HISTORY_CONTENT</td>
+	<td>//div[contains(@class,'taglib-diff')]//p</td>
+	<td></td>
+</tr>
+<tr>
 	<td>HISTORY_CONTENT_ADDED_DIFF</td>
-	<td>//div[@class='kb-entity-body']/div/span[contains(@class,'diff-html-added')]</td>
+	<td>//div[@class='panel-body']//p//span[contains(@id,'added-diff')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>HISTORY_CONTENT_REMOVED_DIFF</td>
-	<td>//div[@class='kn-entity-body']/div/span[contains(@class,'diff-html-removed')]</td>
+	<td>//div[@class='panel-body']//p[contains(.,'${key_kbArticleContentRemovedDiff}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>HISTORY_TITLE_ADDED_DIFF</td>
-	<td>//div[@class='kb-title']/div/span[contains(@class,'diff-html-added')]</td>
+	<td>//div[@class='panel-body']//span[contains(@id,'added-diff')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>HISTORY_TITLE_REMOVED_DIFF</td>
-	<td>//div[@class='kb-title']/div/span[contains(@class,'diff-html-removed')]</td>
+	<td>//div[@class='panel-body']//p//span</td>
 	<td></td>
 </tr>
 <tr>
 	<td>HISTORY_VERSION_TABLE_SOURCE</td>
-	<td>//table[contains(@data-searchcontainerid,'knowledgebaseportlet')]//thead[contains(.,'Version')]/..//a[contains(.,'(Source)')]</td>
+	<td>//table[contains(@data-searchcontainerid,'knowledge_base_web')]//thead[contains(.,'Version')]/..//a[contains(.,'(Source)')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>HISTORY_VERSION_TABLE_TARGET</td>
-	<td>//table[contains(@data-searchcontainerid,'knowledgebaseportlet')]//thead[contains(.,'Version')]/..//a[contains(.,'(Target)')]</td>
+	<td>//table[contains(@data-searchcontainerid,'knowledge_base_web')]//thead[contains(.,'Version')]/..//a[contains(.,'(Target)')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -140,74 +205,17 @@
 <!--SECTIONS-->
 <tr>
 	<td>SECTIONS_SELECT</td>
-	<td>//select[contains(@id,'knowledgebaseportlet_sections')]</td>
+	<td>//select[contains(@id, 'knowledge_base_web') and contains(@id, 'sections')]//option[contains(.,'${key_kbArticleSection}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADMIN_KB_ARTICLE_SECTION</td>
+	<td>xpath=(//div[contains(@data-fieldname,'KBArticleSections')]//textarea)[${key_counter}]</td>
 	<td></td>
 </tr>
 <tr>
 	<td></td>
 	<td></td>
-	<td></td>
-</tr>
-<!--TEMPLATE-->
-<tr>
-	<td>TEMPLATE_TITLE</td>
-	<td>//div[@class='kb-title']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_USE_THIS_TEMPLATE_LINK</td>
-	<td>//span[contains(.,'Use This Template')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_EDIT_LINK</td>
-	<td>//span[contains(.,'Edit')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_PERMISSIONS_LINK</td>
-	<td>//span[contains(.,'Permissions')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_DELETE_LINK</td>
-	<td>//span[contains(.,'Delete')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_CONTENT</td>
-	<td>//div[@class='kb-entity-body']</td>
-	<td></td>
-</tr>
-<tr>
-	<td></td>
-	<td></td>
-	<td></td>
-</tr>
-<!--TEMPLATE_COMMENTS-->
-<tr>
-	<td>TEMPLATE_COMMENTS_DROPDOWN_COLLAPSED</td>
-	<td>//div[contains(@class,'toggler-header-collapsed') and contains(.,'Comments')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_COMMENTS_DROPDOWN_EXPANDED</td>
-	<td>//div[contains(@class,'toggler-header-expanded') and contains(.,'Comments')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_COMMENTS_BODY</td>
-	<td>//div[@class='panel-body']//textarea</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_COMMENTS_YES_RADIO_BUTTON</td>
-	<td>//label[contains(@class,'radio') and contains(@class,'inline') and contains(.,'Yes')]/input</td>
-	<td></td>
-</tr>
-<tr>
-	<td>TEMPLATE_COMMENTS_NO_RADIO_BUTTON</td>
-	<td>//label[contains(@class,'radio') and contains(@class,'inline') and contains(.,'No')]/input</td>
 	<td></td>
 </tr>
 </tbody>

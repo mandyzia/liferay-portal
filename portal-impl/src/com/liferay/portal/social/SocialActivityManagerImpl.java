@@ -15,9 +15,9 @@
 package com.liferay.portal.social;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.ClassedModel;
+import com.liferay.portal.kernel.model.GroupedModel;
 import com.liferay.portal.kernel.social.SocialActivityManager;
-import com.liferay.portal.model.ClassedModel;
-import com.liferay.portal.model.GroupedModel;
 import com.liferay.registry.ServiceReference;
 import com.liferay.registry.collections.ServiceReferenceMapper;
 import com.liferay.registry.collections.ServiceTrackerCollections;
@@ -96,10 +96,6 @@ public class SocialActivityManagerImpl<T extends ClassedModel & GroupedModel>
 			userId, model, type, createDate);
 	}
 
-	protected void activate() {
-		_serviceTrackerMap.open();
-	}
-
 	protected SocialActivityManager<T> getSocialActivityManager(
 		String className) {
 
@@ -116,10 +112,10 @@ public class SocialActivityManagerImpl<T extends ClassedModel & GroupedModel>
 	private final SocialActivityManager<T> _defaultSocialActivityManager;
 
 	private final ServiceTrackerMap<String, SocialActivityManager<T>>
-		_serviceTrackerMap = ServiceTrackerCollections.singleValueMap(
+		_serviceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			(Class<SocialActivityManager<T>>)(Class<?>)
 				SocialActivityManager.class,
-			"(model.className=*)",
+			"(model.class.name=*)",
 			new ServiceReferenceMapper<String, SocialActivityManager<T>>() {
 
 				@Override
@@ -128,7 +124,8 @@ public class SocialActivityManagerImpl<T extends ClassedModel & GroupedModel>
 					Emitter<String> emitter) {
 
 					String modelClassName =
-						(String)serviceReference.getProperty("model.className");
+						(String)serviceReference.getProperty(
+							"model.class.name");
 
 					emitter.emit(modelClassName);
 				}

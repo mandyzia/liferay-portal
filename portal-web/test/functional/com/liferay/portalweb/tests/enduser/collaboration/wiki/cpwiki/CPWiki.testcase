@@ -1,28 +1,43 @@
 <definition component-name="portal-collaboration">
+	<property name="portal.release" value="true" />
 	<property name="testray.main.component.name" value="Wiki" />
 
 	<set-up>
-		<execute macro="User#firstLoginPG" />
+		<execute macro="TestCase#setUpPortalInstance" />
 
-		<execute macro="WikiNode#addMainCP" />
+		<execute macro="User#firstLoginPG" />
 	</set-up>
 
 	<tear-down>
-		<execute macro="WikiNode#tearDownCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="WikiPage#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="WikiNode#tearDownCP" />
+
+				<execute macro="WikiPage#tearDownCP" />
+			</else>
+		</if>
 	</tear-down>
 
-	<command name="AddWikiFrontPage" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+	<command name="AddWikiFrontPage" priority="5">
+		<property name="portal.acceptance" value="true" />
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoCP">
+		<execute macro="WikiNavigator#gotoCP">
 			<var name="wikiPageTitle" value="FrontPage" />
 		</execute>
 
@@ -31,15 +46,17 @@
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoFrontPageCP" />
+		<execute macro="WikiNavigator#gotoFrontPageCP" />
 
 		<execute macro="WikiPage#viewFrontPageCP">
 			<var name="portletName" value="Wiki" />
@@ -48,17 +65,23 @@
 		</execute>
 	</command>
 
-	<command name="AddWikiNode" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+	<command name="AddWikiNode" priority="5">
+		<property name="portal.acceptance" value="true" />
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
 		<execute macro="WikiNode#addCP">
 			<var name="wikiNodeName" value="Wiki Node Name" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
 		<execute macro="WikiNode#viewCP">
@@ -67,32 +90,38 @@
 		</execute>
 	</command>
 
-	<command name="AddWikiPageToNode" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+	<command name="AddWikiPageToNode" priority="5">
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
 		<execute macro="WikiNode#addCP">
 			<var name="wikiNodeName" value="Wiki Node Name" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Wiki Node Name" />
 		</execute>
 
-		<execute macro="WikiPage#gotoAllPagesCP" />
+		<execute macro="WikiNavigator#gotoAllPagesCP" />
 
 		<execute macro="WikiPage#addCP">
 			<var name="wikiPageContent" value="Wiki Page Content" />
 			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
 		<execute macro="WikiNode#viewCP">
@@ -100,7 +129,7 @@
 			<var name="wikiNodeName" value="Wiki Node Name" />
 		</execute>
 
-		<execute macro="WikiPage#gotoCP">
+		<execute macro="WikiNavigator#gotoCP">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
 
@@ -111,30 +140,34 @@
 	</command>
 
 	<command name="CompareVersionsWikiPage" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoAllPagesCP" />
+		<execute macro="WikiNavigator#gotoAllPagesCP" />
 
 		<execute macro="WikiPage#addCP">
 			<var name="wikiPageContent" value="Wiki Page Content" />
 			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoAllPagesCP" />
+		<execute macro="WikiNavigator#gotoAllPagesCP" />
 
 		<execute macro="WikiPage#editPageCP">
 			<var name="wikiNodeName" value="Main" />
@@ -142,15 +175,17 @@
 			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP" >
+		<execute macro="WikiNavigator#gotoNode" >
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoCP">
+		<execute macro="WikiNavigator#gotoCP">
 			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
 
@@ -159,15 +194,17 @@
 			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoAllPagesCP" />
+		<execute macro="WikiNavigator#gotoAllPagesCP" />
 
 		<execute macro="WikiPage#compareVersionsCP">
 			<var name="wikiNodeName" value="Main" />
@@ -179,8 +216,12 @@
 	</command>
 
 	<command name="DeleteWikiNode" priority="5">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<property name="portal.acceptance" value="true" />
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
 		<execute macro="WikiNode#addCP">
@@ -191,18 +232,36 @@
 			<var name="wikiNodeName" value="Wiki Node Name" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Recycle Bin" />
 		</execute>
 
-		<execute macro="WikiNode#viewNoCP">
-			<var name="wikiNodeName" value="Wiki Node Name" />
+		<execute macro="RecycleBin#viewCP">
+			<var name="assetName" value="Wiki Node Name" />
+			<var name="assetType" value="Wiki Node" />
+			<var name="deleteUser" value="Test Test" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNode#viewMainNode">
+			<var name="wikiNodeName" value="Main" />
 		</execute>
 	</command>
 
 	<command name="EditWikiNode" priority="5">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<property name="portal.acceptance" value="true" />
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
 		<execute macro="WikiNode#addCP">
@@ -210,12 +269,16 @@
 		</execute>
 
 		<execute macro="WikiNode#editCP">
+			<var name="wikiNodeDescription" value="Wiki Node Description" />
+			<var name="wikiNodeDescriptionEdit" value="Wiki Node Description Edit" />
 			<var name="wikiNodeName" value="Wiki Node Name" />
 			<var name="wikiNodeNameEdit" value="Wiki Node Name Edit" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
 		<execute macro="WikiNode#viewCP">
@@ -224,16 +287,106 @@
 		</execute>
 	</command>
 
-	<command name="MoveToRecycleBinFrontPage" priority="4">
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+	<command name="MovePageUnderNewParentPage" priority="5">
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoCP">
+		<execute macro="WikiPage#addCP">
+			<var name="wikiPageContent" value="Wiki Page Content 1" />
+			<var name="wikiPageTitle" value="Wiki Page 1" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiPage#addCP">
+			<var name="wikiPageContent" value="Wiki Page Content 2" />
+			<var name="wikiPageTitle" value="Wiki Page 2" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoEntryMoveViaTable">
+			<var name="wikiPageTitle" value="Wiki Page 2" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoChangeParent" />
+
+		<execute macro="WikiPage#selectNewParent">
+			<var name="wikiParentName" value="Wiki Page 1" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiTable#viewEntry">
+			<var name="draftStatus" value="Approved" />
+			<var name="wikiPageTitle" value="Wiki Page 1" />
+		</execute>
+
+		<execute macro="WikiTable#viewEntry">
+			<var name="draftStatus" value="Approved" />
+			<var name="wikiPageTitle" value="Wiki Page 2" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoEntryViaPGTable">
+			<var name="wikiPageTitle" value="Wiki Page 1" />
+		</execute>
+
+		<execute macro="WikiEntry#viewPageContentBody">
+			<var name="wikiPageContent" value="Wiki Page Content 1" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoChildPagePG">
+			<var name="wikiChildPageTitle" value="Wiki Page 2" />
+		</execute>
+
+		<execute macro="WikiEntry#viewPageContentBody">
+			<var name="wikiPageContent" value="Wiki Page Content 2" />
+		</execute>
+	</command>
+
+	<command name="MoveToRecycleBinFrontPage" priority="4">
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoCP">
 			<var name="wikiPageTitle" value="FrontPage" />
 		</execute>
 
@@ -242,11 +395,13 @@
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
@@ -256,19 +411,155 @@
 			<var name="wikiPageTitle" value="FrontPage" />
 		</execute>
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Wiki" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
 		</execute>
 
-		<execute macro="WikiNode#gotoCP">
+		<execute macro="WikiNavigator#gotoNode">
 			<var name="wikiNodeName" value="Main" />
 		</execute>
 
-		<execute macro="WikiPage#gotoFrontPageCP" />
+		<execute macro="WikiNavigator#gotoFrontPageCP" />
 
 		<execute macro="WikiPage#viewFrontPageDefaultCP">
 			<var name="wikiFrontPageContent" value="Wiki FrontPage Content" />
 			<var name="wikiNodeName" value="Main" />
+		</execute>
+	</command>
+
+	<command name="RestoreDeletedPage" priority="5">
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiPage#addCP">
+			<var name="wikiPageContent" value="Wiki Page Content 1" />
+			<var name="wikiPageTitle" value="Wiki Page 1 Original" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiTable#deleteEntry">
+			<var name="wikiPageTitle" value="Wiki Page 1 Original" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiPage#addCP">
+			<var name="wikiPageContent" value="Wiki Page Content 1" />
+			<var name="wikiPageTitle" value="Wiki Page 1 Original" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Recycle Bin" />
+		</execute>
+
+		<execute macro="WikiTable#restoreEntry">
+			<var name="wikiPageTitle" value="Wiki Page 1 Original" />
+		</execute>
+
+		<execute macro="RecycleBinWarning#selectRename" />
+
+		<execute macro="RecycleBinWarning#renameEntry">
+			<var name="renamedTrashEntryTitle" value="Wiki Page 1 Restored" />
+		</execute>
+
+		<execute macro="Button#clickSave" />
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiTable#viewEntry">
+			<var name="draftStatus" value="Approved" />
+			<var name="wikiPageTitle" value="Wiki Page 1 Restored" />
+		</execute>
+
+		<execute macro="WikiTable#viewEntry">
+			<var name="draftStatus" value="Approved" />
+			<var name="wikiPageTitle" value="Wiki Page 1 Original" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoEntryViaPGTable">
+			<var name="wikiPageTitle" value="Wiki Page 1 Restored" />
+		</execute>
+
+		<execute macro="WikiEntry#viewPageContentBody">
+			<var name="wikiPageContent" value="Wiki Page Content 1" />
+		</execute>
+	</command>
+
+	<command name="ViewWikiEntryRSS" priority="4">
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiPage#addCP">
+			<var name="wikiPageContent" value="Wiki Page Content" />
+			<var name="wikiPageTitle" value="Wiki Page RSS" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Wiki" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoNode">
+			<var name="wikiNodeName" value="Main" />
+		</execute>
+
+		<execute macro="WikiNavigator#gotoEntryViaPGTable">
+			<var name="wikiPageTitle" value="Wiki Page RSS" />
+		</execute>
+
+		<execute macro="WikiEntry#viewPageContentBody">
+			<var name="wikiPageContent" value="Wiki Page Content" />
+		</execute>
+
+		<execute macro="WikiPage#viewRSS">
+			<var name="version" value="1.0" />
+			<var name="wikiNodeName" value="Main" />
+			<var name="wikiPageContent" value="Wiki Page Content" />
+			<var name="wikiPageTitle" value="Wiki Page RSS" />
 		</execute>
 	</command>
 </definition>

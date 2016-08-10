@@ -1,55 +1,69 @@
-buildscript {
-	repositories {
-		mavenLocal()
+import com.liferay.gradle.util.GradleUtil
 
-		maven {
-			url "http://cdn.repository.liferay.com/nexus/content/groups/public"
-		}
+buildscript {
+	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.poshi.runner", version: "1.0.11"
 	}
 
-	dependencies {
-		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.poshi.runner", version: "latest.release"
+	repositories {
+		if (!Boolean.getBoolean("maven.local.ignore")) {
+			mavenLocal()
+		}
+
+		maven {
+			url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+		}
 	}
 }
 
 apply plugin: "com.liferay.poshi.runner"
 
+task updateGradleCache
+
+configurations {
+	sikuliComplete
+}
+
+dependencies {
+	["x86", "x86_64"].each {
+		sikuliComplete classifier: "linux-${it}", group: "org.bytedeco.javacpp-presets", name: "opencv", version: poshiRunner.openCVVersion
+		sikuliComplete classifier: "windows-${it}", group: "org.bytedeco.javacpp-presets", name: "opencv", version: poshiRunner.openCVVersion
+	}
+
+	sikuliComplete classifier: "macosx-x86_64", group: "org.bytedeco.javacpp-presets", name: "opencv", version: poshiRunner.openCVVersion
+}
+
 poshiRunner {
-	if (project.hasProperty("componentNames")) {
-		poshiProperty "component.names", project.properties["componentNames"]
+	if (project.hasProperty("poshiRunnerExtProperties")) {
+		poshiPropertiesFile = new File(projectDir.parentFile, project.properties["poshiRunnerExtProperties"])
 	}
 
-	if (project.hasProperty("productNames")) {
-		poshiProperty "product.names", project.properties["productNames"]
-	}
-
-	if (project.hasProperty("saveScreenshot")) {
-		poshiProperty "save.screenshot", project.properties["saveScreenshot"]
-	}
-
-	if (project.hasProperty("seleniumLoggerEnabled")) {
-		poshiProperty "selenium.logger.enabled", project.properties["seleniumLoggerEnabled"]
-	}
-
-	poshiProperty "test.base.dir.name", "test/functional"
-
-	if (project.hasProperty("testCaseAvailablePropertyNames")) {
-		poshiProperty "test.case.available.property.names", project.properties["testCaseAvailablePropertyNames"]
-	}
-
-	poshiProperty "test.dependencies.dir.name", "com/liferay/portalweb/dependencies"
-
-	if (project.hasProperty("testSkipTearDown")) {
-		poshiProperty "test.skip.tear.down", project.properties["testSkipTearDown"]
-	}
-
-	version = "1.0.6"
+	version = "1.0.43"
 }
 
 repositories {
-	mavenLocal()
+	if (!Boolean.getBoolean("maven.local.ignore")) {
+		mavenLocal()
+	}
 
 	maven {
-		url "http://cdn.repository.liferay.com/nexus/content/groups/public"
+		url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+	}
+}
+
+updateGradleCache << {
+	configurations.poshiRunner.resolve()
+	configurations.sikuliComplete.resolve()
+}
+
+if (GradleUtil.getProperty(project, "local", false)) {
+	File localPoshiDir = file("../tools/sdk/dependencies/com.liferay.poshi.runner/lib")
+
+	dependencies {
+		poshiRunner fileTree(dir: localPoshiDir, include: "*.jar")
+	}
+
+	expandPoshiRunner {
+		from zipTree(new File(localPoshiDir, "com.liferay.poshi.runner.jar"))
 	}
 }

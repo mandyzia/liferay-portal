@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service.persistence.impl;
 
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBType;
 import com.liferay.portal.kernel.dao.orm.CustomSQLParam;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -22,6 +24,14 @@ import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.Type;
 import com.liferay.portal.kernel.dao.orm.WildcardMode;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.OrganizationUtil;
+import com.liferay.portal.kernel.service.persistence.RoleUtil;
+import com.liferay.portal.kernel.service.persistence.UserFinder;
+import com.liferay.portal.kernel.service.persistence.UserUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -30,21 +40,16 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.User;
 import com.liferay.portal.model.impl.UserImpl;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.persistence.OrganizationUtil;
-import com.liferay.portal.service.persistence.RoleUtil;
-import com.liferay.portal.service.persistence.UserFinder;
-import com.liferay.portal.service.persistence.UserUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.util.dao.orm.CustomSQLUtil;
 
 import java.io.Serializable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -58,8 +63,7 @@ import java.util.Map;
  * @author Connor McKay
  * @author Shuyang Zhou
  */
-public class UserFinderImpl
-	extends BasePersistenceImpl<User> implements UserFinder {
+public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 
 	public static final String COUNT_BY_SOCIAL_USERS =
 		UserFinder.class.getName() + ".countBySocialUsers";
@@ -78,6 +82,18 @@ public class UserFinderImpl
 
 	public static final String FIND_BY_SOCIAL_USERS =
 		UserFinder.class.getName() + ".findBySocialUsers";
+
+	public static final String FIND_BY_USERS_GROUPS =
+		UserFinder.class.getName() + ".findByUsersGroups";
+
+	public static final String FIND_BY_USERS_ORGS =
+		UserFinder.class.getName() + ".findByUsersOrgs";
+
+	public static final String FIND_BY_USERS_ORGS_GROUP =
+		UserFinder.class.getName() + ".findByUsersOrgsGroup";
+
+	public static final String FIND_BY_USERS_USER_GROUPS =
+		UserFinder.class.getName() + ".findByUsersUserGroups";
 
 	public static final String FIND_BY_C_FN_MN_LN_SN_EA_S =
 		UserFinder.class.getName() + ".findByC_FN_MN_LN_SN_EA_S";
@@ -132,6 +148,140 @@ public class UserFinderImpl
 
 	public static final String JOIN_BY_SOCIAL_RELATION_TYPE =
 		UserFinder.class.getName() + ".joinBySocialRelationType";
+
+	@Override
+	public Map<Long, Integer> countByGroups(
+		long companyId, int status, long[] groupIds) {
+
+		if (ArrayUtil.isEmpty(groupIds)) {
+			return Collections.emptyMap();
+		}
+
+		Arrays.sort(groupIds);
+
+		Session session = null;
+
+		try {
+			Map<Long, Integer> counts = new HashMap<>();
+
+			session = openSession();
+
+			StringBundler sb = null;
+
+			DB db = getDB();
+
+			boolean sybase = false;
+
+			if (db.getDBType() == DBType.SYBASE) {
+				sybase = true;
+			}
+
+			if (sybase) {
+				sb = new StringBundler(25);
+			}
+			else {
+				sb = new StringBundler(17);
+			}
+
+			sb.append("SELECT groupId, COUNT(DISTINCT userId) FROM (");
+
+			if (sybase) {
+				sb.append("SELECT userId, groupId FROM ");
+			}
+
+			sb.append(StringPool.OPEN_PARENTHESIS);
+			sb.append(CustomSQLUtil.get(FIND_BY_USERS_GROUPS));
+			sb.append(StringPool.CLOSE_PARENTHESIS);
+
+			if (sybase) {
+				sb.append(" USERS_GROUPS");
+			}
+
+			sb.append(" UNION ALL ");
+
+			if (sybase) {
+				sb.append("SELECT userId, groupId FROM ");
+			}
+
+			sb.append(StringPool.OPEN_PARENTHESIS);
+			sb.append(CustomSQLUtil.get(FIND_BY_USERS_ORGS));
+			sb.append(StringPool.CLOSE_PARENTHESIS);
+
+			if (sybase) {
+				sb.append(" USERS_ORGS");
+			}
+
+			sb.append(" UNION ALL ");
+
+			if (sybase) {
+				sb.append("SELECT userId, groupId FROM ");
+			}
+
+			sb.append(StringPool.OPEN_PARENTHESIS);
+			sb.append(CustomSQLUtil.get(FIND_BY_USERS_ORGS_GROUP));
+			sb.append(StringPool.CLOSE_PARENTHESIS);
+
+			if (sybase) {
+				sb.append(" USERS_ORGS_GROUP");
+			}
+
+			sb.append(" UNION ALL ");
+
+			if (sybase) {
+				sb.append("SELECT userId, groupId FROM ");
+			}
+
+			sb.append(StringPool.OPEN_PARENTHESIS);
+			sb.append(CustomSQLUtil.get(FIND_BY_USERS_USER_GROUPS));
+			sb.append(StringPool.CLOSE_PARENTHESIS);
+
+			if (sybase) {
+				sb.append(" USERS_USER_GROUPS");
+			}
+
+			sb.append(") TEMP_TABLE GROUP BY groupId");
+
+			String sql = StringUtil.replace(
+				sb.toString(), "[$GROUP_ID$]",
+				StringPool.OPEN_PARENTHESIS + StringUtil.merge(groupIds) +
+					StringPool.CLOSE_PARENTHESIS);
+
+			if (status == WorkflowConstants.STATUS_ANY) {
+				sql = StringUtil.replace(sql, _STATUS_SQL, StringPool.BLANK);
+			}
+
+			SQLQuery q = session.createSynchronizedSQLQuery(sql);
+
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			for (int i = 0; i < 4; i++) {
+				qPos.add(companyId);
+				qPos.add(false);
+
+				if (status != WorkflowConstants.STATUS_ANY) {
+					qPos.add(status);
+				}
+			}
+
+			List<Object[]> list = (List<Object[]>)QueryUtil.list(
+				q, getDialect(), QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+			for (Object[] objects : list) {
+				Number groupId = (Number)objects[0];
+				Number count = (Number)objects[1];
+
+				counts.put(groupId.longValue(), count.intValue());
+			}
+
+			return counts;
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
 
 	@Override
 	public int countBySocialUsers(
@@ -755,7 +905,7 @@ public class UserFinderImpl
 				sql = StringUtil.replace(sql, _STATUS_SQL, StringPool.BLANK);
 			}
 
-			StringBundler sb = new StringBundler(14);
+			StringBundler sb = new StringBundler(20);
 
 			sb.append(StringPool.OPEN_PARENTHESIS);
 			sb.append(replaceJoinAndWhere(sql, params1));
@@ -1180,8 +1330,8 @@ public class UserFinderImpl
 				for (Organization organization : organizationsTree) {
 					sb.append("(Organization_.treePath LIKE '%/");
 					sb.append(organization.getOrganizationId());
-					sb.append("/%')");
-					sb.append(" OR ");
+					sb.append("/%') ");
+					sb.append("OR ");
 				}
 
 				sb.setIndex(sb.index() - 1);

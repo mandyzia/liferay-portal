@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchRepositoryException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchRepositoryException;
+import com.liferay.portal.kernel.model.Repository;
+import com.liferay.portal.kernel.service.RepositoryLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.RepositoryPersistence;
+import com.liferay.portal.kernel.service.persistence.RepositoryUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -31,17 +35,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Repository;
-import com.liferay.portal.service.RepositoryLocalServiceUtil;
-import com.liferay.portal.service.persistence.RepositoryPersistence;
-import com.liferay.portal.service.persistence.RepositoryUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -52,14 +52,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class RepositoryPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -144,6 +146,8 @@ public class RepositoryPersistenceTest {
 
 		newRepository.setDlFolderId(RandomTestUtil.nextLong());
 
+		newRepository.setLastPublishDate(RandomTestUtil.nextDate());
+
 		_repositories.add(_persistence.update(newRepository));
 
 		Repository existingRepository = _persistence.findByPrimaryKey(newRepository.getPrimaryKey());
@@ -180,6 +184,9 @@ public class RepositoryPersistenceTest {
 			newRepository.getTypeSettings());
 		Assert.assertEquals(existingRepository.getDlFolderId(),
 			newRepository.getDlFolderId());
+		Assert.assertEquals(Time.getShortTimestamp(
+				existingRepository.getLastPublishDate()),
+			Time.getShortTimestamp(newRepository.getLastPublishDate()));
 	}
 
 	@Test
@@ -253,8 +260,8 @@ public class RepositoryPersistenceTest {
 			true, "uuid", true, "repositoryId", true, "groupId", true,
 			"companyId", true, "userId", true, "userName", true, "createDate",
 			true, "modifiedDate", true, "classNameId", true, "name", true,
-			"description", true, "portletId", true, "typeSettings", true,
-			"dlFolderId", true);
+			"description", true, "portletId", true, "dlFolderId", true,
+			"lastPublishDate", true);
 	}
 
 	@Test
@@ -363,11 +370,9 @@ public class RepositoryPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = RepositoryLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<Repository>() {
 				@Override
-				public void performAction(Object object) {
-					Repository repository = (Repository)object;
-
+				public void performAction(Repository repository) {
 					Assert.assertNotNull(repository);
 
 					count.increment();
@@ -461,20 +466,20 @@ public class RepositoryPersistenceTest {
 
 		Repository existingRepository = _persistence.findByPrimaryKey(newRepository.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingRepository.getUuid(),
+		Assert.assertTrue(Objects.equals(existingRepository.getUuid(),
 				ReflectionTestUtil.invoke(existingRepository,
 					"getOriginalUuid", new Class<?>[0])));
-		Assert.assertEquals(existingRepository.getGroupId(),
-			ReflectionTestUtil.invoke(existingRepository, "getOriginalGroupId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingRepository.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingRepository,
+				"getOriginalGroupId", new Class<?>[0]));
 
-		Assert.assertEquals(existingRepository.getGroupId(),
-			ReflectionTestUtil.invoke(existingRepository, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingRepository.getName(),
+		Assert.assertEquals(Long.valueOf(existingRepository.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingRepository,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertTrue(Objects.equals(existingRepository.getName(),
 				ReflectionTestUtil.invoke(existingRepository,
 					"getOriginalName", new Class<?>[0])));
-		Assert.assertTrue(Validator.equals(existingRepository.getPortletId(),
+		Assert.assertTrue(Objects.equals(existingRepository.getPortletId(),
 				ReflectionTestUtil.invoke(existingRepository,
 					"getOriginalPortletId", new Class<?>[0])));
 	}
@@ -511,6 +516,8 @@ public class RepositoryPersistenceTest {
 		repository.setTypeSettings(RandomTestUtil.randomString());
 
 		repository.setDlFolderId(RandomTestUtil.nextLong());
+
+		repository.setLastPublishDate(RandomTestUtil.nextDate());
 
 		_repositories.add(_persistence.update(repository));
 

@@ -34,33 +34,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class AUIUtil {
 
-	/**
-	 * @deprecated As of 6.2.0
-	 */
-	@Deprecated
-	public static final String BUTTON_INPUT_PREFIX = "btn-input";
-
 	public static final String BUTTON_PREFIX = "btn";
 
 	public static final String FIELD_PREFIX = "field";
-
-	/**
-	 * @deprecated As of 6.2.0
-	 */
-	@Deprecated
-	public static final String INPUT_PREFIX = "field-input";
-
-	/**
-	 * @deprecated As of 6.2.0
-	 */
-	@Deprecated
-	public static final String LABEL_CHOICE_PREFIX = "choice-label";
-
-	/**
-	 * @deprecated As of 6.2.0
-	 */
-	@Deprecated
-	public static final String LABEL_FIELD_PREFIX = "field-label";
 
 	public static String buildControlGroupCss(
 		boolean inlineField, String inlineLabel, String wrapperCssClass,
@@ -125,37 +101,8 @@ public class AUIUtil {
 		return sb.toString();
 	}
 
-	/**
-	 * @deprecated As of 6.2.0, replaced by {@link #buildCss(String, boolean,
-	 *             boolean, boolean, String)}
-	 */
-	@Deprecated
-	public static String buildCss(
-		String prefix, String baseTypeCss, boolean disabled, boolean first,
-		boolean last, String cssClass) {
-
-		return buildCss(prefix, disabled, first, last, cssClass);
-	}
-
 	public static String buildData(Map<String, Object> data) {
-		if ((data == null) || data.isEmpty()) {
-			return StringPool.BLANK;
-		}
-
-		StringBundler sb = new StringBundler(data.size() * 5);
-
-		for (Map.Entry<String, Object> entry : data.entrySet()) {
-			String dataKey = entry.getKey();
-			String dataValue = String.valueOf(entry.getValue());
-
-			sb.append("data-");
-			sb.append(dataKey);
-			sb.append("=\"");
-			sb.append(HtmlUtil.escapeAttribute(dataValue));
-			sb.append("\" ");
-		}
-
-		return sb.toString();
+		return HtmlUtil.buildData(data);
 	}
 
 	public static String buildLabel(
@@ -172,8 +119,7 @@ public class AUIUtil {
 			if (inlineField) {
 				sb.append("class=\"");
 				sb.append(baseType);
-				sb.append("-inline");
-				sb.append("\" ");
+				sb.append("-inline\" ");
 			}
 		}
 		else {
@@ -187,18 +133,6 @@ public class AUIUtil {
 		}
 
 		return sb.toString();
-	}
-
-	/**
-	 * @deprecated As of 6.2.0, replaced by {@link #buildLabel(String, boolean,
-	 *             boolean, String)}
-	 */
-	@Deprecated
-	public static String buildLabel(
-		String inlineLabel, boolean showForLabel, String forLabel,
-		boolean choiceField) {
-
-		return buildLabel(StringPool.BLANK, false, showForLabel, forLabel);
 	}
 
 	public static Object getAttribute(
@@ -219,6 +153,11 @@ public class AUIUtil {
 		}
 
 		return null;
+	}
+
+	public static String getNamespace(HttpServletRequest request) {
+		return GetterUtil.getString(
+			request.getAttribute("aui:form:portletNamespace"));
 	}
 
 	public static String getNamespace(

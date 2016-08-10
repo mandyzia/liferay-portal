@@ -14,6 +14,13 @@
 
 package com.liferay.portal.repository.liferayrepository.model;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileEntryConstants;
+import com.liferay.document.library.kernel.model.DLFileVersion;
+import com.liferay.document.library.kernel.service.DLAppHelperLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileVersionLocalServiceUtil;
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lock.Lock;
@@ -27,20 +34,12 @@ import com.liferay.portal.kernel.repository.model.FileShortcut;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.repository.model.RepositoryModelOperation;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portlet.documentlibrary.model.DLFileEntry;
-import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
-import com.liferay.portlet.documentlibrary.model.DLFileVersion;
-import com.liferay.portlet.documentlibrary.service.DLAppHelperLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.service.DLFileVersionLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
 import com.liferay.portlet.documentlibrary.util.RepositoryModelUtil;
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -48,6 +47,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Alexander Chow
@@ -89,7 +89,7 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)obj;
 
-		if (Validator.equals(_dlFileEntry, liferayFileEntry._dlFileEntry)) {
+		if (Objects.equals(_dlFileEntry, liferayFileEntry._dlFileEntry)) {
 			return true;
 		}
 
@@ -216,6 +216,11 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	}
 
 	@Override
+	public int getFileVersionsCount(int status) {
+		return _dlFileEntry.getFileVersionsCount(status);
+	}
+
+	@Override
 	public Folder getFolder() {
 		Folder folder = null;
 
@@ -247,6 +252,11 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	@Override
 	public String getIconCssClass() {
 		return _dlFileEntry.getIconCssClass();
+	}
+
+	@Override
+	public Date getLastPublishDate() {
+		return _dlFileEntry.getLastPublishDate();
 	}
 
 	@Override
@@ -520,8 +530,8 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	}
 
 	@Override
-	public void setCreateDate(Date date) {
-		_dlFileEntry.setCreateDate(date);
+	public void setCreateDate(Date createDate) {
+		_dlFileEntry.setCreateDate(createDate);
 	}
 
 	@Override
@@ -530,8 +540,13 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	}
 
 	@Override
-	public void setModifiedDate(Date date) {
-		_dlFileEntry.setModifiedDate(date);
+	public void setLastPublishDate(Date lastPublishDate) {
+		_dlFileEntry.setLastPublishDate(lastPublishDate);
+	}
+
+	@Override
+	public void setModifiedDate(Date modifiedDate) {
+		_dlFileEntry.setModifiedDate(modifiedDate);
 	}
 
 	public void setPrimaryKey(long primaryKey) {

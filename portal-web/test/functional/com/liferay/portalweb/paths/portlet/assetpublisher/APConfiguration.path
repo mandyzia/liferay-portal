@@ -27,22 +27,22 @@
 <!--SUBSCRIPTIONS-->
 <tr>
 	<td>SUBSCRIPTIONS_ENABLE_RSS_SUBSCRIPTION_LABEL</td>
-	<td>//label[@for='_86_enableRss']</td>
+	<td>//label[contains(@for,'enableRss')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUBSCRIPTIONS_ENABLE_RSS_SUBSCRIPTION</td>
-	<td>//input[@id='_86_enableRss']</td>
+	<td>//input[contains(@id,'enableRss')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUBSCRIPTIONS_ENABLE_EMAIL_SUBSCRIPTION_LABEL</td>
-	<td>//label[@for='_86_enableEmailSubscription']</td>
+	<td>//label[contains(@for,'enableEmailSubscription')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUBSCRIPTIONS_ENABLE_EMAIL_SUBSCRIPTION</td>
-	<td>//input[@id='_86_enableEmailSubscription']</td>
+	<td>//input[contains(@id,'enableEmailSubscription')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -63,12 +63,12 @@
 </tr>
 <tr>
 	<td>SOURCE_CURRENT_SCOPE_NAME</td>
-	<td>//div[contains(@id,'groupsSearchContainer')]//tr[contains(.,'Current Site (${key_siteName})')]/td[1]/span/span</td>
+	<td>//div[contains(@class,'open')]//a[@role='menuitem' and contains(.,'Current Site')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SOURCE_SCOPE_NAME</td>
-	<td>//div[contains(@id,'groupsSearchContainer')]//tr[contains(.,'${key_siteName}')]/td[1]/span/span</td>
+	<td>//div[contains(@id,'groupsSearchContainer')]//tr[contains(.,'${key_siteName}')]/td[1]</td>
 	<td></td>
 </tr>
 <tr>
@@ -78,7 +78,7 @@
 </tr>
 <tr>
 	<td>SOURCE_SCOPE_DELETE</td>
-	<td>//div[contains(@id,'groupsSearchContainer')]//tr[contains(.,'${key_siteName}')]/td[3]/span/a</td>
+	<td>//div[contains(@id,'groupsSearchContainer')]//tr[contains(.,'${key_siteName}')]/td[3]//span/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -179,11 +179,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>FILTER_LAYOUT_TAGS_CHECKBOX</td>
-	<td>//input[contains(@id,'mergeLayoutTags')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -243,7 +238,7 @@
 <!--ASSET_SELECTION_MANUAL_ASSET_ENTRIES-->
 <tr>
 	<td>ASSET_SELECTION_MANUAL_ASSET_ENTRIES_SELECT_BUTTON</td>
-	<td>//legend[contains(.,'Asset Entries')]/following-sibling::*//a[@title='Select']</td>
+	<td>//div[contains(.,'Asset Entries')]/following-sibling::div//a[@title='Select']</td>
 	<td></td>
 </tr>
 <tr>
@@ -252,13 +247,8 @@
 	<td></td>
 </tr>
 <tr>
-	<td>ASSET_SELECTION_MANUAL_ASSET_ENTRIES_SELECT_CONTENT_CHOOSE_BUTTON</td>
-	<td>//tr[contains(.,'${key_assetTitle}')]//button[contains(.,'Choose')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>ASSET_SELECTION_MANUAL_ASSET_ENTRIES_SELECT_CONTENT_CHOOSE_BUTTON</td>
-	<td>//tr//td[6]/button[contains(.,'Choose')]</td>
+	<td>ASSET_SELECTION_MANUAL_ASSET_ENTRIES_SELECT_CONTENT_LINK</td>
+	<td>//a[@data-assettitle='${key_assetTitle}']</td>
 	<td></td>
 </tr>
 </tbody>

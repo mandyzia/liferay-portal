@@ -24,23 +24,48 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SCRIPT_VARIABLE</td>
+	<td>//div[contains(@class,'palette-section') and contains(@id,'variable')]//ul/li/span[contains(@data-title,'${key_fieldName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SCRIPT_FIELD</td>
-	<td>//div[@class='palette-section' and contains(.,'Fields')]/ul/li/span[contains(.,'${key_fieldName}')]</td>
+	<td>//div[contains(@class,'palette-section') and contains(@id,'fields')]//ul/li/span[contains(.,'${key_fieldName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCRIPT_UTIL</td>
+	<td>//div[contains(@class,'palette-section') and contains(@id,'util')]//ul/li/span[contains(@data-title,'${key_fieldName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SCRIPT_CONTENT_FIELD</td>
+	<td>//div[contains(@class,'ace_text-layer')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCRIPT_CONTENT_FIELD_TEXT_AREA</td>
 	<td>//div[contains(@id,'richEditor')]/textarea</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SCRIPT_FILE_FIELD</td>
-	<td>//input[contains(@id,'script')]</td>
+	<td>//div[contains(@class,'input-text-wrapper')]/input[contains(@id,'script')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DETAILS</td>
-	<td>//div[@id='templateDetailsSectionPanel']/div/div</td>
+	<td>//div[@id='templateDetailsSectionPanel']/div/div/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DETAILS_TOGGLE</td>
+	<td>//div[@id='templateDetailsSectionPanel']//a/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SAVE_BUTTON</td>
+	<td>//button[contains(.,'Save') and contains(@onclick,'save')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -61,7 +86,7 @@
 </tr>
 <tr>
 	<td>DETAILS_STRUCTURE</td>
-	<td>//input[contains(@id,'structure')]</td>
+	<td>//input[contains(@id,'structure') and contains(@type,'text')]</td>
 	<td></td>
 </tr>
 <tr>

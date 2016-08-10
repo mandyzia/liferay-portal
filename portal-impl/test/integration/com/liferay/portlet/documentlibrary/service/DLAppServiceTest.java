@@ -14,7 +14,20 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
+import com.liferay.document.library.kernel.exception.DuplicateFileEntryException;
+import com.liferay.document.library.kernel.exception.FileExtensionException;
+import com.liferay.document.library.kernel.exception.FileNameException;
+import com.liferay.document.library.kernel.exception.FileSizeException;
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileEntryConstants;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.model.DLSyncConstants;
+import com.liferay.document.library.kernel.service.DLAppServiceUtil;
+import com.liferay.document.library.kernel.service.DLTrashServiceUtil;
 import com.liferay.portal.kernel.comment.CommentManagerUtil;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -22,7 +35,9 @@ import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.messaging.MessageListener;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
@@ -31,7 +46,10 @@ import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.test.AssertUtils;
+import com.liferay.portal.kernel.test.context.ContextUserReplace;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.rule.Sync;
@@ -44,28 +62,17 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.test.WorkflowHandlerInvocationCounter;
-import com.liferay.portal.model.User;
 import com.liferay.portal.security.permission.DoAsUserThread;
-import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.test.ServiceTestUtil;
+import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
 import com.liferay.portal.test.rule.ExpectedLog;
 import com.liferay.portal.test.rule.ExpectedLogs;
 import com.liferay.portal.test.rule.ExpectedType;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.test.PrefsPropsTemporarySwapper;
-import com.liferay.portlet.asset.model.AssetEntry;
-import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.DuplicateFileException;
-import com.liferay.portlet.documentlibrary.FileExtensionException;
-import com.liferay.portlet.documentlibrary.FileNameException;
-import com.liferay.portlet.documentlibrary.FileSizeException;
-import com.liferay.portlet.documentlibrary.model.DLFileEntry;
-import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
-import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
-import com.liferay.portlet.documentlibrary.model.DLSyncConstants;
 
 import java.io.File;
 import java.io.InputStream;
@@ -74,9 +81,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import jodd.util.MimeTypes;
+
 import org.hibernate.util.JDBCExceptionReporter;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -97,7 +108,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -134,20 +145,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 			}
 		}
 
-		@Test
-		public void shouldCreateDiscussion() throws Exception {
-			FileEntry fileEntry = addFileEntry(
-				group.getGroupId(), parentFolder.getFolderId());
-
-			boolean hasDiscussion = CommentManagerUtil.hasDiscussion(
-				DLFileEntryConstants.getClassName(),
-				fileEntry.getFileEntryId());
-
-			Assert.assertEquals(
-				PropsValues.DL_FILE_ENTRY_COMMENTS_ENABLED, hasDiscussion);
-		}
-
-		@Test(expected = DuplicateFileException.class)
+		@Test(expected = DuplicateFileEntryException.class)
 		public void shouldFailIfDuplicateNameAndExtensionInFolder1()
 			throws Exception {
 
@@ -159,7 +157,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				_FILE_NAME, null);
 		}
 
-		@Test(expected = DuplicateFileException.class)
+		@Test(expected = DuplicateFileEntryException.class)
 		public void shouldFailIfDuplicateNameAndExtensionInFolder2()
 			throws Exception {
 
@@ -171,7 +169,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				_STRIPPED_FILE_NAME, null);
 		}
 
-		@Test(expected = DuplicateFileException.class)
+		@Test(expected = DuplicateFileEntryException.class)
 		public void shouldFailIfDuplicateNameAndExtensionInFolder3()
 			throws Exception {
 
@@ -183,7 +181,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				_STRIPPED_FILE_NAME, _FILE_NAME, null);
 		}
 
-		@Test(expected = DuplicateFileException.class)
+		@Test(expected = DuplicateFileEntryException.class)
 		public void shouldFailIfDuplicateNameInFolder() throws Exception {
 			addFileEntry(group.getGroupId(), parentFolder.getFolderId());
 			addFileEntry(group.getGroupId(), parentFolder.getFolderId());
@@ -317,9 +315,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@ExpectedLogs(
 			expectedLogs = {
 				@ExpectedLog(
-					expectedLog =
-						"Deadlock found when trying to get lock; try " +
-							"restarting transaction",
+					expectedLog = "Deadlock found when trying to get lock; try restarting transaction",
 					expectedType = ExpectedType.EXACT
 				),
 				@ExpectedLog(
@@ -504,7 +500,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -548,7 +544,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -628,7 +624,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -657,7 +653,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -730,7 +726,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -768,7 +764,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -791,7 +787,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				serviceContext);
 
-			DLAppServiceUtil.moveFolderToTrash(folder.getFolderId());
+			DLTrashServiceUtil.moveFolderToTrash(folder.getFolderId());
 
 			DLAppServiceUtil.deleteFolder(folder.getFolderId());
 
@@ -834,9 +830,9 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				serviceContext);
 
-			DLAppServiceUtil.moveFolderToTrash(subfolder.getFolderId());
+			DLTrashServiceUtil.moveFolderToTrash(subfolder.getFolderId());
 
-			DLAppServiceUtil.moveFolderToTrash(folder.getFolderId());
+			DLTrashServiceUtil.moveFolderToTrash(folder.getFolderId());
 
 			DLAppServiceUtil.deleteFolder(folder.getFolderId());
 
@@ -852,7 +848,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -875,7 +871,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				serviceContext);
 
-			DLAppServiceUtil.moveFolderToTrash(folder.getFolderId());
+			DLTrashServiceUtil.moveFolderToTrash(folder.getFolderId());
 
 			folder = DLAppServiceUtil.getFolder(folder.getFolderId());
 
@@ -904,9 +900,9 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				serviceContext);
 
-			DLAppServiceUtil.moveFolderToTrash(subfolder.getFolderId());
+			DLTrashServiceUtil.moveFolderToTrash(subfolder.getFolderId());
 
-			DLAppServiceUtil.moveFolderToTrash(folder.getFolderId());
+			DLTrashServiceUtil.moveFolderToTrash(folder.getFolderId());
 
 			folder = DLAppServiceUtil.getFolder(folder.getFolderId());
 
@@ -926,7 +922,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -949,6 +945,94 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 			Assert.assertEquals(1, moveCounter.get());
 		}
 
+		@Test
+		public void shouldHaveSameFileExtension() throws Exception {
+			FileEntry fileEntry = addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(), _FILE_NAME,
+				_STRIPPED_FILE_NAME, null);
+
+			ServiceContext serviceContext =
+				ServiceContextTestUtil.getServiceContext(
+					targetGroup.getGroupId());
+
+			FileEntry copiedFileEntry = DLAppServiceUtil.moveFileEntry(
+				fileEntry.getFileEntryId(),
+				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, serviceContext);
+
+			Assert.assertEquals(
+				fileEntry.getExtension(), copiedFileEntry.getExtension());
+		}
+
+	}
+
+	@Sync
+	public static class WhenMovingAFileEntryToTrash extends BaseDLAppTestCase {
+
+		@ClassRule
+		@Rule
+		public static final AggregateTestRule aggregateTestRule =
+			new AggregateTestRule(
+				new LiferayIntegrationTestRule(),
+				SynchronousDestinationTestRule.INSTANCE);
+
+		@Before
+		@Override
+		public void setUp() throws Exception {
+			super.setUp();
+
+			_fileEntry = addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId());
+		}
+
+		@Test
+		public void shouldCancelCheckout() throws Exception {
+			DLAppServiceUtil.checkOutFileEntry(
+				_fileEntry.getFileEntryId(),
+				ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+
+			Assert.assertTrue(_fileEntry.isCheckedOut());
+
+			DLTrashServiceUtil.moveFileEntryToTrash(
+				_fileEntry.getFileEntryId());
+
+			_fileEntry = DLAppServiceUtil.getFileEntry(
+				_fileEntry.getFileEntryId());
+
+			Assert.assertFalse(_fileEntry.isCheckedOut());
+		}
+
+		@Test
+		public void shouldDeletePWCAssetEntry() throws Exception {
+			DLAppServiceUtil.checkOutFileEntry(
+				_fileEntry.getFileEntryId(),
+				ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+
+			FileVersion fileVersion = _fileEntry.getLatestFileVersion(false);
+
+			Assert.assertNotNull(
+				AssetEntryLocalServiceUtil.fetchEntry(
+					DLFileEntryConstants.getClassName(),
+					fileVersion.getFileVersionId()));
+
+			DLTrashServiceUtil.moveFileEntryToTrash(
+				_fileEntry.getFileEntryId());
+
+			Assert.assertNull(
+				AssetEntryLocalServiceUtil.fetchEntry(
+					DLFileEntryConstants.getClassName(),
+					fileVersion.getFileVersionId()));
+		}
+
+		@After
+		@Override
+		public void tearDown() throws Exception {
+			DLAppServiceUtil.deleteFileEntry(_fileEntry.getFileEntryId());
+
+			super.tearDown();
+		}
+
+		private FileEntry _fileEntry;
+
 	}
 
 	@Sync
@@ -958,7 +1042,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -991,7 +1075,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -1069,7 +1153,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -1141,7 +1225,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -1214,7 +1298,8 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 					new PrefsPropsTemporarySwapper(
 						PropsKeys.DL_FILE_MAX_SIZE, 1L)) {
 
-				byte[] bytes = RandomTestUtil.randomBytes();
+				byte[] bytes = RandomTestUtil.randomBytes(
+					TikaSafeRandomizerBumper.INSTANCE);
 
 				DLAppServiceUtil.updateFileEntry(
 					fileEntry.getFileEntryId(), fileName,
@@ -1365,7 +1450,7 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Test
@@ -1397,6 +1482,162 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 				RandomTestUtil.randomString(), StringPool.BLANK,
 				serviceContext);
+		}
+
+	}
+
+	@Sync
+	public static class WhenViewingFolderContents extends BaseDLAppTestCase {
+
+		@ClassRule
+		@Rule
+		public static final AggregateTestRule aggregateTestRule =
+			new AggregateTestRule(
+				new LiferayIntegrationTestRule(),
+				SynchronousDestinationTestRule.INSTANCE);
+
+		@Test
+		public void shouldCountDraftsIfOwner() throws Exception {
+			ServiceContext serviceContext =
+				ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			int foldersAndFileEntriesAndFileShortcutsCount =
+				DLAppServiceUtil.getFoldersAndFileEntriesAndFileShortcutsCount(
+					group.getGroupId(), parentFolder.getFolderId(),
+					WorkflowConstants.STATUS_APPROVED, false);
+
+			Assert.assertEquals(2, foldersAndFileEntriesAndFileShortcutsCount);
+		}
+
+		@Test
+		public void shouldNotCountDraftsIfNotOwner() throws Exception {
+			ServiceContext serviceContext =
+				ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			User user = UserTestUtil.addGroupUser(group, "User");
+
+			try (ContextUserReplace contextUserReplace =
+					new ContextUserReplace(user)) {
+
+				int foldersAndFileEntriesAndFileShortcutsCount =
+					DLAppServiceUtil.
+						getFoldersAndFileEntriesAndFileShortcutsCount(
+							group.getGroupId(), parentFolder.getFolderId(),
+							WorkflowConstants.STATUS_APPROVED, false);
+
+				Assert.assertEquals(
+					1, foldersAndFileEntriesAndFileShortcutsCount);
+			}
+			finally {
+				UserLocalServiceUtil.deleteUser(user.getUserId());
+			}
+		}
+
+		@Test
+		public void shouldNotReturnDraftsIfNotOwner() throws Exception {
+			ServiceContext serviceContext =
+				ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			User user = UserTestUtil.addGroupUser(group, "User");
+
+			try (ContextUserReplace contextUserReplace =
+					new ContextUserReplace(user)) {
+
+				List<Object> foldersAndFileEntriesAndFileShortcuts =
+					DLAppServiceUtil.getFoldersAndFileEntriesAndFileShortcuts(
+						group.getGroupId(), parentFolder.getFolderId(),
+						WorkflowConstants.STATUS_APPROVED, false,
+						QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+				Assert.assertEquals(
+					1, foldersAndFileEntriesAndFileShortcuts.size());
+			}
+			finally {
+				UserLocalServiceUtil.deleteUser(user.getUserId());
+			}
+		}
+
+		@Test
+		public void shouldReturnDraftsIfOwner() throws Exception {
+			ServiceContext serviceContext =
+				ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+
+			DLAppServiceUtil.addFileEntry(
+				group.getGroupId(), parentFolder.getFolderId(),
+				StringUtil.randomString(),
+				MimeTypes.MIME_APPLICATION_OCTET_STREAM,
+				StringUtil.randomString(), StringUtil.randomString(),
+				StringPool.BLANK, (byte[])null, serviceContext);
+
+			List<Object> foldersAndFileEntriesAndFileShortcuts =
+				DLAppServiceUtil.getFoldersAndFileEntriesAndFileShortcuts(
+					group.getGroupId(), parentFolder.getFolderId(),
+					WorkflowConstants.STATUS_APPROVED, false, QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS);
+
+			Assert.assertEquals(
+				2, foldersAndFileEntriesAndFileShortcuts.size());
 		}
 
 	}
@@ -1562,7 +1803,8 @@ public class DLAppServiceTest extends BaseDLAppTestCase {
 		return DLAppServiceUtil.updateFileEntry(
 			fileEntryId, fileName, ContentTypes.TEXT_PLAIN, fileName,
 			StringPool.BLANK, StringPool.BLANK, majorVersion,
-			RandomTestUtil.randomBytes(), serviceContext);
+			RandomTestUtil.randomBytes(TikaSafeRandomizerBumper.INSTANCE),
+			serviceContext);
 	}
 
 	private static final String _FILE_NAME = "Title.txt";

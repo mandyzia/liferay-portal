@@ -15,6 +15,7 @@
 package com.liferay.portal.configuration;
 
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
+import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.IOException;
@@ -86,6 +87,23 @@ public class ConfigurationImplTest {
 	}
 
 	@Test
+	public void testLoadEmptyProperties() throws Exception {
+		TestResourceClassLoader testResourceClassLoader =
+			new TestResourceClassLoader();
+
+		testResourceClassLoader.addPropertiesResource(
+			ConfigurationImplTest.class.getName(), StringPool.BLANK);
+
+		ConfigurationImpl configurationImpl = new ConfigurationImpl(
+			testResourceClassLoader, ConfigurationImplTest.class.getName(),
+			CompanyConstants.SYSTEM, null);
+
+		Properties properties = configurationImpl.getProperties();
+
+		Assert.assertTrue(properties.isEmpty());
+	}
+
+	@Test
 	public void testMultiValueProperty() throws IOException {
 		TestResourceClassLoader testResourceClassLoader =
 			new TestResourceClassLoader();
@@ -95,7 +113,8 @@ public class ConfigurationImplTest {
 			"key1=value1,value2\nkey2=value3\nkey2=value4");
 
 		ConfigurationImpl configurationImpl = new ConfigurationImpl(
-			testResourceClassLoader, ConfigurationImplTest.class.getName());
+			testResourceClassLoader, ConfigurationImplTest.class.getName(),
+			CompanyConstants.SYSTEM, null);
 
 		Assert.assertEquals("value1,value2", configurationImpl.get("key1"));
 		Assert.assertEquals("value3,value4", configurationImpl.get("key2"));
@@ -119,7 +138,8 @@ public class ConfigurationImplTest {
 			"key1=value1\nkey2=${key1},value2");
 
 		ConfigurationImpl configurationImpl = new ConfigurationImpl(
-			testResourceClassLoader, ConfigurationImplTest.class.getName());
+			testResourceClassLoader, ConfigurationImplTest.class.getName(),
+			CompanyConstants.SYSTEM, null);
 
 		Assert.assertEquals("value1", configurationImpl.get("key1"));
 
@@ -144,7 +164,8 @@ public class ConfigurationImplTest {
 			"key1=value1\nkey2=${key1}value2");
 
 		ConfigurationImpl configurationImpl = new ConfigurationImpl(
-			testResourceClassLoader, ConfigurationImplTest.class.getName());
+			testResourceClassLoader, ConfigurationImplTest.class.getName(),
+			CompanyConstants.SYSTEM, null);
 
 		Assert.assertEquals("value1", configurationImpl.get("key1"));
 		Assert.assertEquals("value1value2", configurationImpl.get("key2"));
@@ -160,7 +181,8 @@ public class ConfigurationImplTest {
 			"namespace.key1=value1\nnamespace.key2=value2");
 
 		ConfigurationImpl configurationImpl = new ConfigurationImpl(
-			testResourceClassLoader, ConfigurationImplTest.class.getName());
+			testResourceClassLoader, ConfigurationImplTest.class.getName(),
+			CompanyConstants.SYSTEM, null);
 
 		Properties properties = configurationImpl.getProperties(
 			"namespace.", false);
@@ -216,7 +238,8 @@ public class ConfigurationImplTest {
 			ConfigurationImplTest.class.getName(), "key1=value1\nkey2=value2");
 
 		ConfigurationImpl configurationImpl = new ConfigurationImpl(
-			testResourceClassLoader, ConfigurationImplTest.class.getName());
+			testResourceClassLoader, ConfigurationImplTest.class.getName(),
+			CompanyConstants.SYSTEM, null);
 
 		Assert.assertEquals("value1", configurationImpl.get("key1"));
 		Assert.assertEquals("value2", configurationImpl.get("key2"));

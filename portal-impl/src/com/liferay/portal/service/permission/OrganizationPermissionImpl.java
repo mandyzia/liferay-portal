@@ -15,13 +15,15 @@
 package com.liferay.portal.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.OrganizationConstants;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.kernel.service.permission.OrganizationPermission;
+import com.liferay.portal.kernel.service.permission.PortalPermissionUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.model.Organization;
-import com.liferay.portal.model.OrganizationConstants;
-import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.service.OrganizationLocalServiceUtil;
 
 /**
  * @author Charles May
@@ -133,12 +135,12 @@ public class OrganizationPermissionImpl implements OrganizationPermission {
 				   OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID)) {
 
 			if (actionId.equals(ActionKeys.ADD_ORGANIZATION) &&
-				permissionChecker.hasPermission(
+				(permissionChecker.hasPermission(
 					groupId, Organization.class.getName(),
 					organization.getOrganizationId(),
 					ActionKeys.MANAGE_SUBORGANIZATIONS) ||
-				PortalPermissionUtil.contains(
-					permissionChecker, ActionKeys.ADD_ORGANIZATION)) {
+				 PortalPermissionUtil.contains(
+					 permissionChecker, ActionKeys.ADD_ORGANIZATION))) {
 
 				return true;
 			}

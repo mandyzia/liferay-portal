@@ -24,12 +24,17 @@ import com.liferay.portal.kernel.process.local.LocalProcessLauncher.ProcessConte
 import com.liferay.portal.kernel.process.log.ProcessOutputStream;
 import com.liferay.portal.kernel.resiliency.mpi.MPIHelperUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.ci.AutoBalanceTestCase;
+import com.liferay.portal.kernel.test.junit.BridgeJUnitTestRunner;
+import com.liferay.portal.kernel.test.junit.BridgeJUnitTestRunner.BridgeRunListener;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.test.log.CaptureAppender;
+import com.liferay.portal.test.rule.ExpectedLogs;
+import com.liferay.portal.test.rule.HypersonicServerTestRule;
 import com.liferay.portal.test.rule.PACLTestRule;
 import com.liferay.portal.test.rule.callback.LogAssertionTestCallback;
 import com.liferay.portal.util.InitUtil;
@@ -57,6 +62,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -66,22 +72,20 @@ import java.util.concurrent.Future;
 
 import javax.naming.Context;
 
+import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.Description;
-import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
-import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.BlockJUnit4ClassRunner;
-import org.junit.runners.model.InitializationError;
 
 /**
  * @author Shuyang Zhou
  */
-@RunWith(PACLAggregateTest.PACLAggregateTestRunner.class)
-public class PACLAggregateTest {
+@RunWith(BridgeJUnitTestRunner.class)
+public class PACLAggregateTest extends AutoBalanceTestCase {
+
+	@ClassRule
+	public static final HypersonicServerTestRule hypersonicServerTestRule =
+		HypersonicServerTestRule.INSTANCE;
 
 	@Test
 	public void testPACLTests() throws Exception {
@@ -104,27 +108,6 @@ public class PACLAggregateTest {
 		}
 	}
 
-	public static class PACLAggregateTestRunner extends BlockJUnit4ClassRunner {
-
-		public PACLAggregateTestRunner(Class<?> clazz)
-			throws InitializationError {
-
-			super(clazz);
-		}
-
-		@Override
-		public void run(RunNotifier runNotifier) {
-			_runNotifier = runNotifier;
-
-			System.setProperty("catalina.base", ".");
-
-			super.run(runNotifier);
-		}
-
-		private static RunNotifier _runNotifier;
-
-	}
-
 	protected ProcessConfig createProcessConfig() {
 		Builder builder = new Builder();
 
@@ -136,14 +119,14 @@ public class PACLAggregateTest {
 
 		URL url = PACLAggregateTest.class.getResource("security.policy");
 
-		arguments.add("-Djava.security.policy=" + url.getFile());
+		arguments.add("-Djava.security.policy==" + url.getFile());
 		arguments.add("-Dliferay.mode=test");
 
-		boolean junitDebug = Boolean.getBoolean("junit.debug");
+		boolean junitDebug = Boolean.getBoolean("jvm.debug");
 
 		if (junitDebug) {
 			arguments.add(_JPDA_OPTIONS);
-			arguments.add("-Djunit.debug=true");
+			arguments.add("-Djvm.debug=true");
 		}
 
 		arguments.add(
@@ -155,6 +138,10 @@ public class PACLAggregateTest {
 		arguments.add(
 			"-Dportal:" + PropsKeys.MODULE_FRAMEWORK_PROPERTIES +
 				_OSGI_CONSOLE);
+
+		for (String property : hypersonicServerTestRule.getJdbcProperties()) {
+			arguments.add("-D" + property);
+		}
 
 		builder.setArguments(arguments);
 		builder.setBootstrapClassPath(System.getProperty("java.class.path"));
@@ -187,6 +174,12 @@ public class PACLAggregateTest {
 				}
 
 			});
+
+		Arrays.sort(files);
+
+		if (isCIMode()) {
+			files = slice(files);
+		}
 
 		Package pkg = PACLAggregateTest.class.getPackage();
 
@@ -266,75 +259,6 @@ public class PACLAggregateTest {
 
 	}
 
-	private static class NoticeBridgeRunListener
-		extends RunListener implements Serializable {
-
-		@Override
-		public void testAssumptionFailure(Failure failure) {
-			write("fireTestAssumptionFailed", failure);
-		}
-
-		@Override
-		public void testFailure(Failure failure) {
-			write("fireTestFailure", failure);
-		}
-
-		@Override
-		public void testFinished(Description description) {
-			write("fireTestFinished", description);
-		}
-
-		@Override
-		public void testIgnored(Description description) {
-			write("fireTestIgnored", description);
-		}
-
-		@Override
-		public void testRunFinished(Result result) {
-			write("fireTestRunFinished", result);
-		}
-
-		@Override
-		public void testRunStarted(Description description) {
-			write("fireTestRunStarted", description);
-		}
-
-		@Override
-		public void testStarted(Description description) {
-			write("fireTestStarted", description);
-		}
-
-		protected void write(final String methodName, final Object argument) {
-			ProcessOutputStream processOutputStream =
-				ProcessContext.getProcessOutputStream();
-
-			try {
-				processOutputStream.writeProcessCallable(
-					new ProcessCallable<Serializable>() {
-
-						@Override
-						public Serializable call() {
-							ReflectionTestUtil.invoke(
-								PACLAggregateTestRunner._runNotifier,
-								methodName,
-								new Class<?>[] {argument.getClass()}, argument);
-
-							return null;
-						}
-
-						private static final long serialVersionUID = 1L;
-
-					});
-			}
-			catch (IOException ioe) {
-				ReflectionUtil.throwException(ioe);
-			}
-		}
-
-		private static final long serialVersionUID = 1L;
-
-	}
-
 	private static class PACLTestsProcessCallable
 		implements ProcessCallable<Result> {
 
@@ -355,7 +279,7 @@ public class PACLAggregateTest {
 
 			System.setProperty("catalina.base", ".");
 
-			CaptureAppender captureAppender = null;
+			List<CaptureAppender> captureAppenders = null;
 
 			Path tempStatePath = null;
 
@@ -375,13 +299,11 @@ public class PACLAggregateTest {
 				Log4JUtil.configureLog4J(
 					PACLTestsProcessCallable.class.getClassLoader());
 
-				captureAppender = LogAssertionTestCallback.startAssert(null);
+				captureAppenders = LogAssertionTestCallback.startAssert(
+					Collections.<ExpectedLogs>emptyList());
 
-				JUnitCore junitCore = new JUnitCore();
-
-				junitCore.addListener(new NoticeBridgeRunListener());
-
-				return junitCore.run(
+				return BridgeJUnitTestRunner.runBridgeTests(
+					new ProcessBridgeRunListener(PACLAggregateTest.class),
 					_classes.toArray(new Class<?>[_classes.size()]));
 			}
 			catch (IOException ioe) {
@@ -427,7 +349,9 @@ public class PACLAggregateTest {
 						throw new ProcessException(ioe);
 					}
 
-					LogAssertionTestCallback.endAssert(null, captureAppender);
+					LogAssertionTestCallback.endAssert(
+						Collections.<ExpectedLogs>emptyList(),
+						captureAppenders);
 				}
 			}
 		}
@@ -444,6 +368,44 @@ public class PACLAggregateTest {
 		private static final long serialVersionUID = 1L;
 
 		private final List<Class<?>> _classes;
+
+	}
+
+	private static class ProcessBridgeRunListener extends BridgeRunListener {
+
+		@Override
+		protected void bridge(final String methodName, final Object argument) {
+			ProcessOutputStream processOutputStream =
+				ProcessContext.getProcessOutputStream();
+
+			try {
+				processOutputStream.writeProcessCallable(
+					new ProcessCallable<Serializable>() {
+
+						@Override
+						public Serializable call() {
+							ReflectionTestUtil.invoke(
+								BridgeJUnitTestRunner.getRunNotifier(testClass),
+								methodName,
+								new Class<?>[] {argument.getClass()}, argument);
+
+							return null;
+						}
+
+						private static final long serialVersionUID = 1L;
+
+					});
+			}
+			catch (IOException ioe) {
+				ReflectionUtil.throwException(ioe);
+			}
+		}
+
+		private ProcessBridgeRunListener(Class<?> testClass) {
+			super(testClass);
+		}
+
+		private static final long serialVersionUID = 1L;
 
 	}
 

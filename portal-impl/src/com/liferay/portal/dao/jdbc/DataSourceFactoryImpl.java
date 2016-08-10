@@ -14,9 +14,17 @@
 
 package com.liferay.portal.dao.jdbc;
 
+import com.liferay.portal.dao.jdbc.pool.metrics.C3P0ConnectionPoolMetrics;
+import com.liferay.portal.dao.jdbc.pool.metrics.DBCPConnectionPoolMetrics;
+import com.liferay.portal.dao.jdbc.pool.metrics.HikariConnectionPoolMetrics;
+import com.liferay.portal.dao.jdbc.pool.metrics.TomcatConnectionPoolMetrics;
 import com.liferay.portal.dao.jdbc.util.DataSourceWrapper;
+import com.liferay.portal.dao.jdbc.util.RetryDataSourceWrapper;
 import com.liferay.portal.kernel.configuration.Filter;
+import com.liferay.portal.kernel.dao.db.DBManagerUtil;
+import com.liferay.portal.kernel.dao.db.DBType;
 import com.liferay.portal.kernel.dao.jdbc.DataSourceFactory;
+import com.liferay.portal.kernel.dao.jdbc.pool.metrics.ConnectionPoolMetrics;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.jndi.JNDIUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -29,6 +37,7 @@ import com.liferay.portal.kernel.util.ServerDetector;
 import com.liferay.portal.kernel.util.SortedProperties;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.spring.hibernate.DialectDetector;
 import com.liferay.portal.util.JarUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
@@ -58,6 +67,7 @@ import javax.sql.DataSource;
 
 import jodd.bean.BeanUtil;
 
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.dbcp.BasicDataSourceFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.jmx.ConnectionPool;
@@ -171,6 +181,15 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 			_log.debug("Created data source " + dataSource.getClass());
 		}
 
+		if (PropsValues.RETRY_DATA_SOURCE_MAX_RETRIES > 0) {
+			DBType dbType = DBManagerUtil.getDBType(
+				DialectDetector.getDialect(dataSource));
+
+			if (dbType == DBType.SYBASE) {
+				dataSource = new RetryDataSourceWrapper(dataSource);
+			}
+		}
+
 		return _pacl.getDataSource(dataSource);
 	}
 
@@ -263,13 +282,22 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 			}
 		}
 
+		registerConnectionPoolMetrics(
+			new C3P0ConnectionPoolMetrics(comboPooledDataSource));
+
 		return comboPooledDataSource;
 	}
 
 	protected DataSource initDataSourceDBCP(Properties properties)
 		throws Exception {
 
-		return BasicDataSourceFactory.createDataSource(properties);
+		DataSource dataSource = BasicDataSourceFactory.createDataSource(
+			properties);
+
+		registerConnectionPoolMetrics(
+			new DBCPConnectionPoolMetrics((BasicDataSource)dataSource));
+
+		return dataSource;
 	}
 
 	protected DataSource initDataSourceHikariCP(Properties properties)
@@ -294,11 +322,6 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 			if (StringUtil.equalsIgnoreCase(key, "url")) {
 				key = "jdbcUrl";
-			}
-			else if (StringUtil.equalsIgnoreCase(
-						key, "hikariConnectionCustomizerClassName")) {
-
-				key = "connectionCustomizerClassName";
 			}
 
 			// Ignore Liferay property
@@ -337,6 +360,9 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 				}
 			}
 		}
+
+		registerConnectionPoolMetrics(
+			new HikariConnectionPoolMetrics(hikariDataSource));
 
 		return (DataSource)hikariDataSource;
 	}
@@ -399,6 +425,9 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 			_serviceTracker.open();
 		}
 
+		registerConnectionPoolMetrics(
+			new TomcatConnectionPoolMetrics(dataSource));
+
 		return dataSource;
 	}
 
@@ -408,6 +437,7 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 			StringUtil.equalsIgnoreCase(key, "acquireRetryDelay") ||
 			StringUtil.equalsIgnoreCase(key, "connectionCustomizerClassName") ||
 			StringUtil.equalsIgnoreCase(key, "idleConnectionTestPeriod") ||
+			StringUtil.equalsIgnoreCase(key, "initialPoolSize") ||
 			StringUtil.equalsIgnoreCase(key, "maxIdleTime") ||
 			StringUtil.equalsIgnoreCase(key, "maxPoolSize") ||
 			StringUtil.equalsIgnoreCase(key, "minPoolSize") ||
@@ -416,9 +446,8 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 			return true;
 		}
-		else {
-			return false;
-		}
+
+		return false;
 	}
 
 	protected boolean isPropertyDBCP(String key) {
@@ -429,17 +458,16 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 			return true;
 		}
-		else {
-			return false;
-		}
+
+		return false;
 	}
 
 	protected boolean isPropertyHikariCP(String key) {
 		if (StringUtil.equalsIgnoreCase(key, "autoCommit") ||
+			StringUtil.equalsIgnoreCase(key, "connectionTestQuery") ||
 			StringUtil.equalsIgnoreCase(key, "connectionTimeout") ||
-			StringUtil.equalsIgnoreCase(
-				key, "hikariConnectionCustomizerClassName") ||
 			StringUtil.equalsIgnoreCase(key, "idleTimeout") ||
+			StringUtil.equalsIgnoreCase(key, "initializationFailFast") ||
 			StringUtil.equalsIgnoreCase(key, "maximumPoolSize") ||
 			StringUtil.equalsIgnoreCase(key, "maxLifetime") ||
 			StringUtil.equalsIgnoreCase(key, "minimumIdle") ||
@@ -447,9 +475,8 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 			return true;
 		}
-		else {
-			return false;
-		}
+
+		return false;
 	}
 
 	protected boolean isPropertyLiferay(String key) {
@@ -458,9 +485,8 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 			return true;
 		}
-		else {
-			return false;
-		}
+
+		return false;
 	}
 
 	protected boolean isPropertyTomcat(String key) {
@@ -472,9 +498,17 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 			return true;
 		}
-		else {
-			return false;
-		}
+
+		return false;
+	}
+
+	protected void registerConnectionPoolMetrics(
+		ConnectionPoolMetrics connectionPoolMetrics) {
+
+		Registry registry = RegistryUtil.getRegistry();
+
+		registry.registerService(
+			ConnectionPoolMetrics.class, connectionPoolMetrics);
 	}
 
 	protected void testDatabaseClass(Properties properties) throws Exception {
@@ -562,18 +596,9 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 	private static final PACL _pacl = new NoPACL();
 
-	private ServiceTracker <MBeanServer, MBeanServer> _serviceTracker;
+	private ServiceTracker<MBeanServer, MBeanServer> _serviceTracker;
 
-	private static class NoPACL implements PACL {
-
-		@Override
-		public DataSource getDataSource(DataSource dataSource) {
-			return dataSource;
-		}
-
-	}
-
-	private class MBeanServerServiceTrackerCustomizer
+	private static class MBeanServerServiceTrackerCustomizer
 		implements ServiceTrackerCustomizer<MBeanServer, MBeanServer> {
 
 		public MBeanServerServiceTrackerCustomizer(
@@ -635,6 +660,15 @@ public class DataSourceFactoryImpl implements DataSourceFactory {
 
 		private final org.apache.tomcat.jdbc.pool.DataSource _dataSource;
 		private final ObjectName _objectName;
+
+	}
+
+	private static class NoPACL implements PACL {
+
+		@Override
+		public DataSource getDataSource(DataSource dataSource) {
+			return dataSource;
+		}
 
 	}
 

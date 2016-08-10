@@ -31,15 +31,16 @@ import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.social.NoSuchActivityException;
-import com.liferay.portlet.social.model.SocialActivity;
-import com.liferay.portlet.social.service.SocialActivityLocalServiceUtil;
-import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
-import com.liferay.portlet.social.service.persistence.SocialActivityUtil;
+import com.liferay.social.kernel.exception.NoSuchActivityException;
+import com.liferay.social.kernel.model.SocialActivity;
+import com.liferay.social.kernel.service.SocialActivityLocalServiceUtil;
+import com.liferay.social.kernel.service.persistence.SocialActivityPersistence;
+import com.liferay.social.kernel.service.persistence.SocialActivityUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -56,8 +57,9 @@ import java.util.Set;
  * @generated
  */
 public class SocialActivityPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -404,11 +406,9 @@ public class SocialActivityPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = SocialActivityLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<SocialActivity>() {
 				@Override
-				public void performAction(Object object) {
-					SocialActivity socialActivity = (SocialActivity)object;
-
+				public void performAction(SocialActivity socialActivity) {
 					Assert.assertNotNull(socialActivity);
 
 					count.increment();
@@ -500,30 +500,33 @@ public class SocialActivityPersistenceTest {
 
 		SocialActivity existingSocialActivity = _persistence.findByPrimaryKey(newSocialActivity.getPrimaryKey());
 
-		Assert.assertEquals(existingSocialActivity.getMirrorActivityId(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Long.valueOf(
+				existingSocialActivity.getMirrorActivityId()),
+			ReflectionTestUtil.<Long>invoke(existingSocialActivity,
 				"getOriginalMirrorActivityId", new Class<?>[0]));
 
-		Assert.assertEquals(existingSocialActivity.getGroupId(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Long.valueOf(existingSocialActivity.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingSocialActivity,
 				"getOriginalGroupId", new Class<?>[0]));
-		Assert.assertEquals(existingSocialActivity.getUserId(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Long.valueOf(existingSocialActivity.getUserId()),
+			ReflectionTestUtil.<Long>invoke(existingSocialActivity,
 				"getOriginalUserId", new Class<?>[0]));
-		Assert.assertEquals(existingSocialActivity.getCreateDate(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Long.valueOf(existingSocialActivity.getCreateDate()),
+			ReflectionTestUtil.<Long>invoke(existingSocialActivity,
 				"getOriginalCreateDate", new Class<?>[0]));
-		Assert.assertEquals(existingSocialActivity.getClassNameId(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Long.valueOf(
+				existingSocialActivity.getClassNameId()),
+			ReflectionTestUtil.<Long>invoke(existingSocialActivity,
 				"getOriginalClassNameId", new Class<?>[0]));
-		Assert.assertEquals(existingSocialActivity.getClassPK(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Long.valueOf(existingSocialActivity.getClassPK()),
+			ReflectionTestUtil.<Long>invoke(existingSocialActivity,
 				"getOriginalClassPK", new Class<?>[0]));
-		Assert.assertEquals(existingSocialActivity.getType(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Integer.valueOf(existingSocialActivity.getType()),
+			ReflectionTestUtil.<Integer>invoke(existingSocialActivity,
 				"getOriginalType", new Class<?>[0]));
-		Assert.assertEquals(existingSocialActivity.getReceiverUserId(),
-			ReflectionTestUtil.invoke(existingSocialActivity,
+		Assert.assertEquals(Long.valueOf(
+				existingSocialActivity.getReceiverUserId()),
+			ReflectionTestUtil.<Long>invoke(existingSocialActivity,
 				"getOriginalReceiverUserId", new Class<?>[0]));
 	}
 

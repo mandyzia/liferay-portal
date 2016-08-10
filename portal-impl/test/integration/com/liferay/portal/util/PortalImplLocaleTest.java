@@ -15,27 +15,30 @@
 package com.liferay.portal.util;
 
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.servlet.HttpMethods;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.language.LanguageResources;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Layout;
 import com.liferay.portal.servlet.I18nServlet;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
 
 import java.io.IOException;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -61,11 +64,12 @@ public class PortalImplLocaleTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Before
 	public void setUp() throws Exception {
+		_availableLocales = LanguageUtil.getAvailableLocales();
+
 		PropsValues.LOCALES_ENABLED = new String[] {
 			"ca_ES", "en_US", "fr_FR", "de_DE", "pt_BR", "es_ES", "en_GB"
 		};
@@ -77,6 +81,14 @@ public class PortalImplLocaleTest {
 
 		_group = GroupTestUtil.addGroup();
 		_layout = LayoutTestUtil.addLayout(_group);
+
+		List<Locale> availableLocales = Arrays.asList(
+			LocaleUtil.fromLanguageId("ca_ES"), LocaleUtil.US,
+			LocaleUtil.FRANCE, LocaleUtil.GERMANY, LocaleUtil.BRAZIL,
+			LocaleUtil.SPAIN, LocaleUtil.UK);
+
+		CompanyTestUtil.resetCompanyLocales(
+			_group.getCompanyId(), availableLocales, LocaleUtil.getDefault());
 
 		GroupTestUtil.updateDisplaySettings(
 			_group.getGroupId(),
@@ -90,6 +102,10 @@ public class PortalImplLocaleTest {
 			PropsKeys.LOCALES_ENABLED);
 
 		LanguageUtil.init();
+
+		CompanyTestUtil.resetCompanyLocales(
+			TestPropsValues.getCompanyId(), _availableLocales,
+			LocaleUtil.getDefault());
 	}
 
 	@Test
@@ -176,6 +192,8 @@ public class PortalImplLocaleTest {
 
 		return mockHttpServletResponse;
 	}
+
+	private Set<Locale> _availableLocales;
 
 	@DeleteAfterTestRun
 	private Group _group;

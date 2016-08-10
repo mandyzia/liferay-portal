@@ -1,7 +1,0 @@
-dependencies {
-	compile group: "org.apache.ant", name: "ant", version: "1.9.4"
-}
-
-liferay {
-	deployDir = file("../../../lib/development")
-}

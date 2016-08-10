@@ -14,25 +14,36 @@
 
 package com.liferay.portlet.trash.util;
 
+import com.liferay.document.library.kernel.store.DLStoreUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.ContainerModel;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
+import com.liferay.portal.kernel.portlet.PortletURLUtil;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
 import com.liferay.portal.kernel.servlet.SessionMessages;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashRenderer;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -40,26 +51,18 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.ContainerModel;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.TrashedModel;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.permission.PortletPermissionUtil;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.PortletURLUtil;
-import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
-import com.liferay.portlet.trash.model.TrashEntry;
-import com.liferay.portlet.trash.model.TrashVersion;
 import com.liferay.portlet.trash.model.impl.TrashEntryImpl;
-import com.liferay.portlet.trash.service.TrashEntryLocalServiceUtil;
-import com.liferay.portlet.trash.service.TrashVersionLocalServiceUtil;
-import com.liferay.portlet.trash.util.comparator.EntryCreateDateComparator;
-import com.liferay.portlet.trash.util.comparator.EntryTypeComparator;
-import com.liferay.portlet.trash.util.comparator.EntryUserNameComparator;
+import com.liferay.trash.kernel.model.TrashEntry;
+import com.liferay.trash.kernel.model.TrashVersion;
+import com.liferay.trash.kernel.service.TrashEntryLocalServiceUtil;
+import com.liferay.trash.kernel.service.TrashVersionLocalServiceUtil;
+import com.liferay.trash.kernel.util.Trash;
+import com.liferay.trash.kernel.util.TrashUtil;
+import com.liferay.trash.kernel.util.comparator.EntryCreateDateComparator;
+import com.liferay.trash.kernel.util.comparator.EntryTypeComparator;
+import com.liferay.trash.kernel.util.comparator.EntryUserNameComparator;
 
 import java.text.Format;
 
@@ -109,9 +112,8 @@ public class TrashImpl implements Trash {
 		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
 			className);
 
-		String rootContainerModelTitle =
-			trashHandler.getRootContainerModelTitle(
-				classPK, themeDisplay.getLocale());
+		String rootContainerModelTitle = LanguageUtil.get(
+			themeDisplay.getLocale(), trashHandler.getRootContainerModelName());
 
 		if (classPK == 0) {
 			PortalUtil.addPortletBreadcrumbEntry(
@@ -259,11 +261,18 @@ public class TrashImpl implements Trash {
 
 					entry = new TrashEntryImpl();
 
-					entry.setClassName(entryClassName);
-					entry.setClassPK(classPK);
-
 					entry.setUserName(userName);
 					entry.setCreateDate(removedDate);
+
+					TrashHandler trashHandler =
+						TrashHandlerRegistryUtil.getTrashHandler(
+							entryClassName);
+
+					TrashRenderer trashRenderer = trashHandler.getTrashRenderer(
+						classPK);
+
+					entry.setClassName(trashRenderer.getClassName());
+					entry.setClassPK(trashRenderer.getClassPK());
 
 					String rootEntryClassName = GetterUtil.getString(
 						document.get(Field.ROOT_ENTRY_CLASS_NAME));
@@ -367,8 +376,8 @@ public class TrashImpl implements Trash {
 		sb.append(
 			StringUtil.replace(
 				dateFormatDateTime.format(new Date()),
-				new String[] {StringPool.SLASH, StringPool.COLON},
-				new String[] {StringPool.PERIOD, StringPool.PERIOD}));
+				new char[] {CharPool.SLASH, CharPool.COLON},
+				new char[] {CharPool.PERIOD, CharPool.PERIOD}));
 		sb.append(StringPool.CLOSE_PARENTHESIS);
 
 		if (trashRenderer != null) {
@@ -455,11 +464,8 @@ public class TrashImpl implements Trash {
 			return null;
 		}
 
-		Layout layout = themeDisplay.getLayout();
-
 		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
-			request, portletId, layout.getLayoutId(),
-			PortletRequest.RENDER_PHASE);
+			request, portletId, PortletRequest.RENDER_PHASE);
 
 		portletURL.setParameter("mvcPath", "/view_content.jsp");
 		portletURL.setParameter("redirect", themeDisplay.getURLCurrent());
@@ -500,11 +506,8 @@ public class TrashImpl implements Trash {
 			return null;
 		}
 
-		Layout layout = themeDisplay.getLayout();
-
 		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
-			request, portletId, layout.getLayoutId(),
-			PortletRequest.RENDER_PHASE);
+			request, portletId, PortletRequest.RENDER_PHASE);
 
 		portletURL.setParameter("redirect", themeDisplay.getURLCurrent());
 

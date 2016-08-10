@@ -20,7 +20,6 @@ import com.liferay.portal.kernel.monitoring.MethodSignature;
 import com.liferay.portal.kernel.monitoring.RequestStatus;
 import com.liferay.portal.kernel.monitoring.ServiceMonitoringControl;
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
-import com.liferay.portal.monitoring.statistics.DataSampleFactoryUtil;
 import com.liferay.portal.spring.aop.ChainableMethodAdvice;
 
 import java.lang.reflect.Method;
@@ -34,8 +33,8 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * @author Michael C. Han
  */
-public class ServiceMonitorAdvice extends ChainableMethodAdvice
-	implements ServiceMonitoringControl {
+public class ServiceMonitorAdvice
+	extends ChainableMethodAdvice implements ServiceMonitoringControl {
 
 	@Override
 	public void addServiceClass(String className) {
@@ -171,8 +170,8 @@ public class ServiceMonitorAdvice extends ChainableMethodAdvice
 		return false;
 	}
 
-	private static final ThreadLocal<DataSample>
-		_dataSampleThreadLocal = new AutoResetThreadLocal<>(
+	private static final ThreadLocal<DataSample> _dataSampleThreadLocal =
+		new AutoResetThreadLocal<>(
 			ServiceMonitorAdvice.class + "._dataSampleThreadLocal");
 	private static boolean _inclusiveMode = true;
 	private static boolean _monitorServiceRequest;

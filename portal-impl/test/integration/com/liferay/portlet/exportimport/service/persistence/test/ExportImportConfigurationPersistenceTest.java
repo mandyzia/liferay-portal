@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.exportimport.service.persistence.test;
 
+import com.liferay.exportimport.kernel.exception.NoSuchConfigurationException;
+import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
+import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalServiceUtil;
+import com.liferay.exportimport.kernel.service.persistence.ExportImportConfigurationPersistence;
+import com.liferay.exportimport.kernel.service.persistence.ExportImportConfigurationUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -31,15 +37,10 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.exportimport.NoSuchConfigurationException;
-import com.liferay.portlet.exportimport.model.ExportImportConfiguration;
-import com.liferay.portlet.exportimport.service.ExportImportConfigurationLocalServiceUtil;
-import com.liferay.portlet.exportimport.service.persistence.ExportImportConfigurationPersistence;
-import com.liferay.portlet.exportimport.service.persistence.ExportImportConfigurationUtil;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -56,8 +57,9 @@ import java.util.Set;
  * @generated
  */
 public class ExportImportConfigurationPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -253,9 +255,8 @@ public class ExportImportConfigurationPersistenceTest {
 			"mvccVersion", true, "exportImportConfigurationId", true,
 			"groupId", true, "companyId", true, "userId", true, "userName",
 			true, "createDate", true, "modifiedDate", true, "name", true,
-			"description", true, "type", true, "settings", true, "status",
-			true, "statusByUserId", true, "statusByUserName", true,
-			"statusDate", true);
+			"description", true, "type", true, "status", true,
+			"statusByUserId", true, "statusByUserName", true, "statusDate", true);
 	}
 
 	@Test
@@ -369,11 +370,10 @@ public class ExportImportConfigurationPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = ExportImportConfigurationLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<ExportImportConfiguration>() {
 				@Override
-				public void performAction(Object object) {
-					ExportImportConfiguration exportImportConfiguration = (ExportImportConfiguration)object;
-
+				public void performAction(
+					ExportImportConfiguration exportImportConfiguration) {
 					Assert.assertNotNull(exportImportConfiguration);
 
 					count.increment();

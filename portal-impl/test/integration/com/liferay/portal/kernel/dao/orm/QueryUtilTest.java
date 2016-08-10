@@ -16,7 +16,7 @@ package com.liferay.portal.kernel.dao.orm;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.dao.db.DB;
-import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
+import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -44,7 +44,7 @@ public class QueryUtilTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		_db = DBFactoryUtil.getDB();
+		_db = DBManagerUtil.getDB();
 
 		_db.runSQL(_SQL_CREATE_TABLE);
 		_db.runSQL(createInserts(_SIZE));
@@ -257,7 +257,7 @@ public class QueryUtilTest {
 
 				Assert.assertFalse(unmodifiable);
 			}
-			catch (UnsupportedOperationException e) {
+			catch (UnsupportedOperationException uoe) {
 				Assert.assertTrue(unmodifiable);
 			}
 
@@ -325,8 +325,9 @@ public class QueryUtilTest {
 			Object[] firstRow = result.get(0);
 			Object[] lastRow = result.get(result.size() - 1);
 
-			Assert.assertEquals(firstType, firstRow[0]);
-			Assert.assertEquals(lastType, lastRow[0]);
+			Assert.assertEquals(
+				firstType, StringUtil.trim((String)firstRow[0]));
+			Assert.assertEquals(lastType, StringUtil.trim((String)lastRow[0]));
 		}
 		finally {
 			_sessionFactory.closeSession(session);

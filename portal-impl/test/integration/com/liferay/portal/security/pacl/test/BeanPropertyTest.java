@@ -14,17 +14,13 @@
 
 package com.liferay.portal.security.pacl.test;
 
-import com.liferay.portal.kernel.dao.orm.EntityCache;
-import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
-import com.liferay.portal.kernel.dao.orm.FinderCache;
-import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.PortalCustomSQL;
 import com.liferay.portal.kernel.dao.orm.PortalCustomSQLUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.test.rule.PACLTestRule;
-import com.liferay.portal.util.PortalUtil;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -67,28 +63,11 @@ public class BeanPropertyTest {
 	}
 
 	@Test
-	public void testSet1() throws Exception {
+	public void testSet() throws Exception {
 		try {
-			EntityCache entityCache = EntityCacheUtil.getEntityCache();
+			LanguageUtil languageUtil = new LanguageUtil();
 
-			EntityCacheUtil entityCacheUtil = new EntityCacheUtil();
-
-			entityCacheUtil.setEntityCache(entityCache);
-
-			Assert.fail();
-		}
-		catch (SecurityException se) {
-		}
-	}
-
-	@Test
-	public void testSet2() throws Exception {
-		try {
-			FinderCacheUtil finderCacheUtil = new FinderCacheUtil();
-
-			FinderCache finderCache = FinderCacheUtil.getFinderCache();
-
-			finderCacheUtil.setFinderCache(finderCache);
+			languageUtil.setLanguage(null);
 
 			Assert.fail();
 		}

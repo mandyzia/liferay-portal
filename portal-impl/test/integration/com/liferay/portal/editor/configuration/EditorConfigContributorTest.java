@@ -19,20 +19,22 @@ import com.liferay.portal.kernel.editor.configuration.EditorConfiguration;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigurationFactoryUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistration;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,8 +47,23 @@ public class EditorConfigContributorTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
+
+	@BeforeClass
+	public static void setUpClass() {
+		_editorConfigProviderSwapper = new EditorConfigProviderSwapper(
+			Arrays.<Class<?>>asList(
+				EmoticonsEditorConfigContributor.class,
+				ImageEditorConfigContributor.class,
+				TablesEditorConfigContributor.class,
+				TextFormatEditorConfigContributor.class,
+				VideoEditorConfigContributor.class));
+	}
+
+	@AfterClass
+	public static void tearDownClass() {
+		_editorConfigProviderSwapper.close();
+	}
 
 	@After
 	public void tearDown() {
@@ -227,11 +244,11 @@ public class EditorConfigContributorTest {
 		properties.put("editor.name", _EDITOR_NAME_2);
 		properties.put("service.ranking", 1000);
 
-		EditorConfigContributor ImageEditorConfigContributor =
+		EditorConfigContributor imageEditorConfigContributor =
 			new ImageEditorConfigContributor();
 
 		_editorConfigContributorServiceRegistration2 = registry.registerService(
-			EditorConfigContributor.class, ImageEditorConfigContributor,
+			EditorConfigContributor.class, imageEditorConfigContributor,
 			properties);
 
 		EditorConfiguration editorConfiguration =
@@ -412,7 +429,8 @@ public class EditorConfigContributorTest {
 	}
 
 	@Test
-	public void testPortletNameAndEditorNameOverridesEditorConfigKeyEditorConfig()
+	public void
+			testPortletNameAndEditorNameOverridesEditorConfigKeyEditorConfig()
 		throws Exception {
 
 		Registry registry = RegistryUtil.getRegistry();
@@ -520,12 +538,14 @@ public class EditorConfigContributorTest {
 
 	private static final String _PORTLET_NAME = "testPortletName";
 
+	private static EditorConfigProviderSwapper _editorConfigProviderSwapper;
+
 	private ServiceRegistration<EditorConfigContributor>
 		_editorConfigContributorServiceRegistration1;
 	private ServiceRegistration<EditorConfigContributor>
 		_editorConfigContributorServiceRegistration2;
 
-	private class EmoticonsEditorConfigContributor
+	private static class EmoticonsEditorConfigContributor
 		implements EditorConfigContributor {
 
 		@Override
@@ -533,7 +553,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", EmoticonsEditorConfigContributor.class.getName());
@@ -552,7 +572,7 @@ public class EditorConfigContributorTest {
 
 	}
 
-	private class ImageEditorConfigContributor
+	private static class ImageEditorConfigContributor
 		implements EditorConfigContributor {
 
 		@Override
@@ -560,7 +580,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", ImageEditorConfigContributor.class.getName());
@@ -575,7 +595,7 @@ public class EditorConfigContributorTest {
 
 	}
 
-	private class TablesEditorConfigContributor
+	private static class TablesEditorConfigContributor
 		implements EditorConfigContributor {
 
 		@Override
@@ -583,7 +603,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", TablesEditorConfigContributor.class.getName());
@@ -602,7 +622,7 @@ public class EditorConfigContributorTest {
 
 	}
 
-	private class TextFormatEditorConfigContributor
+	private static class TextFormatEditorConfigContributor
 		implements EditorConfigContributor {
 
 		@Override
@@ -610,7 +630,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", TextFormatEditorConfigContributor.class.getName());
@@ -632,7 +652,7 @@ public class EditorConfigContributorTest {
 
 	}
 
-	private class VideoEditorConfigContributor
+	private static class VideoEditorConfigContributor
 		implements EditorConfigContributor {
 
 		@Override
@@ -640,7 +660,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			JSONObject toolbarsJSONObject = jsonObject.getJSONObject(
 				"toolbars");

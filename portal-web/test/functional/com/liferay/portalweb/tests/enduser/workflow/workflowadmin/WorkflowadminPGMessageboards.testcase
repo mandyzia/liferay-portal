@@ -1,5 +1,5 @@
 <definition component-name="portal-workflow">
-	<property name="web.plugins.includes" value="kaleo-web" />
+	<property name="portal.release" value="true" />
 	<property name="testray.main.component.name" value="Workflow" />
 
 	<var name="pageName" value="Message Boards Page" />
@@ -7,22 +7,26 @@
 	<var name="workflowAssetType" value="Message Boards Message" />
 
 	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="Page#gotoConfigurationCP">
-			<var name="portletName" value="Workflow Configuration" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Workflow Configuration" />
 		</execute>
 
-		<execute macro="Workflow#configureSiteWorkflow">
+		<execute macro="Workflow#configureWorkflow">
 			<var name="workflowDefinition" value="Single Approver (Version 1)" />
-			<var name="workflowResourceKey" value="RESOURCE_TABLE_MESSAGE_BOARDS_MESSAGE_SELECT" />
+			<var name="workflowResourceValue" value="Message Boards Message" />
 		</execute>
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -32,22 +36,34 @@
 	</set-up>
 
 	<tear-down>
-		<execute macro="MessageboardsThread#tearDownPG">
-			<var name="pageName" value="${pageName}" />
-		</execute>
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="Page#tearDownPG" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="MessageboardsCategory#tearDownCP" />
 
-		<execute macro="Workflow#tearDownPortalWorkflow" />
+				<execute macro="MessageboardsThread#tearDownCP" />
 
-		<execute macro="Workflow#tearDownSiteWorkflow" />
+				<execute macro="MessageboardsPortlet#tearDownConfigurationGeneralCP" />
+
+				<execute macro="Page#tearDownPG" />
+
+				<execute macro="Workflow#tearDownPortalWorkflow" />
+
+				<execute macro="Workflow#tearDownSiteWorkflow" />
+			</else>
+		</if>
 	</tear-down>
 
-	<command known-issues="LPS-56092" name="ApproveMessageBoardsThreadPG" priority="4">
+	<command name="ApproveMessageBoardsThreadPG" priority="4">
 		<var name="threadBody" value="MB Thread Body" />
 		<var name="threadSubject" value="MB Thread Subject" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -56,7 +72,7 @@
 			<var name="threadSubject" value="${threadSubject}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -76,7 +92,7 @@
 			<var name="workflowTask" value="Review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -97,14 +113,13 @@
 			<var name="workflowTask" value="Review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<execute macro="MessageboardsThread#gotoPG">
 			<var name="lastPostUserName" value="Test Test" />
 			<var name="postCount" value="1" />
-			<var name="startedByUserName" value="Test Test" />
 			<var name="threadBody" value="${threadBody}" />
 			<var name="threadSubject" value="${threadSubject}" />
 		</execute>
@@ -113,13 +128,33 @@
 			<var name="threadBody" value="${threadBody}" />
 			<var name="threadSubject" value="${threadSubject}" />
 		</execute>
+
+		<execute macro="Page#gotoMyAccount">
+			<var name="portletName" value="My Submissions" />
+		</execute>
+
+		<execute macro="Workflow#gotoViewCompletedAssetViaMySubmissions">
+			<var name="workflowAssetTitle" value="${threadSubject}" />
+		</execute>
+
+		<execute macro="MessageboardsThread#viewAsWorkflowAsset">
+			<var name="threadBody" value="${threadBody}" />
+			<var name="threadSubject" value="${threadSubject}" />
+		</execute>
+
+		<execute macro="MessageboardsThread#gotoViewInContext" />
+
+		<execute macro="MessageboardsThread#viewPG">
+			<var name="threadBody" value="${threadBody}" />
+			<var name="threadSubject" value="${threadSubject}" />
+		</execute>
 	</command>
 
-	<command known-issues="LPS-56092" name="RejectMessageBoardsThreadPG" priority="4">
+	<command name="RejectMessageBoardsThreadPG" priority="4">
 		<var name="threadBody" value="MB Thread Body" />
 		<var name="threadSubject" value="MB Thread Subject" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -158,7 +193,7 @@
 			<var name="workflowAssetType" value="${workflowAssetType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 

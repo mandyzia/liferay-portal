@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.messageboards.service.persistence.test;
 
+import com.liferay.message.boards.kernel.exception.NoSuchMessageException;
+import com.liferay.message.boards.kernel.model.MBMessage;
+import com.liferay.message.boards.kernel.service.MBMessageLocalServiceUtil;
+import com.liferay.message.boards.kernel.service.persistence.MBMessagePersistence;
+import com.liferay.message.boards.kernel.service.persistence.MBMessageUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -31,19 +37,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
-
-import com.liferay.portlet.messageboards.NoSuchMessageException;
-import com.liferay.portlet.messageboards.model.MBMessage;
-import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
-import com.liferay.portlet.messageboards.service.persistence.MBMessagePersistence;
-import com.liferay.portlet.messageboards.service.persistence.MBMessageUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -54,14 +54,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class MBMessagePersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -158,6 +160,8 @@ public class MBMessagePersistenceTest {
 
 		newMBMessage.setAnswer(RandomTestUtil.randomBoolean());
 
+		newMBMessage.setLastPublishDate(RandomTestUtil.nextDate());
+
 		newMBMessage.setStatus(RandomTestUtil.nextInt());
 
 		newMBMessage.setStatusByUserId(RandomTestUtil.nextLong());
@@ -212,6 +216,9 @@ public class MBMessagePersistenceTest {
 			newMBMessage.getAllowPingbacks());
 		Assert.assertEquals(existingMBMessage.getAnswer(),
 			newMBMessage.getAnswer());
+		Assert.assertEquals(Time.getShortTimestamp(
+				existingMBMessage.getLastPublishDate()),
+			Time.getShortTimestamp(newMBMessage.getLastPublishDate()));
 		Assert.assertEquals(existingMBMessage.getStatus(),
 			newMBMessage.getStatus());
 		Assert.assertEquals(existingMBMessage.getStatusByUserId(),
@@ -487,10 +494,10 @@ public class MBMessagePersistenceTest {
 			true, "userName", true, "createDate", true, "modifiedDate", true,
 			"classNameId", true, "classPK", true, "categoryId", true,
 			"threadId", true, "rootMessageId", true, "parentMessageId", true,
-			"subject", true, "body", true, "format", true, "anonymous", true,
-			"priority", true, "allowPingbacks", true, "answer", true, "status",
-			true, "statusByUserId", true, "statusByUserName", true,
-			"statusDate", true);
+			"subject", true, "format", true, "anonymous", true, "priority",
+			true, "allowPingbacks", true, "answer", true, "lastPublishDate",
+			true, "status", true, "statusByUserId", true, "statusByUserName",
+			true, "statusDate", true);
 	}
 
 	@Test
@@ -599,11 +606,9 @@ public class MBMessagePersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = MBMessageLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<MBMessage>() {
 				@Override
-				public void performAction(Object object) {
-					MBMessage mbMessage = (MBMessage)object;
-
+				public void performAction(MBMessage mbMessage) {
 					Assert.assertNotNull(mbMessage);
 
 					count.increment();
@@ -695,12 +700,12 @@ public class MBMessagePersistenceTest {
 
 		MBMessage existingMBMessage = _persistence.findByPrimaryKey(newMBMessage.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingMBMessage.getUuid(),
+		Assert.assertTrue(Objects.equals(existingMBMessage.getUuid(),
 				ReflectionTestUtil.invoke(existingMBMessage, "getOriginalUuid",
 					new Class<?>[0])));
-		Assert.assertEquals(existingMBMessage.getGroupId(),
-			ReflectionTestUtil.invoke(existingMBMessage, "getOriginalGroupId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingMBMessage.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingMBMessage,
+				"getOriginalGroupId", new Class<?>[0]));
 	}
 
 	protected MBMessage addMBMessage() throws Exception {
@@ -747,6 +752,8 @@ public class MBMessagePersistenceTest {
 		mbMessage.setAllowPingbacks(RandomTestUtil.randomBoolean());
 
 		mbMessage.setAnswer(RandomTestUtil.randomBoolean());
+
+		mbMessage.setLastPublishDate(RandomTestUtil.nextDate());
 
 		mbMessage.setStatus(RandomTestUtil.nextInt());
 

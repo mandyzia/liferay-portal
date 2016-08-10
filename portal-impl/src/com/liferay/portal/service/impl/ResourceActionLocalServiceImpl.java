@@ -14,19 +14,19 @@
 
 package com.liferay.portal.service.impl;
 
-import com.liferay.portal.NoSuchResourceActionException;
+import com.liferay.portal.kernel.exception.NoSuchResourceActionException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.ResourceAction;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.spring.aop.Skip;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.ResourceAction;
-import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.RoleConstants;
-import com.liferay.portal.security.permission.ActionKeys;
-import com.liferay.portal.security.permission.ResourceActionsUtil;
+import com.liferay.portal.kernel.util.comparator.ResourceActionBitwiseValueComparator;
 import com.liferay.portal.service.base.ResourceActionLocalServiceBaseImpl;
-import com.liferay.portal.util.comparator.ResourceActionBitwiseValueComparator;
 
 import java.util.ArrayList;
 import java.util.List;

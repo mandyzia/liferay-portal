@@ -18,29 +18,15 @@
 
 <%
 String url = (String)request.getAttribute("liferay-ui:captcha:url");
-
-boolean captchaEnabled = false;
-
-try {
-	if (portletRequest != null) {
-		captchaEnabled = CaptchaUtil.isEnabled(portletRequest);
-	}
-	else {
-		captchaEnabled = CaptchaUtil.isEnabled(request);
-	}
-}
-catch (CaptchaMaxChallengesException cmce) {
-	captchaEnabled = true;
-}
 %>
 
 <c:if test="<%= captchaEnabled %>">
 	<div class="taglib-captcha">
-		<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="text-to-identify" />" class="captcha" id="<portlet:namespace />captcha" src="<%= url %>" />
+		<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="text-to-identify" />" class="captcha" id="<portlet:namespace />captcha" src="<%= HttpUtil.addParameter(url, "t", String.valueOf(System.currentTimeMillis())) %>" />
 
 		<liferay-ui:icon cssClass="refresh" iconCssClass="icon-refresh" id="refreshCaptcha" label="<%= false %>" localizeMessage="<%= true %>" message="refresh-captcha" url="javascript:;" />
 
-		<aui:input label="text-verification" name="captchaText" size="10" type="text" value="">
+		<aui:input ignoreRequestValue="<%= true %>" label="text-verification" name="captchaText" size="10" type="text" value="">
 			<aui:validator name="required" />
 		</aui:input>
 	</div>

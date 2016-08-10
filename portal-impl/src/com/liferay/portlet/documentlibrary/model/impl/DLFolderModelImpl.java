@@ -16,35 +16,38 @@ package com.liferay.portlet.documentlibrary.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.NoSuchModelException;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.model.DLFolderModel;
+import com.liferay.document.library.kernel.model.DLFolderSoap;
+
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
+import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.ContainerModel;
+import com.liferay.portal.kernel.model.TrashedModel;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.ContainerModel;
-import com.liferay.portal.model.TrashedModel;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.impl.BaseModelImpl;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
 
-import com.liferay.portlet.documentlibrary.model.DLFolder;
-import com.liferay.portlet.documentlibrary.model.DLFolderModel;
-import com.liferay.portlet.documentlibrary.model.DLFolderSoap;
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
-import com.liferay.portlet.trash.model.TrashEntry;
-import com.liferay.portlet.trash.service.TrashEntryLocalServiceUtil;
+import com.liferay.trash.kernel.model.TrashEntry;
+import com.liferay.trash.kernel.service.TrashEntryLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -98,6 +101,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 			{ "defaultFileEntryTypeId", Types.BIGINT },
 			{ "hidden_", Types.BOOLEAN },
 			{ "restrictionType", Types.INTEGER },
+			{ "lastPublishDate", Types.TIMESTAMP },
 			{ "status", Types.INTEGER },
 			{ "statusByUserId", Types.BIGINT },
 			{ "statusByUserName", Types.VARCHAR },
@@ -124,13 +128,14 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		TABLE_COLUMNS_MAP.put("defaultFileEntryTypeId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("hidden_", Types.BOOLEAN);
 		TABLE_COLUMNS_MAP.put("restrictionType", Types.INTEGER);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("statusByUserId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("statusByUserName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("statusDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table DLFolder (uuid_ VARCHAR(75) null,folderId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,repositoryId LONG,mountPoint BOOLEAN,parentFolderId LONG,treePath STRING null,name VARCHAR(255) null,description STRING null,lastPostDate DATE null,defaultFileEntryTypeId LONG,hidden_ BOOLEAN,restrictionType INTEGER,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+	public static final String TABLE_SQL_CREATE = "create table DLFolder (uuid_ VARCHAR(75) null,folderId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,repositoryId LONG,mountPoint BOOLEAN,parentFolderId LONG,treePath STRING null,name VARCHAR(255) null,description STRING null,lastPostDate DATE null,defaultFileEntryTypeId LONG,hidden_ BOOLEAN,restrictionType INTEGER,lastPublishDate DATE null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table DLFolder";
 	public static final String ORDER_BY_JPQL = " ORDER BY dlFolder.parentFolderId ASC, dlFolder.name ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY DLFolder.parentFolderId ASC, DLFolder.name ASC";
@@ -138,13 +143,13 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portlet.documentlibrary.model.DLFolder"),
+				"value.object.entity.cache.enabled.com.liferay.document.library.kernel.model.DLFolder"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portlet.documentlibrary.model.DLFolder"),
+				"value.object.finder.cache.enabled.com.liferay.document.library.kernel.model.DLFolder"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portlet.documentlibrary.model.DLFolder"),
+				"value.object.column.bitmask.enabled.com.liferay.document.library.kernel.model.DLFolder"),
 			true);
 	public static final long COMPANYID_COLUMN_BITMASK = 1L;
 	public static final long FOLDERID_COLUMN_BITMASK = 2L;
@@ -155,7 +160,8 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 	public static final long PARENTFOLDERID_COLUMN_BITMASK = 64L;
 	public static final long REPOSITORYID_COLUMN_BITMASK = 128L;
 	public static final long STATUS_COLUMN_BITMASK = 256L;
-	public static final long UUID_COLUMN_BITMASK = 512L;
+	public static final long TREEPATH_COLUMN_BITMASK = 512L;
+	public static final long UUID_COLUMN_BITMASK = 1024L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -188,6 +194,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		model.setDefaultFileEntryTypeId(soapModel.getDefaultFileEntryTypeId());
 		model.setHidden(soapModel.getHidden());
 		model.setRestrictionType(soapModel.getRestrictionType());
+		model.setLastPublishDate(soapModel.getLastPublishDate());
 		model.setStatus(soapModel.getStatus());
 		model.setStatusByUserId(soapModel.getStatusByUserId());
 		model.setStatusByUserName(soapModel.getStatusByUserName());
@@ -219,16 +226,17 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 	public static final String MAPPING_TABLE_DLFILEENTRYTYPES_DLFOLDERS_NAME = "DLFileEntryTypes_DLFolders";
 	public static final Object[][] MAPPING_TABLE_DLFILEENTRYTYPES_DLFOLDERS_COLUMNS =
 		{
+			{ "companyId", Types.BIGINT },
 			{ "fileEntryTypeId", Types.BIGINT },
 			{ "folderId", Types.BIGINT }
 		};
 	public static final String MAPPING_TABLE_DLFILEENTRYTYPES_DLFOLDERS_SQL_CREATE =
-		"create table DLFileEntryTypes_DLFolders (fileEntryTypeId LONG not null,folderId LONG not null,primary key (fileEntryTypeId, folderId))";
+		"create table DLFileEntryTypes_DLFolders (companyId LONG not null,fileEntryTypeId LONG not null,folderId LONG not null,primary key (fileEntryTypeId, folderId))";
 	public static final boolean FINDER_CACHE_ENABLED_DLFILEENTRYTYPES_DLFOLDERS = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
 				"value.object.finder.cache.enabled.DLFileEntryTypes_DLFolders"),
 			true);
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portlet.documentlibrary.model.DLFolder"));
+				"lock.expiration.time.com.liferay.document.library.kernel.model.DLFolder"));
 
 	public DLFolderModelImpl() {
 	}
@@ -285,6 +293,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		attributes.put("defaultFileEntryTypeId", getDefaultFileEntryTypeId());
 		attributes.put("hidden", getHidden());
 		attributes.put("restrictionType", getRestrictionType());
+		attributes.put("lastPublishDate", getLastPublishDate());
 		attributes.put("status", getStatus());
 		attributes.put("statusByUserId", getStatusByUserId());
 		attributes.put("statusByUserName", getStatusByUserName());
@@ -405,6 +414,12 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 
 		if (restrictionType != null) {
 			setRestrictionType(restrictionType);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 
 		Integer status = (Integer)attributes.get("status");
@@ -625,6 +640,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		return _mountPoint;
 	}
 
+	@JSON
 	@Override
 	public boolean isMountPoint() {
 		return _mountPoint;
@@ -683,7 +699,17 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 
 	@Override
 	public void setTreePath(String treePath) {
+		_columnBitmask |= TREEPATH_COLUMN_BITMASK;
+
+		if (_originalTreePath == null) {
+			_originalTreePath = _treePath;
+		}
+
 		_treePath = treePath;
+	}
+
+	public String getOriginalTreePath() {
+		return GetterUtil.getString(_originalTreePath);
 	}
 
 	@JSON
@@ -756,6 +782,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		return _hidden;
 	}
 
+	@JSON
 	@Override
 	public boolean isHidden() {
 		return _hidden;
@@ -787,6 +814,17 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 	@Override
 	public void setRestrictionType(int restrictionType) {
 		_restrictionType = restrictionType;
+	}
+
+	@JSON
+	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
 	}
 
 	@JSON
@@ -1023,15 +1061,6 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		return true;
 	}
 
-	/**
-	 * @deprecated As of 6.1.0, replaced by {@link #isApproved}
-	 */
-	@Deprecated
-	@Override
-	public boolean getApproved() {
-		return isApproved();
-	}
-
 	@Override
 	public boolean isApproved() {
 		if (getStatus() == WorkflowConstants.STATUS_APPROVED) {
@@ -1161,6 +1190,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		dlFolderImpl.setDefaultFileEntryTypeId(getDefaultFileEntryTypeId());
 		dlFolderImpl.setHidden(getHidden());
 		dlFolderImpl.setRestrictionType(getRestrictionType());
+		dlFolderImpl.setLastPublishDate(getLastPublishDate());
 		dlFolderImpl.setStatus(getStatus());
 		dlFolderImpl.setStatusByUserId(getStatusByUserId());
 		dlFolderImpl.setStatusByUserName(getStatusByUserName());
@@ -1267,6 +1297,8 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 
 		dlFolderModelImpl._setOriginalParentFolderId = false;
 
+		dlFolderModelImpl._originalTreePath = dlFolderModelImpl._treePath;
+
 		dlFolderModelImpl._originalName = dlFolderModelImpl._name;
 
 		dlFolderModelImpl._originalHidden = dlFolderModelImpl._hidden;
@@ -1371,6 +1403,15 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 
 		dlFolderCacheModel.restrictionType = getRestrictionType();
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			dlFolderCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			dlFolderCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		dlFolderCacheModel.status = getStatus();
 
 		dlFolderCacheModel.statusByUserId = getStatusByUserId();
@@ -1397,7 +1438,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(45);
+		StringBundler sb = new StringBundler(47);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -1435,6 +1476,8 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		sb.append(getHidden());
 		sb.append(", restrictionType=");
 		sb.append(getRestrictionType());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append(", status=");
 		sb.append(getStatus());
 		sb.append(", statusByUserId=");
@@ -1450,10 +1493,10 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(70);
+		StringBundler sb = new StringBundler(73);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portlet.documentlibrary.model.DLFolder");
+		sb.append("com.liferay.document.library.kernel.model.DLFolder");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -1529,6 +1572,10 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 		sb.append(getRestrictionType());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>status</column-name><column-value><![CDATA[");
 		sb.append(getStatus());
 		sb.append("]]></column-value></column>");
@@ -1580,6 +1627,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 	private long _originalParentFolderId;
 	private boolean _setOriginalParentFolderId;
 	private String _treePath;
+	private String _originalTreePath;
 	private String _name;
 	private String _originalName;
 	private String _description;
@@ -1589,6 +1637,7 @@ public class DLFolderModelImpl extends BaseModelImpl<DLFolder>
 	private boolean _originalHidden;
 	private boolean _setOriginalHidden;
 	private int _restrictionType;
+	private Date _lastPublishDate;
 	private int _status;
 	private int _originalStatus;
 	private boolean _setOriginalStatus;

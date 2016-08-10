@@ -34,15 +34,16 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.ratings.NoSuchEntryException;
-import com.liferay.portlet.ratings.model.RatingsEntry;
-import com.liferay.portlet.ratings.service.RatingsEntryLocalServiceUtil;
-import com.liferay.portlet.ratings.service.persistence.RatingsEntryPersistence;
-import com.liferay.portlet.ratings.service.persistence.RatingsEntryUtil;
+import com.liferay.ratings.kernel.exception.NoSuchEntryException;
+import com.liferay.ratings.kernel.model.RatingsEntry;
+import com.liferay.ratings.kernel.service.RatingsEntryLocalServiceUtil;
+import com.liferay.ratings.kernel.service.persistence.RatingsEntryPersistence;
+import com.liferay.ratings.kernel.service.persistence.RatingsEntryUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -59,8 +60,9 @@ import java.util.Set;
  * @generated
  */
 public class RatingsEntryPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -340,11 +342,9 @@ public class RatingsEntryPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = RatingsEntryLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<RatingsEntry>() {
 				@Override
-				public void performAction(Object object) {
-					RatingsEntry ratingsEntry = (RatingsEntry)object;
-
+				public void performAction(RatingsEntry ratingsEntry) {
 					Assert.assertNotNull(ratingsEntry);
 
 					count.increment();
@@ -436,14 +436,14 @@ public class RatingsEntryPersistenceTest {
 
 		RatingsEntry existingRatingsEntry = _persistence.findByPrimaryKey(newRatingsEntry.getPrimaryKey());
 
-		Assert.assertEquals(existingRatingsEntry.getUserId(),
-			ReflectionTestUtil.invoke(existingRatingsEntry,
+		Assert.assertEquals(Long.valueOf(existingRatingsEntry.getUserId()),
+			ReflectionTestUtil.<Long>invoke(existingRatingsEntry,
 				"getOriginalUserId", new Class<?>[0]));
-		Assert.assertEquals(existingRatingsEntry.getClassNameId(),
-			ReflectionTestUtil.invoke(existingRatingsEntry,
+		Assert.assertEquals(Long.valueOf(existingRatingsEntry.getClassNameId()),
+			ReflectionTestUtil.<Long>invoke(existingRatingsEntry,
 				"getOriginalClassNameId", new Class<?>[0]));
-		Assert.assertEquals(existingRatingsEntry.getClassPK(),
-			ReflectionTestUtil.invoke(existingRatingsEntry,
+		Assert.assertEquals(Long.valueOf(existingRatingsEntry.getClassPK()),
+			ReflectionTestUtil.<Long>invoke(existingRatingsEntry,
 				"getOriginalClassPK", new Class<?>[0]));
 	}
 

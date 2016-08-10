@@ -18,7 +18,7 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.service.PortalServiceUtil;
+import com.liferay.portal.kernel.service.PortalServiceUtil;
 
 import java.rmi.RemoteException;
 
@@ -70,6 +70,19 @@ public class PortalServiceSoap {
 	public static int getBuildNumber() throws RemoteException {
 		try {
 			int returnValue = PortalServiceUtil.getBuildNumber();
+
+			return returnValue;
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static java.lang.String getVersion() throws RemoteException {
+		try {
+			java.lang.String returnValue = PortalServiceUtil.getVersion();
 
 			return returnValue;
 		}

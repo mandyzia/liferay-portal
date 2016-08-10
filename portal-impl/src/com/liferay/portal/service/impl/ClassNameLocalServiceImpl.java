@@ -15,13 +15,12 @@
 package com.liferay.portal.service.impl;
 
 import com.liferay.portal.kernel.cache.CacheRegistryItem;
-import com.liferay.portal.kernel.cache.CacheRegistryUtil;
+import com.liferay.portal.kernel.model.ClassName;
+import com.liferay.portal.kernel.model.ModelHintsUtil;
 import com.liferay.portal.kernel.spring.aop.Skip;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.ClassName;
-import com.liferay.portal.model.ModelHintsUtil;
 import com.liferay.portal.model.impl.ClassNameImpl;
 import com.liferay.portal.service.base.ClassNameLocalServiceBaseImpl;
 
@@ -53,13 +52,6 @@ public class ClassNameLocalServiceImpl
 	}
 
 	@Override
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-
-		CacheRegistryUtil.register(this);
-	}
-
-	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public void checkClassNames() {
 		List<ClassName> classNames = classNamePersistence.findAll();
@@ -73,6 +65,11 @@ public class ClassNameLocalServiceImpl
 		for (String model : models) {
 			getClassName(model);
 		}
+	}
+
+	@Override
+	public ClassName fetchByClassNameId(long classNameId) {
+		return classNamePersistence.fetchByPrimaryKey(classNameId);
 	}
 
 	@Override

@@ -39,7 +39,7 @@
 			<var name="siteType" value="${siteType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
@@ -50,13 +50,13 @@
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
@@ -66,13 +66,13 @@
 			<var name="dmDocumentTitle" value="${dmDocumentTitle}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents" />
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="true" />
 		</execute>
 
-		<execute macro="DMFolder#gotoPG">
+		<execute macro="DMNavigator#gotoFolder">
 			<var name="dmFolderName" value="${dmFolderName}" />
 		</execute>
 
@@ -80,9 +80,8 @@
 			<var name="dmDocumentTitle" value="${dmDocumentTitle}" />
 		</execute>
 
-		<execute macro="Page#openURL">
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<var name="key_dmDocumentTitle" value="${dmDocumentTitle}" />

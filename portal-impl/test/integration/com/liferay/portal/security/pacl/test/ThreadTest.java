@@ -60,7 +60,9 @@ public class ThreadTest {
 	@Test
 	public void testCurrent3() throws Exception {
 		try {
-			ClassLoader classLoader = getClass().getClassLoader();
+			Class<?> clazz = getClass();
+
+			ClassLoader classLoader = clazz.getClassLoader();
 
 			Thread.currentThread().setContextClassLoader(classLoader);
 
@@ -121,6 +123,7 @@ public class ThreadTest {
 			@Override
 			public void run() {
 			}
+
 		};
 
 		thread.start();
@@ -156,12 +159,12 @@ public class ThreadTest {
 			Thread thread = new Thread() {
 
 				@Override
-				public void setContextClassLoader(ClassLoader cl) {
-					super.setContextClassLoader(cl);
+				public void run() {
 				}
 
 				@Override
-				public void run() {
+				public void setContextClassLoader(ClassLoader cl) {
+					super.setContextClassLoader(cl);
 				}
 
 			};
@@ -211,8 +214,7 @@ public class ThreadTest {
 					return null;
 				}
 
-			}
-		);
+			});
 
 		Thread thread = new Thread(futureTask);
 
@@ -240,8 +242,7 @@ public class ThreadTest {
 					return null;
 				}
 
-			}
-		);
+			});
 
 		Thread thread = new Thread(futureTask);
 
@@ -270,8 +271,7 @@ public class ThreadTest {
 					return null;
 				}
 
-			}
-		);
+			});
 
 		Thread thread = new Thread(futureTask);
 
@@ -300,8 +300,7 @@ public class ThreadTest {
 					return null;
 				}
 
-			}
-		);
+			});
 
 		Thread thread = new Thread(futureTask);
 
@@ -314,7 +313,9 @@ public class ThreadTest {
 
 	@Test
 	public void testNew10() throws Exception {
-		final ClassLoader classLoader = getClass().getClassLoader();
+		Class<?> clazz = getClass();
+
+		final ClassLoader classLoader = clazz.getClassLoader();
 
 		FutureTask<Exception> futureTask = new FutureTask<Exception>(
 			new Callable<Exception>() {
@@ -332,8 +333,7 @@ public class ThreadTest {
 					return null;
 				}
 
-			}
-		);
+			});
 
 		Thread thread = new Thread(futureTask);
 
@@ -362,8 +362,7 @@ public class ThreadTest {
 					return null;
 				}
 
-			}
-		);
+			});
 
 		Thread thread = new Thread(futureTask);
 
@@ -383,8 +382,8 @@ public class ThreadTest {
 				@Override
 				public void run() {
 				}
-			}
-		);
+
+			});
 
 		thread.start();
 	}
@@ -404,8 +403,7 @@ public class ThreadTest {
 						return null;
 					}
 
-				}
-			);
+				});
 
 			Assert.fail();
 		}
@@ -421,12 +419,12 @@ public class ThreadTest {
 		threadPoolExecutor.submit(
 			new Callable<Void>() {
 
-					@Override
-					public Void call() throws Exception {
-						return null;
-					}
+				@Override
+				public Void call() throws Exception {
+					return null;
 				}
-		);
+
+			});
 	}
 
 	@Test

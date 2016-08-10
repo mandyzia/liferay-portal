@@ -4,8 +4,8 @@
 
 		<!-- Configure IdP (Identity Provider) on http://localhost:8080 with database lportal and saml deployed -->
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="SAML Admin" />
+		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+			<var name="portlet" value="SAML Admin" />
 		</execute>
 
 		<execute macro="SAMLRole#configure">
@@ -38,9 +38,12 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="SAML Admin" />
-			<var name="specificURL" value="http://www.able.com:9080" />
+		<execute macro="Navigator#openSpecificURL">
+			<var name="url" value="http://www.able.com:9080" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+			<var name="portlet" value="SAML Admin" />
 		</execute>
 
 		<execute macro="SAMLRole#configure">
@@ -73,19 +76,10 @@
 
 		<!-- Add the configured SP connection to the IdP -->
 
-		<execute macro="Page#openURL">
-			<var name="friendlyURL" value="${friendlyURL}" />
-			<var name="pageAccess" value="${pageAccess}" />
-			<var name="pageStaging" value="${pageStaging}" />
-			<var name="siteName" value="${siteName}" />
-			<var name="siteNameURL" value="${siteNameURL}" />
-			<var name="siteURL" value="${siteURL}" />
-			<var name="specificURL" value="${specificURL}" />
-			<var name="virtualHostsURL" value="${virtualHostsURL}" />
-		</execute>
+		<execute macro="Navigator#openURL" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="SAML Admin" />
+		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+			<var name="portlet" value="SAML Admin" />
 		</execute>
 
 		<execute macro="SAMLNavigation#gotoServiceProviderConnection" />
@@ -104,6 +98,7 @@
 			<var name="authenticationMethod" value="${authenticationMethod}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="password" value="${password}" />
+			<var name="samlEnabled" value="${samlEnabled}" />
 			<var name="specificURL" value="${idpInitiatedSSOURL}" />
 			<var name="syntaxCheckingEnabled" value="${syntaxCheckingEnabled}" />
 			<var name="userEmailAddress" value="${userEmailAddress}" />
@@ -119,7 +114,6 @@
 
 		<execute macro="User#loginPG">
 			<var name="authenticationMethod" value="${authenticationMethod}" />
-			<var name="loginViaDockbar" value="${loginViaDockbar}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="password" value="${password}" />
 			<var name="rememberMeChecked" value="${rememberMeChecked}" />

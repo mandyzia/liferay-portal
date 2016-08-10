@@ -14,7 +14,7 @@
 
 package com.liferay.taglib.ui;
 
-import com.liferay.portlet.asset.model.AssetCategoryConstants;
+import com.liferay.asset.kernel.model.AssetCategoryConstants;
 import com.liferay.taglib.util.IncludeTag;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Brian Wing Shun Chan
  * @author Jorge Ferrer
+ * @deprecated As of 7.0.0
  */
+@Deprecated
 public class AssetCategoriesSelectorTag extends IncludeTag {
 
 	public void setClassName(String className) {
@@ -35,10 +37,6 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 
 	public void setClassTypePK(long classTypePK) {
 		_classTypePK = classTypePK;
-	}
-
-	public void setContentCallback(String contentCallback) {
-		_contentCallback = contentCallback;
 	}
 
 	public void setCurCategoryIds(String curCategoryIds) {
@@ -57,16 +55,20 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 		_ignoreRequestValue = ignoreRequestValue;
 	}
 
+	public void setShowRequiredLabel(boolean showRequiredLabel) {
+		_showRequiredLabel = showRequiredLabel;
+	}
+
 	@Override
 	protected void cleanUp() {
 		_className = null;
 		_classPK = 0;
 		_classTypePK = AssetCategoryConstants.ALL_CLASS_TYPE_PK;
-		_contentCallback = null;
 		_curCategoryIds = null;
 		_groupIds = null;
 		_hiddenInput = "assetCategoryIds";
 		_ignoreRequestValue = false;
+		_showRequiredLabel = true;
 	}
 
 	@Override
@@ -85,9 +87,6 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 			"liferay-ui:asset-categories-selector:classTypePK",
 			String.valueOf(_classTypePK));
 		request.setAttribute(
-			"liferay-ui:asset-categories-selector:contentCallback",
-			String.valueOf(_contentCallback));
-		request.setAttribute(
 			"liferay-ui:asset-categories-selector:curCategoryIds",
 			_curCategoryIds);
 		request.setAttribute(
@@ -97,6 +96,9 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 		request.setAttribute(
 			"liferay-ui:asset-categories-selector:ignoreRequestValue",
 			_ignoreRequestValue);
+		request.setAttribute(
+			"liferay-ui:asset-categories-selector:showRequiredLabel",
+			String.valueOf(_showRequiredLabel));
 	}
 
 	private static final String _PAGE =
@@ -105,10 +107,10 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 	private String _className;
 	private long _classPK;
 	private long _classTypePK = AssetCategoryConstants.ALL_CLASS_TYPE_PK;
-	private String _contentCallback;
 	private String _curCategoryIds;
 	private long[] _groupIds;
 	private String _hiddenInput = "assetCategoryIds";
 	private boolean _ignoreRequestValue;
+	private boolean _showRequiredLabel = true;
 
 }

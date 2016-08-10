@@ -1,11 +1,14 @@
 buildscript {
-	repositories {
-		mavenLocal()
-		mavenCentral()
-	}
-
 	dependencies {
 		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.whip", version: "latest.release"
+	}
+
+	repositories {
+		mavenLocal()
+
+		maven {
+			url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+		}
 	}
 }
 
@@ -13,8 +16,11 @@ apply plugin: "com.liferay.whip"
 apply plugin: "eclipse"
 apply plugin: "java"
 
+group = "com.example"
+
 dependencies {
-	testCompile files("../../../../portal-service/portal-service.jar", "../../../../portal-test/portal-test.jar")
+	testCompile group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "latest.release"
+	testCompile group: "com.liferay.portal", name: "com.liferay.portal.test", version: "latest.release"
 	testCompile group: "junit", name: "junit", version: "4.12"
 }
 
@@ -22,7 +28,7 @@ repositories {
 	mavenLocal()
 
 	maven {
-		url "http://cdn.repository.liferay.com/nexus/content/groups/public"
+		url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
 	}
 }
 
@@ -36,5 +42,3 @@ test {
 		includes = ['com/example/.*']
 	}
 }
-
-group = "com.example"

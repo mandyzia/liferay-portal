@@ -19,7 +19,7 @@
 <%
 AssetEntry assetEntry = (AssetEntry)request.getAttribute("liferay-ui:asset-display:assetEntry");
 
-AssetRenderer assetRenderer = (AssetRenderer)request.getAttribute(WebKeys.ASSET_RENDERER);
+AssetRenderer<?> assetRenderer = (AssetRenderer<?>)request.getAttribute(WebKeys.ASSET_RENDERER);
 %>
 
 <div class="asset-preview">
@@ -39,17 +39,17 @@ AssetRenderer assetRenderer = (AssetRenderer)request.getAttribute(WebKeys.ASSET_
 	</div>
 
 	<%
-	String displayDateString = StringPool.BLANK;
+	String publishDateString = StringPool.BLANK;
 
-	if (assetRenderer.getDisplayDate() != null) {
+	if (assetEntry.getPublishDate() != null) {
 		Format displayFormatDate = FastDateFormatFactoryUtil.getSimpleDateFormat("MMMM d, yyyy", locale, timeZone);
 
-		displayDateString = CharPool.OPEN_PARENTHESIS + displayFormatDate.format(assetRenderer.getDisplayDate()) + CharPool.CLOSE_PARENTHESIS;
+		publishDateString = CharPool.OPEN_PARENTHESIS + displayFormatDate.format(assetEntry.getPublishDate()) + CharPool.CLOSE_PARENTHESIS;
 	}
 	%>
 
 	<div class="asset-information">
-		<span class="user-name"><%= HtmlUtil.escape(assetRenderer.getUserName()) %></span>&nbsp; <span class="display-date"><%= displayDateString %></span>
+		<span class="user-name"><%= HtmlUtil.escape(assetRenderer.getUserName()) %></span>&nbsp; <span class="display-date"><%= publishDateString %></span>
 	</div>
 
 	<div class="asset-summary">

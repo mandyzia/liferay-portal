@@ -1,4 +1,0 @@
-Bundle-Name: Liferay Mobile Device Rules Web
-Bundle-SymbolicName: com.liferay.mobile.device.rules.web
-Bundle-Version: 1.0.0
-Include-Resource: classes

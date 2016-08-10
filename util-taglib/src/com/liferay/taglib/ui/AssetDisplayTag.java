@@ -14,16 +14,16 @@
 
 package com.liferay.taglib.ui;
 
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.model.AssetRenderer;
+import com.liferay.asset.kernel.model.AssetRendererFactory;
+import com.liferay.asset.kernel.model.Renderer;
+import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ServerDetector;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portlet.asset.model.AssetEntry;
-import com.liferay.portlet.asset.model.AssetRenderer;
-import com.liferay.portlet.asset.model.AssetRendererFactory;
-import com.liferay.portlet.asset.model.Renderer;
-import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.taglib.util.IncludeTag;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class AssetDisplayTag extends IncludeTag {
 		return _assetEntry;
 	}
 
-	public AssetRendererFactory getAssetRendererFactory() {
+	public AssetRendererFactory<?> getAssetRendererFactory() {
 		return _assetRendererFactory;
 	}
 
@@ -118,12 +118,12 @@ public class AssetDisplayTag extends IncludeTag {
 		_assetEntry = assetEntry;
 	}
 
-	public void setAssetRenderer(AssetRenderer assetRenderer) {
+	public void setAssetRenderer(AssetRenderer<?> assetRenderer) {
 		_renderer = assetRenderer;
 	}
 
 	public void setAssetRendererFactory(
-		AssetRendererFactory assetRendererFactory) {
+		AssetRendererFactory<?> assetRendererFactory) {
 
 		_assetRendererFactory = assetRendererFactory;
 	}
@@ -224,7 +224,7 @@ public class AssetDisplayTag extends IncludeTag {
 		}
 
 		if (_renderer instanceof AssetRenderer) {
-			AssetRenderer assetRenderer = (AssetRenderer)_renderer;
+			AssetRenderer<?> assetRenderer = (AssetRenderer<?>)_renderer;
 
 			request.setAttribute(WebKeys.ASSET_RENDERER, assetRenderer);
 		}
@@ -233,7 +233,7 @@ public class AssetDisplayTag extends IncludeTag {
 				"liferay-ui:asset-display:renderer", _renderer);
 		}
 
-		AssetRendererFactory assetRendererFactory = _assetRendererFactory;
+		AssetRendererFactory<?> assetRendererFactory = _assetRendererFactory;
 
 		if ((assetRendererFactory == null) && (assetEntry != null)) {
 			assetRendererFactory = assetEntry.getAssetRendererFactory();
@@ -256,7 +256,7 @@ public class AssetDisplayTag extends IncludeTag {
 
 	private int _abstractLength = 200;
 	private AssetEntry _assetEntry;
-	private AssetRendererFactory _assetRendererFactory;
+	private AssetRendererFactory<?> _assetRendererFactory;
 	private String _className;
 	private long _classPK;
 	private String _page;

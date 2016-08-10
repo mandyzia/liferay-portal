@@ -16,23 +16,25 @@ package com.liferay.portal.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.RepositoryEntry;
+import com.liferay.portal.kernel.model.RepositoryEntryModel;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.RepositoryEntry;
-import com.liferay.portal.model.RepositoryEntryModel;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
-
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
 
 import java.io.Serializable;
 
@@ -76,7 +78,8 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 			{ "modifiedDate", Types.TIMESTAMP },
 			{ "repositoryId", Types.BIGINT },
 			{ "mappedId", Types.VARCHAR },
-			{ "manualCheckInRequired", Types.BOOLEAN }
+			{ "manualCheckInRequired", Types.BOOLEAN },
+			{ "lastPublishDate", Types.TIMESTAMP }
 		};
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
 
@@ -93,9 +96,10 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 		TABLE_COLUMNS_MAP.put("repositoryId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("mappedId", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("manualCheckInRequired", Types.BOOLEAN);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table RepositoryEntry (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,repositoryEntryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,repositoryId LONG,mappedId VARCHAR(255) null,manualCheckInRequired BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table RepositoryEntry (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,repositoryEntryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,repositoryId LONG,mappedId VARCHAR(255) null,manualCheckInRequired BOOLEAN,lastPublishDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table RepositoryEntry";
 	public static final String ORDER_BY_JPQL = " ORDER BY repositoryEntry.repositoryEntryId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY RepositoryEntry.repositoryEntryId ASC";
@@ -103,13 +107,13 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portal.model.RepositoryEntry"),
+				"value.object.entity.cache.enabled.com.liferay.portal.kernel.model.RepositoryEntry"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portal.model.RepositoryEntry"),
+				"value.object.finder.cache.enabled.com.liferay.portal.kernel.model.RepositoryEntry"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portal.model.RepositoryEntry"),
+				"value.object.column.bitmask.enabled.com.liferay.portal.kernel.model.RepositoryEntry"),
 			true);
 	public static final long COMPANYID_COLUMN_BITMASK = 1L;
 	public static final long GROUPID_COLUMN_BITMASK = 2L;
@@ -118,7 +122,7 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 	public static final long UUID_COLUMN_BITMASK = 16L;
 	public static final long REPOSITORYENTRYID_COLUMN_BITMASK = 32L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portal.model.RepositoryEntry"));
+				"lock.expiration.time.com.liferay.portal.kernel.model.RepositoryEntry"));
 
 	public RepositoryEntryModelImpl() {
 	}
@@ -169,6 +173,7 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 		attributes.put("repositoryId", getRepositoryId());
 		attributes.put("mappedId", getMappedId());
 		attributes.put("manualCheckInRequired", getManualCheckInRequired());
+		attributes.put("lastPublishDate", getLastPublishDate());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -249,6 +254,12 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 
 		if (manualCheckInRequired != null) {
 			setManualCheckInRequired(manualCheckInRequired);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 	}
 
@@ -469,6 +480,16 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 	}
 
 	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
+	}
+
+	@Override
 	public StagedModelType getStagedModelType() {
 		return new StagedModelType(PortalUtil.getClassNameId(
 				RepositoryEntry.class.getName()));
@@ -517,6 +538,7 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 		repositoryEntryImpl.setRepositoryId(getRepositoryId());
 		repositoryEntryImpl.setMappedId(getMappedId());
 		repositoryEntryImpl.setManualCheckInRequired(getManualCheckInRequired());
+		repositoryEntryImpl.setLastPublishDate(getLastPublishDate());
 
 		repositoryEntryImpl.resetOriginalValues();
 
@@ -660,12 +682,21 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 
 		repositoryEntryCacheModel.manualCheckInRequired = getManualCheckInRequired();
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			repositoryEntryCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			repositoryEntryCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		return repositoryEntryCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(25);
+		StringBundler sb = new StringBundler(27);
 
 		sb.append("{mvccVersion=");
 		sb.append(getMvccVersion());
@@ -691,6 +722,8 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 		sb.append(getMappedId());
 		sb.append(", manualCheckInRequired=");
 		sb.append(getManualCheckInRequired());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append("}");
 
 		return sb.toString();
@@ -698,10 +731,10 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(40);
+		StringBundler sb = new StringBundler(43);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portal.model.RepositoryEntry");
+		sb.append("com.liferay.portal.kernel.model.RepositoryEntry");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -752,6 +785,10 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 			"<column><column-name>manualCheckInRequired</column-name><column-value><![CDATA[");
 		sb.append(getManualCheckInRequired());
 		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
 
@@ -783,6 +820,7 @@ public class RepositoryEntryModelImpl extends BaseModelImpl<RepositoryEntry>
 	private String _mappedId;
 	private String _originalMappedId;
 	private boolean _manualCheckInRequired;
+	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private RepositoryEntry _escapedModel;
 }

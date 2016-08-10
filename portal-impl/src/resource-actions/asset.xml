@@ -3,7 +3,7 @@
 
 <resource-action-mapping>
 	<model-resource>
-		<model-name>com.liferay.portlet.asset</model-name>
+		<model-name>com.liferay.asset</model-name>
 		<portlet-ref>
 			<portlet-name>com_liferay_asset_tags_admin_web_portlet_AssetTagsAdminPortlet</portlet-name>
 		</portlet-ref>
@@ -21,10 +21,11 @@
 		</permissions>
 	</model-resource>
 	<model-resource>
-		<model-name>com.liferay.portlet.asset</model-name>
+		<model-name>com.liferay.asset</model-name>
 		<portlet-ref>
 			<portlet-name>com_liferay_asset_categories_admin_web_portlet_AssetCategoriesAdminPortlet</portlet-name>
 		</portlet-ref>
+		<root>true</root>
 		<weight>1</weight>
 		<permissions>
 			<supports>
@@ -40,7 +41,7 @@
 		</permissions>
 	</model-resource>
 	<model-resource>
-		<model-name>com.liferay.portlet.asset.model.AssetCategory</model-name>
+		<model-name>com.liferay.asset.kernel.model.AssetCategory</model-name>
 		<portlet-ref>
 			<portlet-name>com_liferay_asset_categories_admin_web_portlet_AssetCategoriesAdminPortlet</portlet-name>
 		</portlet-ref>
@@ -67,7 +68,7 @@
 		</permissions>
 	</model-resource>
 	<model-resource>
-		<model-name>com.liferay.portlet.asset.model.AssetTag</model-name>
+		<model-name>com.liferay.asset.kernel.model.AssetTag</model-name>
 		<portlet-ref>
 			<portlet-name>com_liferay_asset_tags_admin_web_portlet_AssetTagsAdminPortlet</portlet-name>
 		</portlet-ref>
@@ -77,21 +78,16 @@
 				<action-key>DELETE</action-key>
 				<action-key>PERMISSIONS</action-key>
 				<action-key>UPDATE</action-key>
-				<action-key>VIEW</action-key>
 			</supports>
-			<site-member-defaults>
-				<action-key>VIEW</action-key>
-			</site-member-defaults>
-			<guest-defaults>
-				<action-key>VIEW</action-key>
-			</guest-defaults>
+			<site-member-defaults />
+			<guest-defaults />
 			<guest-unsupported>
 				<action-key>UPDATE</action-key>
 			</guest-unsupported>
 		</permissions>
 	</model-resource>
 	<model-resource>
-		<model-name>com.liferay.portlet.asset.model.AssetVocabulary</model-name>
+		<model-name>com.liferay.asset.kernel.model.AssetVocabulary</model-name>
 		<portlet-ref>
 			<portlet-name>com_liferay_asset_categories_admin_web_portlet_AssetCategoriesAdminPortlet</portlet-name>
 		</portlet-ref>

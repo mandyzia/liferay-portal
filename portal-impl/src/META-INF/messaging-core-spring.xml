@@ -11,20 +11,26 @@
 
 	<!-- Message bus -->
 
-	<bean id="com.liferay.portal.kernel.messaging.MessageBusUtil" class="com.liferay.portal.kernel.messaging.MessageBusUtil">
+	<bean class="com.liferay.portal.kernel.messaging.MessageBusUtil" id="com.liferay.portal.kernel.messaging.MessageBusUtil">
 		<property name="synchronousMessageSenderMode" value="DEFAULT" />
 	</bean>
-	<bean id="com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSenderFactoryUtil" class="com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSenderFactoryUtil" />
+	<bean class="com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSenderFactoryUtil" id="com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSenderFactoryUtil" />
 
 	<!-- Configurator -->
 
-	<bean id="messagingConfigurator.core" class="com.liferay.portal.kernel.messaging.config.DefaultMessagingConfigurator">
+	<bean class="com.liferay.portal.kernel.messaging.config.DefaultMessagingConfigurator" id="messagingConfigurator.core">
 		<property name="destinationConfigurations">
 			<util:set>
 				<bean class="com.liferay.portal.kernel.messaging.DestinationConfiguration">
 					<constructor-arg name="destinationName" value="liferay/message_bus/default_response" />
 					<constructor-arg name="destinationType">
 						<util:constant static-field="com.liferay.portal.kernel.messaging.DestinationConfiguration.DESTINATION_TYPE_SYNCHRONOUS" />
+					</constructor-arg>
+				</bean>
+				<bean class="com.liferay.portal.kernel.messaging.DestinationConfiguration">
+					<constructor-arg name="destinationName" value="liferay/message_bus/message_status" />
+					<constructor-arg name="destinationType">
+						<util:constant static-field="com.liferay.portal.kernel.messaging.DestinationConfiguration.DESTINATION_TYPE_PARALLEL" />
 					</constructor-arg>
 				</bean>
 			</util:set>

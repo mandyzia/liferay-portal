@@ -16,35 +16,38 @@ package com.liferay.portlet.documentlibrary.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.NoSuchModelException;
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileEntryModel;
+import com.liferay.document.library.kernel.model.DLFileEntrySoap;
+
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
+import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.ContainerModel;
+import com.liferay.portal.kernel.model.TrashedModel;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.ContainerModel;
-import com.liferay.portal.model.TrashedModel;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.impl.BaseModelImpl;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
 
-import com.liferay.portlet.documentlibrary.model.DLFileEntry;
-import com.liferay.portlet.documentlibrary.model.DLFileEntryModel;
-import com.liferay.portlet.documentlibrary.model.DLFileEntrySoap;
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
-import com.liferay.portlet.trash.model.TrashEntry;
-import com.liferay.portlet.trash.service.TrashEntryLocalServiceUtil;
+import com.liferay.trash.kernel.model.TrashEntry;
+import com.liferay.trash.kernel.service.TrashEntryLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -108,7 +111,8 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 			{ "largeImageId", Types.BIGINT },
 			{ "custom1ImageId", Types.BIGINT },
 			{ "custom2ImageId", Types.BIGINT },
-			{ "manualCheckInRequired", Types.BOOLEAN }
+			{ "manualCheckInRequired", Types.BOOLEAN },
+			{ "lastPublishDate", Types.TIMESTAMP }
 		};
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
 
@@ -142,9 +146,10 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 		TABLE_COLUMNS_MAP.put("custom1ImageId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("custom2ImageId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("manualCheckInRequired", Types.BOOLEAN);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table DLFileEntry (uuid_ VARCHAR(75) null,fileEntryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,repositoryId LONG,folderId LONG,treePath STRING null,name VARCHAR(255) null,fileName VARCHAR(255) null,extension VARCHAR(75) null,mimeType VARCHAR(75) null,title VARCHAR(255) null,description STRING null,extraSettings TEXT null,fileEntryTypeId LONG,version VARCHAR(75) null,size_ LONG,readCount INTEGER,smallImageId LONG,largeImageId LONG,custom1ImageId LONG,custom2ImageId LONG,manualCheckInRequired BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table DLFileEntry (uuid_ VARCHAR(75) null,fileEntryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,repositoryId LONG,folderId LONG,treePath STRING null,name VARCHAR(255) null,fileName VARCHAR(255) null,extension VARCHAR(75) null,mimeType VARCHAR(75) null,title VARCHAR(255) null,description STRING null,extraSettings TEXT null,fileEntryTypeId LONG,version VARCHAR(75) null,size_ LONG,readCount INTEGER,smallImageId LONG,largeImageId LONG,custom1ImageId LONG,custom2ImageId LONG,manualCheckInRequired BOOLEAN,lastPublishDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table DLFileEntry";
 	public static final String ORDER_BY_JPQL = " ORDER BY dlFileEntry.folderId ASC, dlFileEntry.name ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY DLFileEntry.folderId ASC, DLFileEntry.name ASC";
@@ -152,25 +157,29 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portlet.documentlibrary.model.DLFileEntry"),
+				"value.object.entity.cache.enabled.com.liferay.document.library.kernel.model.DLFileEntry"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portlet.documentlibrary.model.DLFileEntry"),
+				"value.object.finder.cache.enabled.com.liferay.document.library.kernel.model.DLFileEntry"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portlet.documentlibrary.model.DLFileEntry"),
+				"value.object.column.bitmask.enabled.com.liferay.document.library.kernel.model.DLFileEntry"),
 			true);
 	public static final long COMPANYID_COLUMN_BITMASK = 1L;
-	public static final long FILEENTRYTYPEID_COLUMN_BITMASK = 2L;
-	public static final long FILENAME_COLUMN_BITMASK = 4L;
-	public static final long FOLDERID_COLUMN_BITMASK = 8L;
-	public static final long GROUPID_COLUMN_BITMASK = 16L;
-	public static final long MIMETYPE_COLUMN_BITMASK = 32L;
-	public static final long NAME_COLUMN_BITMASK = 64L;
-	public static final long REPOSITORYID_COLUMN_BITMASK = 128L;
-	public static final long TITLE_COLUMN_BITMASK = 256L;
-	public static final long USERID_COLUMN_BITMASK = 512L;
-	public static final long UUID_COLUMN_BITMASK = 1024L;
+	public static final long CUSTOM1IMAGEID_COLUMN_BITMASK = 2L;
+	public static final long CUSTOM2IMAGEID_COLUMN_BITMASK = 4L;
+	public static final long FILEENTRYTYPEID_COLUMN_BITMASK = 8L;
+	public static final long FILENAME_COLUMN_BITMASK = 16L;
+	public static final long FOLDERID_COLUMN_BITMASK = 32L;
+	public static final long GROUPID_COLUMN_BITMASK = 64L;
+	public static final long LARGEIMAGEID_COLUMN_BITMASK = 128L;
+	public static final long MIMETYPE_COLUMN_BITMASK = 256L;
+	public static final long NAME_COLUMN_BITMASK = 512L;
+	public static final long REPOSITORYID_COLUMN_BITMASK = 1024L;
+	public static final long SMALLIMAGEID_COLUMN_BITMASK = 2048L;
+	public static final long TITLE_COLUMN_BITMASK = 4096L;
+	public static final long USERID_COLUMN_BITMASK = 8192L;
+	public static final long UUID_COLUMN_BITMASK = 16384L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -214,6 +223,7 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 		model.setCustom1ImageId(soapModel.getCustom1ImageId());
 		model.setCustom2ImageId(soapModel.getCustom2ImageId());
 		model.setManualCheckInRequired(soapModel.getManualCheckInRequired());
+		model.setLastPublishDate(soapModel.getLastPublishDate());
 
 		return model;
 	}
@@ -239,7 +249,7 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portlet.documentlibrary.model.DLFileEntry"));
+				"lock.expiration.time.com.liferay.document.library.kernel.model.DLFileEntry"));
 
 	public DLFileEntryModelImpl() {
 	}
@@ -307,6 +317,7 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 		attributes.put("custom1ImageId", getCustom1ImageId());
 		attributes.put("custom2ImageId", getCustom2ImageId());
 		attributes.put("manualCheckInRequired", getManualCheckInRequired());
+		attributes.put("lastPublishDate", getLastPublishDate());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -489,6 +500,12 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 
 		if (manualCheckInRequired != null) {
 			setManualCheckInRequired(manualCheckInRequired);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 	}
 
@@ -981,7 +998,19 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 
 	@Override
 	public void setSmallImageId(long smallImageId) {
+		_columnBitmask |= SMALLIMAGEID_COLUMN_BITMASK;
+
+		if (!_setOriginalSmallImageId) {
+			_setOriginalSmallImageId = true;
+
+			_originalSmallImageId = _smallImageId;
+		}
+
 		_smallImageId = smallImageId;
+	}
+
+	public long getOriginalSmallImageId() {
+		return _originalSmallImageId;
 	}
 
 	@JSON
@@ -992,7 +1021,19 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 
 	@Override
 	public void setLargeImageId(long largeImageId) {
+		_columnBitmask |= LARGEIMAGEID_COLUMN_BITMASK;
+
+		if (!_setOriginalLargeImageId) {
+			_setOriginalLargeImageId = true;
+
+			_originalLargeImageId = _largeImageId;
+		}
+
 		_largeImageId = largeImageId;
+	}
+
+	public long getOriginalLargeImageId() {
+		return _originalLargeImageId;
 	}
 
 	@JSON
@@ -1003,7 +1044,19 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 
 	@Override
 	public void setCustom1ImageId(long custom1ImageId) {
+		_columnBitmask |= CUSTOM1IMAGEID_COLUMN_BITMASK;
+
+		if (!_setOriginalCustom1ImageId) {
+			_setOriginalCustom1ImageId = true;
+
+			_originalCustom1ImageId = _custom1ImageId;
+		}
+
 		_custom1ImageId = custom1ImageId;
+	}
+
+	public long getOriginalCustom1ImageId() {
+		return _originalCustom1ImageId;
 	}
 
 	@JSON
@@ -1014,7 +1067,19 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 
 	@Override
 	public void setCustom2ImageId(long custom2ImageId) {
+		_columnBitmask |= CUSTOM2IMAGEID_COLUMN_BITMASK;
+
+		if (!_setOriginalCustom2ImageId) {
+			_setOriginalCustom2ImageId = true;
+
+			_originalCustom2ImageId = _custom2ImageId;
+		}
+
 		_custom2ImageId = custom2ImageId;
+	}
+
+	public long getOriginalCustom2ImageId() {
+		return _originalCustom2ImageId;
 	}
 
 	@JSON
@@ -1023,6 +1088,7 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 		return _manualCheckInRequired;
 	}
 
+	@JSON
 	@Override
 	public boolean isManualCheckInRequired() {
 		return _manualCheckInRequired;
@@ -1031,6 +1097,17 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 	@Override
 	public void setManualCheckInRequired(boolean manualCheckInRequired) {
 		_manualCheckInRequired = manualCheckInRequired;
+	}
+
+	@JSON
+	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
 	}
 
 	@Override
@@ -1230,6 +1307,7 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 		dlFileEntryImpl.setCustom1ImageId(getCustom1ImageId());
 		dlFileEntryImpl.setCustom2ImageId(getCustom2ImageId());
 		dlFileEntryImpl.setManualCheckInRequired(getManualCheckInRequired());
+		dlFileEntryImpl.setLastPublishDate(getLastPublishDate());
 
 		dlFileEntryImpl.resetOriginalValues();
 
@@ -1339,6 +1417,22 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 		dlFileEntryModelImpl._originalFileEntryTypeId = dlFileEntryModelImpl._fileEntryTypeId;
 
 		dlFileEntryModelImpl._setOriginalFileEntryTypeId = false;
+
+		dlFileEntryModelImpl._originalSmallImageId = dlFileEntryModelImpl._smallImageId;
+
+		dlFileEntryModelImpl._setOriginalSmallImageId = false;
+
+		dlFileEntryModelImpl._originalLargeImageId = dlFileEntryModelImpl._largeImageId;
+
+		dlFileEntryModelImpl._setOriginalLargeImageId = false;
+
+		dlFileEntryModelImpl._originalCustom1ImageId = dlFileEntryModelImpl._custom1ImageId;
+
+		dlFileEntryModelImpl._setOriginalCustom1ImageId = false;
+
+		dlFileEntryModelImpl._originalCustom2ImageId = dlFileEntryModelImpl._custom2ImageId;
+
+		dlFileEntryModelImpl._setOriginalCustom2ImageId = false;
 
 		dlFileEntryModelImpl._columnBitmask = 0;
 	}
@@ -1485,12 +1579,21 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 
 		dlFileEntryCacheModel.manualCheckInRequired = getManualCheckInRequired();
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			dlFileEntryCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			dlFileEntryCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		return dlFileEntryCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(59);
+		StringBundler sb = new StringBundler(61);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -1550,6 +1653,8 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 		sb.append(getCustom2ImageId());
 		sb.append(", manualCheckInRequired=");
 		sb.append(getManualCheckInRequired());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append("}");
 
 		return sb.toString();
@@ -1557,10 +1662,10 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(91);
+		StringBundler sb = new StringBundler(94);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portlet.documentlibrary.model.DLFileEntry");
+		sb.append("com.liferay.document.library.kernel.model.DLFileEntry");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -1679,6 +1784,10 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 			"<column><column-name>manualCheckInRequired</column-name><column-value><![CDATA[");
 		sb.append(getManualCheckInRequired());
 		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
 
@@ -1732,10 +1841,19 @@ public class DLFileEntryModelImpl extends BaseModelImpl<DLFileEntry>
 	private long _size;
 	private int _readCount;
 	private long _smallImageId;
+	private long _originalSmallImageId;
+	private boolean _setOriginalSmallImageId;
 	private long _largeImageId;
+	private long _originalLargeImageId;
+	private boolean _setOriginalLargeImageId;
 	private long _custom1ImageId;
+	private long _originalCustom1ImageId;
+	private boolean _setOriginalCustom1ImageId;
 	private long _custom2ImageId;
+	private long _originalCustom2ImageId;
+	private boolean _setOriginalCustom2ImageId;
 	private boolean _manualCheckInRequired;
+	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private DLFileEntry _escapedModel;
 }

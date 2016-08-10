@@ -14,25 +14,26 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchOrgGroupRoleException;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchOrgGroupRoleException;
+import com.liferay.portal.kernel.model.OrgGroupRole;
+import com.liferay.portal.kernel.service.persistence.OrgGroupRolePK;
+import com.liferay.portal.kernel.service.persistence.OrgGroupRolePersistence;
+import com.liferay.portal.kernel.service.persistence.OrgGroupRoleUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.transaction.Propagation;
-import com.liferay.portal.model.OrgGroupRole;
-import com.liferay.portal.service.persistence.OrgGroupRolePK;
-import com.liferay.portal.service.persistence.OrgGroupRolePersistence;
-import com.liferay.portal.service.persistence.OrgGroupRoleUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -49,8 +50,9 @@ import java.util.Set;
  * @generated
  */
 public class OrgGroupRolePersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -111,6 +113,8 @@ public class OrgGroupRolePersistenceTest {
 
 		newOrgGroupRole.setMvccVersion(RandomTestUtil.nextLong());
 
+		newOrgGroupRole.setCompanyId(RandomTestUtil.nextLong());
+
 		_orgGroupRoles.add(_persistence.update(newOrgGroupRole));
 
 		OrgGroupRole existingOrgGroupRole = _persistence.findByPrimaryKey(newOrgGroupRole.getPrimaryKey());
@@ -123,6 +127,8 @@ public class OrgGroupRolePersistenceTest {
 			newOrgGroupRole.getGroupId());
 		Assert.assertEquals(existingOrgGroupRole.getRoleId(),
 			newOrgGroupRole.getRoleId());
+		Assert.assertEquals(existingOrgGroupRole.getCompanyId(),
+			newOrgGroupRole.getCompanyId());
 	}
 
 	@Test
@@ -349,6 +355,8 @@ public class OrgGroupRolePersistenceTest {
 		OrgGroupRole orgGroupRole = _persistence.create(pk);
 
 		orgGroupRole.setMvccVersion(RandomTestUtil.nextLong());
+
+		orgGroupRole.setCompanyId(RandomTestUtil.nextLong());
 
 		_orgGroupRoles.add(_persistence.update(orgGroupRole));
 

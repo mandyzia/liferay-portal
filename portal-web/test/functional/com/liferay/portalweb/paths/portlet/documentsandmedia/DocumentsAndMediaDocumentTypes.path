@@ -19,6 +19,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SAVE_BUTTON</td>
+	<td>//button[contains(@type,'submit')]/span[contains(.,'Save')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -36,7 +41,7 @@
 </tr>
 <tr>
 	<td>DOCUMENT_TYPES_TABLE_ACTIONS</td>
-	<td>//tr[contains(.,'${key_dmDocumentTypeName}')]/td[4]/div/a</td>
+	<td>//tr[contains(.,'${key_dmDocumentTypeName}')]/td[4]//div/a</td>
 	<td></td>
 </tr>
 <tr>

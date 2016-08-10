@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
+import com.liferay.portal.kernel.security.xml.SecureXMLFactoryProviderUtil;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.settings.Settings;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -29,6 +30,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Localization;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PrefsParamUtil;
+import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -37,9 +39,9 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.language.LanguageResources;
-import com.liferay.portal.security.xml.SecureXMLFactoryProviderUtil;
 import com.liferay.util.ContentUtil;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -342,6 +344,27 @@ public class LocalizationImpl implements Localization {
 
 	@Override
 	public Map<Locale, String> getLocalizationMap(
+		Collection<Locale> locales, Locale defaultLocale, String key) {
+
+		Map<Locale, String> map = new HashMap<>();
+
+		String defaultValue = LanguageUtil.get(defaultLocale, key);
+
+		for (Locale locale : locales) {
+			String value = LanguageUtil.get(locale, key);
+
+			if (!locale.equals(defaultLocale) && value.equals(defaultValue)) {
+				continue;
+			}
+
+			map.put(locale, value);
+		}
+
+		return map;
+	}
+
+	@Override
+	public Map<Locale, String> getLocalizationMap(
 		HttpServletRequest request, String parameter) {
 
 		Map<Locale, String> map = new HashMap<>();
@@ -374,9 +397,11 @@ public class LocalizationImpl implements Localization {
 			defaultPropertyValue = PropsUtil.get(propertyName);
 		}
 
+		Class<?> clazz = getClass();
+
 		return getLocalizationMap(
 			preferences, preferenceName, propertyName, defaultPropertyValue,
-			getClass().getClassLoader());
+			clazz.getClassLoader());
 	}
 
 	@Override
@@ -588,17 +613,6 @@ public class LocalizationImpl implements Localization {
 	@Override
 	public String getLocalizedName(String name, String languageId) {
 		return name.concat(StringPool.UNDERLINE).concat(languageId);
-	}
-
-	/**
-	 * @deprecated As of 7.0.0
-	 */
-	@Deprecated
-	@Override
-	public Map<Locale, String> getLocalizedParameter(
-		PortletRequest portletRequest, String parameter) {
-
-		return getLocalizationMap(portletRequest, parameter);
 	}
 
 	@Override
@@ -1179,27 +1193,13 @@ public class LocalizationImpl implements Localization {
 						xmlStreamReader.getLocalName());
 					xmlStreamWriter.writeAttribute(_LANGUAGE_ID, languageId);
 
-					while (xmlStreamReader.hasNext()) {
-						event = xmlStreamReader.next();
+					String text = xmlStreamReader.getElementText();
 
-						if ((event == XMLStreamConstants.CHARACTERS) ||
-							(event == XMLStreamConstants.CDATA)) {
-
-							String text = xmlStreamReader.getText();
-
-							if (cdata) {
-								xmlStreamWriter.writeCData(text);
-							}
-							else {
-								xmlStreamWriter.writeCharacters(
-									xmlStreamReader.getText());
-							}
-
-							break;
-						}
-						else if (event == XMLStreamConstants.END_ELEMENT) {
-							break;
-						}
+					if (cdata) {
+						xmlStreamWriter.writeCData(text);
+					}
+					else {
+						xmlStreamWriter.writeCharacters(text);
 					}
 
 					xmlStreamWriter.writeEndElement();
@@ -1238,19 +1238,18 @@ public class LocalizationImpl implements Localization {
 		String bundleName, Locale locale, ClassLoader classLoader, String key,
 		String defaultValue) {
 
-		ResourceBundle resourceBundle = ResourceBundle.getBundle(
+		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			bundleName, locale, classLoader);
 
 		String value = null;
 
 		if (resourceBundle.containsKey(key)) {
 			try {
-				value = resourceBundle.getString(key);
+				value = ResourceBundleUtil.getString(resourceBundle, key);
 
 				value = new String(
 					value.getBytes(StringPool.ISO_8859_1), StringPool.UTF8);
 			}
-
 			catch (Exception e) {
 			}
 		}

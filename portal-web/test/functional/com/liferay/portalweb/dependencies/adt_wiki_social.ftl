@@ -1,8 +1,8 @@
-<#assign liferay_ui = taglibLiferayHash["/WEB-INF/tld/liferay-ui.tld"] />
+<#assign
+	wikiPageClassName = "com.liferay.wiki.model.WikiPage"
 
-<#assign wikiPageClassName = "com.liferay.portlet.wiki.model.WikiPage" />
-
-<#assign assetRenderer = assetEntry.getAssetRenderer() />
+	assetRenderer = assetEntry.getAssetRenderer()
+/>
 
 <div class="taglib-header">
 	<h1 class="header-title">${entry.getTitle()}</h1>
@@ -46,7 +46,10 @@
 
 	 <br />
 
-	<@getRatings cssClass="page-ratings" entry=entry />
+	<@getRatings
+		cssClass="page-ratings"
+		entry=entry
+	/>
 
 	<@getRelatedAssets />
 </div>
@@ -116,7 +119,10 @@
 						<a href="${viewPageURL}">${dateUtil.getDate(childPage.getModifiedDate(),"dd MMM yyyy - HH:mm:ss", locale)} <@liferay.language key="by" /> ${htmlUtil.escape(portalUtil.getUserName(childPage.getUserId(), childPage.getUserName()))}</a>
 					</td>
 					<td>
-						<@getRatings cssClass="child-ratings" entry=childPage />
+						<@getRatings
+							cssClass="child-ratings"
+							entry=childPage
+						/>
 					</td>
 				</tr>
 			</#list>
@@ -160,7 +166,7 @@
 </#macro>
 
 <#macro getDiscussion>
-	<#if validator.isNotNull(assetRenderer.getDiscussionPath()) && wikiPortletInstanceSettings.enableComments()>
+	<#if validator.isNotNull(assetRenderer.getDiscussionPath()) && wikiPortletInstanceOverriddenConfiguration.enableComments()>
 		<br />
 
 		<#assign discussionURL = renderResponse.createActionURL() />
@@ -172,7 +178,7 @@
 			classPK=entry.getResourcePrimKey()
 			formAction=discussionURL?string
 			formName="fm2"
-			ratingsEnabled=wikiPortletInstanceSettings.enableCommentRatings()
+			ratingsEnabled=wikiPortletInstanceOverriddenConfiguration.enableCommentRatings()
 			redirect=currentURL
 			subject=assetRenderer.getTitle(locale)
 			userId=assetRenderer.getUserId()
@@ -216,8 +222,10 @@
 	${printURL.setParameter("viewMode", "print")}
 	${printURL.setWindowState("pop_up")}
 
-	<#assign title = languageUtil.format(locale, "print-x-x", ["hide-accessible", htmlUtil.escape(assetRenderer.getTitle(locale))], false) />
-	<#assign taglibPrintURL = "javascript:Liferay.Util.openWindow({dialog: {width: 960}, id:'" + renderResponse.getNamespace() + "printAsset', title: '" + title + "', uri: '" + htmlUtil.escapeURL(printURL.toString()) + "'});" />
+	<#assign
+		title = languageUtil.format(locale, "print-x-x", ["hide-accessible", htmlUtil.escape(assetRenderer.getTitle(locale))], false)
+		taglibPrintURL = "javascript:Liferay.Util.openWindow({dialog: {width: 960}, id:'" + renderResponse.getNamespace() + "printAsset', title: '" + title + "', uri: '" + htmlUtil.escapeURL(printURL.toString()) + "'});"
+	/>
 
 	<@liferay_ui["icon"]
 		iconCssClass="icon-print"
@@ -230,7 +238,7 @@
 	cssClass
 	entry
 >
-	<#if wikiPortletInstanceSettings.enablePageRatings()>
+	<#if wikiPortletInstanceOverriddenConfiguration.enablePageRatings()>
 		<div class="${cssClass}">
 			<@liferay_ui["ratings"]
 				className=wikiPageClassName
@@ -241,7 +249,7 @@
 </#macro>
 
 <#macro getRelatedAssets>
-	<#if assetEntry?? && wikiPortletInstanceSettings.enableRelatedAssets()>
+	<#if assetEntry?? && wikiPortletInstanceOverriddenConfiguration.enableRelatedAssets()>
 		<@liferay_ui["asset-links"]
 			assetEntryId=assetEntry.getEntryId()
 		/>

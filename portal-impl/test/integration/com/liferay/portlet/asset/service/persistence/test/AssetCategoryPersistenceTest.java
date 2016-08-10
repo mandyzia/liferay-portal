@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.asset.service.persistence.test;
 
+import com.liferay.asset.kernel.exception.NoSuchCategoryException;
+import com.liferay.asset.kernel.model.AssetCategory;
+import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
+import com.liferay.asset.kernel.service.persistence.AssetCategoryPersistence;
+import com.liferay.asset.kernel.service.persistence.AssetCategoryUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -30,19 +36,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
-
-import com.liferay.portlet.asset.NoSuchCategoryException;
-import com.liferay.portlet.asset.model.AssetCategory;
-import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
-import com.liferay.portlet.asset.service.persistence.AssetCategoryPersistence;
-import com.liferay.portlet.asset.service.persistence.AssetCategoryUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -53,14 +53,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class AssetCategoryPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -143,6 +145,8 @@ public class AssetCategoryPersistenceTest {
 
 		newAssetCategory.setVocabularyId(RandomTestUtil.nextLong());
 
+		newAssetCategory.setLastPublishDate(RandomTestUtil.nextDate());
+
 		_assetCategories.add(_persistence.update(newAssetCategory));
 
 		AssetCategory existingAssetCategory = _persistence.findByPrimaryKey(newAssetCategory.getPrimaryKey());
@@ -179,6 +183,9 @@ public class AssetCategoryPersistenceTest {
 			newAssetCategory.getDescription());
 		Assert.assertEquals(existingAssetCategory.getVocabularyId(),
 			newAssetCategory.getVocabularyId());
+		Assert.assertEquals(Time.getShortTimestamp(
+				existingAssetCategory.getLastPublishDate()),
+			Time.getShortTimestamp(newAssetCategory.getLastPublishDate()));
 	}
 
 	@Test
@@ -349,7 +356,7 @@ public class AssetCategoryPersistenceTest {
 			"userId", true, "userName", true, "createDate", true,
 			"modifiedDate", true, "parentCategoryId", true, "leftCategoryId",
 			true, "rightCategoryId", true, "name", true, "title", true,
-			"description", true, "vocabularyId", true);
+			"description", true, "vocabularyId", true, "lastPublishDate", true);
 	}
 
 	@Test
@@ -458,11 +465,9 @@ public class AssetCategoryPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = AssetCategoryLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<AssetCategory>() {
 				@Override
-				public void performAction(Object object) {
-					AssetCategory assetCategory = (AssetCategory)object;
-
+				public void performAction(AssetCategory assetCategory) {
 					Assert.assertNotNull(assetCategory);
 
 					count.increment();
@@ -554,21 +559,23 @@ public class AssetCategoryPersistenceTest {
 
 		AssetCategory existingAssetCategory = _persistence.findByPrimaryKey(newAssetCategory.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingAssetCategory.getUuid(),
+		Assert.assertTrue(Objects.equals(existingAssetCategory.getUuid(),
 				ReflectionTestUtil.invoke(existingAssetCategory,
 					"getOriginalUuid", new Class<?>[0])));
-		Assert.assertEquals(existingAssetCategory.getGroupId(),
-			ReflectionTestUtil.invoke(existingAssetCategory,
+		Assert.assertEquals(Long.valueOf(existingAssetCategory.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingAssetCategory,
 				"getOriginalGroupId", new Class<?>[0]));
 
-		Assert.assertEquals(existingAssetCategory.getParentCategoryId(),
-			ReflectionTestUtil.invoke(existingAssetCategory,
+		Assert.assertEquals(Long.valueOf(
+				existingAssetCategory.getParentCategoryId()),
+			ReflectionTestUtil.<Long>invoke(existingAssetCategory,
 				"getOriginalParentCategoryId", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingAssetCategory.getName(),
+		Assert.assertTrue(Objects.equals(existingAssetCategory.getName(),
 				ReflectionTestUtil.invoke(existingAssetCategory,
 					"getOriginalName", new Class<?>[0])));
-		Assert.assertEquals(existingAssetCategory.getVocabularyId(),
-			ReflectionTestUtil.invoke(existingAssetCategory,
+		Assert.assertEquals(Long.valueOf(
+				existingAssetCategory.getVocabularyId()),
+			ReflectionTestUtil.<Long>invoke(existingAssetCategory,
 				"getOriginalVocabularyId", new Class<?>[0]));
 	}
 
@@ -602,6 +609,8 @@ public class AssetCategoryPersistenceTest {
 		assetCategory.setDescription(RandomTestUtil.randomString());
 
 		assetCategory.setVocabularyId(RandomTestUtil.nextLong());
+
+		assetCategory.setLastPublishDate(RandomTestUtil.nextDate());
 
 		_assetCategories.add(_persistence.update(assetCategory));
 
@@ -850,6 +859,8 @@ public class AssetCategoryPersistenceTest {
 		assetCategory.setDescription(RandomTestUtil.randomString());
 
 		assetCategory.setVocabularyId(RandomTestUtil.nextLong());
+
+		assetCategory.setLastPublishDate(RandomTestUtil.nextDate());
 
 		if (parentCategoryId != null) {
 			assetCategory.setParentCategoryId(parentCategoryId);

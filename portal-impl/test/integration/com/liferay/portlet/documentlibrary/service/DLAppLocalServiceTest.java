@@ -14,15 +14,28 @@
 
 package com.liferay.portlet.documentlibrary.service;
 
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
+import com.liferay.document.library.kernel.exception.NoSuchFolderException;
+import com.liferay.document.library.kernel.model.DLFileEntryConstants;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.model.DLSyncConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLTrashServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.messaging.MessageListener;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.repository.LocalRepository;
 import com.liferay.portal.kernel.repository.RepositoryProviderUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
+import com.liferay.portal.kernel.service.RepositoryLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.rule.Sync;
@@ -35,20 +48,9 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Repository;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
-import com.liferay.portal.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.service.RepositoryLocalServiceUtil;
-import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
-import com.liferay.portlet.asset.model.AssetEntry;
-import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.NoSuchFolderException;
-import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
-import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
-import com.liferay.portlet.documentlibrary.model.DLSyncConstants;
 
 import java.io.ByteArrayInputStream;
 
@@ -75,7 +77,7 @@ public class DLAppLocalServiceTest {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Before
@@ -129,7 +131,7 @@ public class DLAppLocalServiceTest {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Before
@@ -202,7 +204,7 @@ public class DLAppLocalServiceTest {
 		public void shouldDeleteTrashedFolders() throws Exception {
 			Folder folder = addFolder(_group.getGroupId(), true);
 
-			DLAppServiceUtil.moveFolderToTrash(folder.getFolderId());
+			DLTrashServiceUtil.moveFolderToTrash(folder.getFolderId());
 
 			DLAppLocalServiceUtil.deleteAllRepositories(_group.getGroupId());
 
@@ -227,7 +229,7 @@ public class DLAppLocalServiceTest {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Before
@@ -303,7 +305,7 @@ public class DLAppLocalServiceTest {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Before
@@ -354,7 +356,7 @@ public class DLAppLocalServiceTest {
 		@Rule
 		public static final AggregateTestRule aggregateTestRule =
 			new AggregateTestRule(
-				new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE,
+				new LiferayIntegrationTestRule(),
 				SynchronousDestinationTestRule.INSTANCE);
 
 		@Before
@@ -403,7 +405,8 @@ public class DLAppLocalServiceTest {
 			TestPropsValues.getUserId(), serviceContext.getScopeGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 			RandomTestUtil.randomString(), ContentTypes.TEXT_PLAIN, "Old Title",
-			RandomTestUtil.randomString(), null, RandomTestUtil.randomBytes(),
+			RandomTestUtil.randomString(), null,
+			RandomTestUtil.randomBytes(TikaSafeRandomizerBumper.INSTANCE),
 			serviceContext);
 	}
 
@@ -491,7 +494,8 @@ public class DLAppLocalServiceTest {
 			TestPropsValues.getUserId(), fileEntry.getFileEntryId(),
 			RandomTestUtil.randomString(), ContentTypes.TEXT_PLAIN, "New Title",
 			RandomTestUtil.randomString(), null, true,
-			RandomTestUtil.randomBytes(), serviceContext);
+			RandomTestUtil.randomBytes(TikaSafeRandomizerBumper.INSTANCE),
+			serviceContext);
 	}
 
 }

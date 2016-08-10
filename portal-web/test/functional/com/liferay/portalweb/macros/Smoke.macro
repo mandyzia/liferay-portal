@@ -3,32 +3,32 @@
 	<var name="userLastName" value="Test" />
 
 	<command name="runSmoke" summary-ignore="true">
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="Test Page1" />
 			<var name="pageTemplateName" value="${pageTemplateName}" />
-			<var name="pageType" value="${pageType}" />
+			<var name="sitePageType" value="${pageType}" />
 		</execute>
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="Test Page2" />
 			<var name="pageTemplateName" value="${pageTemplateName}" />
-			<var name="pageType" value="${pageType}" />
+			<var name="sitePageType" value="${pageType}" />
 		</execute>
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="defaultURL" value="${defaultURL}" />
 			<var name="nodePort" value="${nodePort}" />
 			<var name="pageName" value="Test Page3" />
 			<var name="pageTemplateName" value="${pageTemplateName}" />
-			<var name="pageType" value="${pageType}" />
+			<var name="sitePageType" value="${pageType}" />
 		</execute>
 
 		<var name="pageName" value="Test Page1" />
-		<var name="portletBody" value="Welcome to Liferay Portal" />
+		<var name="portletBody" value="Welcome to Liferay" />
 		<var name="portletName" value="Hello World" />
 
 		<task summary="Add a '${portletName}' portlet to the page named '${pageName}'">
@@ -64,28 +64,43 @@
 			</execute>
 		</task>
 
-		<var name="portletName" value="Blogs" />
-		<var name="portletTitle" value="Blogs" />
+		<var name="portlet" value="Web Content" />
 
-		<task macro-summary="Page#gotoContentCP">
-			<execute macro="Page#gotoContentCP">
-				<var name="portletName" value="${portletName}" />
+		<task macro-summary="ProductMenu#gotoSitesContent">
+			<execute macro="Navigator#openURL" />
+
+			<execute macro="ProductMenu#gotoSitesContent">
+				<var name="portlet" value="${portlet}" />
 			</execute>
 
 			<execute macro="SiteAdmin#viewPortletTitle">
-				<var name="portletTitle" value="${portletTitle}" />
+				<var name="portletTitle" value="${portlet}" />
+			</execute>
+		</task>
+
+		<var name="webContentContent" value="Web Content Content" />
+		<var name="webContentTitle" value="Web Content Title" />
+
+		<task summary="Add a web content article with '${webContentTitle}' as the title and '${webContentContent}' as the content">
+			<execute macro="WebContentNavigator#gotoAddCP" />
+
+			<execute function="Pause" locator1="30000" />
+
+			<execute macro="WebContent#addCP">
+				<var name="webContentContent" value="${webContentContent}" />
+				<var name="webContentTitle" value="${webContentTitle}" />
+			</execute>
+
+			<execute macro="PortletEntry#publish" />
+
+			<execute macro="WebContent#viewTitle">
+				<var name="webContentTitle" value="${webContentTitle}" />
 			</execute>
 		</task>
 	</command>
 
 	<command name="viewWelcomePage" summary="View default welcome page while signed in as '${userFirstName} ${userLastName}'">
-		<execute function="AssertTextEquals" locator1="Home#BREADCRUMB_1" value1="Welcome" />
-
-		<execute function="AssertTextEquals#assertText" locator1="PGSignin#PORTLET_TITLE" value1="Sign In" />
-		<execute function="AssertTextEquals#assertPartialText" locator1="PGSignin#PORTLET_CONTENT" value1="You are signed in as" />
-		<execute function="AssertTextEquals" locator1="PGSignin#PORTLET_CONTENT_USER_NAME" value1="${userFirstName} ${userLastName}" />
-
-		<execute function="AssertTextEquals#assertText" locator1="PGHelloworld#PORTLET_TITLE" value1="Hello World" />
-		<execute function="AssertTextEquals#assertPartialText" locator1="PGHelloworld#PORTLET_CONTENT" value1="Welcome to Liferay Portal" />
+		<execute function="AssertTextEquals#assertText" locator1="HelloWorld#PORTLET_TITLE" value1="Hello World" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="HelloWorld#PORTLET_CONTENT" value1="Welcome to Liferay" />
 	</command>
 </definition>

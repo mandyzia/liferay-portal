@@ -1,18 +1,21 @@
 <definition component-name="portal-collaboration">
-	<property name="portlet.plugins.includes" value="notifications-portlet" />
+	<property name="portal.release" value="true" />
+	<property name="custom.properties" value="default.layout.template.id=1_column" />
 	<property name="testray.main.component.name" value="Notifications" />
 
 	<var name="pageName" value="Blogs Page" />
 	<var name="portletName" value="Blogs" />
 
 	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -20,8 +23,8 @@
 			<var name="portletName" value="${portletName}" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#addCP">
@@ -31,8 +34,8 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#editPasswordCP">
@@ -41,8 +44,8 @@
 			<var name="userScreenName" value="usersn" />
 		</execute>
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
 		<execute macro="User#assignRegularRoleCP">
@@ -52,28 +55,38 @@
 	</set-up>
 
 	<tear-down>
-		<execute macro="Blogs#tearDownSubscribePG" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="Blogs#tearDownCP" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="Blogs#tearDownSubscribePG" />
 
-		<execute macro="NotificationsPortlet#tearDownUserDeliveries" />
+				<execute macro="Blogs#tearDownCP" />
 
-		<execute macro="Page#tearDownPG" />
+				<execute macro="NotificationsPortlet#tearDownUserDeliveries" />
 
-		<execute macro="User#tearDownCP" />
+				<execute macro="Page#tearDownPG" />
+
+				<execute macro="User#tearDownCP" />
+			</else>
+		</if>
 	</tear-down>
 
 	<command name="MarkAllNotificationsAsRead" priority="4">
 		<var name="blogsEntryCounterList" value="1,2,3" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Blogs Page" />
 		</execute>
 
 		<execute macro="Blogs#subscribePG" />
 
-		<execute macro="Notifications#viewCount">
-			<var name="notificationCount" value="0" />
+		<execute macro="Notifications#viewNoNotifications">
+			<var name="activePanel" value="Profile" />
 		</execute>
 
 		<execute macro="User#logoutPG" />
@@ -83,7 +96,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -94,8 +107,8 @@
 			</execute>
 		</for>
 
-		<execute macro="Notifications#viewCount">
-			<var name="notificationCount" value="0" />
+		<execute macro="Notifications#viewNoNotifications">
+			<var name="activePanel" value="Profile" />
 		</execute>
 
 		<execute macro="User#logoutPG" />
@@ -105,42 +118,40 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#gotoDockbar" />
+		<execute macro="Notifications#viewBadgeCount">
+			<var name="activePanel" value="Notifications" />
+			<var name="notificationCount" value="3" />
+		</execute>
+
+		<execute macro="Notifications#gotoNotifications" />
 
 		<execute macro="Notifications#markAllAsRead" />
 
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Blogs Page" />
+		<execute macro="Notifications#viewNoNotifications">
+			<var name="activePanel" value="Notifications" />
 		</execute>
-
-		<execute macro="Notifications#viewCount">
-			<var name="notificationCount" value="0" />
-		</execute>
-
-		<execute macro="Notifications#gotoDockbar" />
-
-		<execute macro="Notifications#viewDefaultContent" />
 	</command>
 
 	<command name="ViewNoWebsiteNotificationForNewBlogsEntry" priority="4">
-		<execute macro="Page#gotoPG">
-			<var name="pageName" value="Blogs Page" />
-		</execute>
+		<execute macro="NotificationsPortlet#gotoNotificationDelivery" />
 
-		<execute macro="NotificationsPortlet#setUserDeliveries">
-			<var name="actionType" value="add" />
+		<execute function="AssertElementPresent" locator1="IFrame#DIALOG" />
+
+		<execute macro="IFrame#selectConfigurationFrame" />
+
+		<execute macro="NotificationsPortlet#disableUserDeliveries">
+			<var name="actionType" value="Add" />
 			<var name="contentType" value="Blogs" />
-			<var name="enableDelivery" value="false" />
 			<var name="notificationType" value="Website" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<execute macro="Blogs#subscribePG" />
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -151,7 +162,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -160,7 +171,7 @@
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -171,13 +182,13 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 	</command>
 
 	<command name="ViewNoWebsiteNotificationForUpdatedBlogsEntry" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -188,7 +199,7 @@
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -199,7 +210,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -210,7 +221,7 @@
 			<var name="entryTitleEdit" value="Blogs Entry Title Edit" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -221,11 +232,11 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -236,13 +247,13 @@
 	</command>
 
 	<command name="ViewWebsiteNotificationForNewBlogsEntry" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<execute macro="Blogs#subscribePG" />
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -253,7 +264,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -262,7 +273,7 @@
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -273,11 +284,11 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCountAlert">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="1" />
 		</execute>
 
-		<execute macro="Notifications#gotoDockbar" />
+		<execute macro="Notifications#gotoNotifications" />
 
 		<execute macro="Notifications#viewNewContent">
 			<var name="assetType" value="blogs entry" />
@@ -294,13 +305,13 @@
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 	</command>
 
 	<command name="ViewWebsiteNotificationForNewCommentViaBlogs" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -319,7 +330,7 @@
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -330,7 +341,7 @@
 			<var name="userEmailAddress" value="userea@liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -343,7 +354,7 @@
 			<var name="entryComment" value="Blogs Entry Comment" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 
@@ -354,11 +365,11 @@
 			<var name="userEmailAddress" value="test@liferay.com" />
 		</execute>
 
-		<execute macro="Notifications#viewCountAlert">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="1" />
 		</execute>
 
-		<execute macro="Notifications#gotoDockbar" />
+		<execute macro="Notifications#gotoNotifications" />
 
 		<execute macro="Notifications#viewNewComment">
 			<var name="assetType" value="comment" />
@@ -371,16 +382,18 @@
 			<var name="contentBody" value="Blogs Entry Comment" />
 		</execute>
 
+		<execute macro="BlogsNavigator#gotoEntryPG">
+			<var name="entryContent" value="Blogs Entry Content" />
+			<var name="entryTitle" value="Blogs Entry Title" />
+		</execute>
+
 		<execute macro="BlogsEntryComment#viewPG">
 			<var name="commentCount" value="1" />
 			<var name="entryComment" value="Blogs Entry Comment" />
-			<var name="entryContent" value="Blogs Entry Content" />
-			<var name="entryTitle" value="Blogs Entry Title" />
-			<var name="userFullName" value="Test Test" />
 			<var name="userFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Notifications#viewCount">
+		<execute macro="Notifications#viewBadgeCount">
 			<var name="notificationCount" value="0" />
 		</execute>
 	</command>

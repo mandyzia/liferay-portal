@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.asset.service.persistence.test;
 
+import com.liferay.asset.kernel.exception.NoSuchTagException;
+import com.liferay.asset.kernel.model.AssetTag;
+import com.liferay.asset.kernel.service.AssetTagLocalServiceUtil;
+import com.liferay.asset.kernel.service.persistence.AssetTagPersistence;
+import com.liferay.asset.kernel.service.persistence.AssetTagUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -30,19 +36,13 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
-
-import com.liferay.portlet.asset.NoSuchTagException;
-import com.liferay.portlet.asset.model.AssetTag;
-import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
-import com.liferay.portlet.asset.service.persistence.AssetTagPersistence;
-import com.liferay.portlet.asset.service.persistence.AssetTagUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -53,14 +53,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class AssetTagPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -135,6 +137,8 @@ public class AssetTagPersistenceTest {
 
 		newAssetTag.setAssetCount(RandomTestUtil.nextInt());
 
+		newAssetTag.setLastPublishDate(RandomTestUtil.nextDate());
+
 		_assetTags.add(_persistence.update(newAssetTag));
 
 		AssetTag existingAssetTag = _persistence.findByPrimaryKey(newAssetTag.getPrimaryKey());
@@ -158,6 +162,9 @@ public class AssetTagPersistenceTest {
 		Assert.assertEquals(existingAssetTag.getName(), newAssetTag.getName());
 		Assert.assertEquals(existingAssetTag.getAssetCount(),
 			newAssetTag.getAssetCount());
+		Assert.assertEquals(Time.getShortTimestamp(
+				existingAssetTag.getLastPublishDate()),
+			Time.getShortTimestamp(newAssetTag.getLastPublishDate()));
 	}
 
 	@Test
@@ -255,7 +262,7 @@ public class AssetTagPersistenceTest {
 		return OrderByComparatorFactoryUtil.create("AssetTag", "uuid", true,
 			"tagId", true, "groupId", true, "companyId", true, "userId", true,
 			"userName", true, "createDate", true, "modifiedDate", true, "name",
-			true, "assetCount", true);
+			true, "assetCount", true, "lastPublishDate", true);
 	}
 
 	@Test
@@ -364,11 +371,9 @@ public class AssetTagPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = AssetTagLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<AssetTag>() {
 				@Override
-				public void performAction(Object object) {
-					AssetTag assetTag = (AssetTag)object;
-
+				public void performAction(AssetTag assetTag) {
 					Assert.assertNotNull(assetTag);
 
 					count.increment();
@@ -460,17 +465,17 @@ public class AssetTagPersistenceTest {
 
 		AssetTag existingAssetTag = _persistence.findByPrimaryKey(newAssetTag.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingAssetTag.getUuid(),
+		Assert.assertTrue(Objects.equals(existingAssetTag.getUuid(),
 				ReflectionTestUtil.invoke(existingAssetTag, "getOriginalUuid",
 					new Class<?>[0])));
-		Assert.assertEquals(existingAssetTag.getGroupId(),
-			ReflectionTestUtil.invoke(existingAssetTag, "getOriginalGroupId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingAssetTag.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingAssetTag,
+				"getOriginalGroupId", new Class<?>[0]));
 
-		Assert.assertEquals(existingAssetTag.getGroupId(),
-			ReflectionTestUtil.invoke(existingAssetTag, "getOriginalGroupId",
-				new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingAssetTag.getName(),
+		Assert.assertEquals(Long.valueOf(existingAssetTag.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(existingAssetTag,
+				"getOriginalGroupId", new Class<?>[0]));
+		Assert.assertTrue(Objects.equals(existingAssetTag.getName(),
 				ReflectionTestUtil.invoke(existingAssetTag, "getOriginalName",
 					new Class<?>[0])));
 	}
@@ -497,6 +502,8 @@ public class AssetTagPersistenceTest {
 		assetTag.setName(RandomTestUtil.randomString());
 
 		assetTag.setAssetCount(RandomTestUtil.nextInt());
+
+		assetTag.setLastPublishDate(RandomTestUtil.nextDate());
 
 		_assetTags.add(_persistence.update(assetTag));
 

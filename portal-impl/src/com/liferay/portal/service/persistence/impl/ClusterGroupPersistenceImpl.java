@@ -16,24 +16,25 @@ package com.liferay.portal.service.persistence.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.NoSuchClusterGroupException;
+import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
+import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
 import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
+import com.liferay.portal.kernel.exception.NoSuchClusterGroupException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.ClusterGroup;
+import com.liferay.portal.kernel.service.persistence.ClusterGroupPersistence;
+import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.ClusterGroup;
-import com.liferay.portal.model.MVCCModel;
 import com.liferay.portal.model.impl.ClusterGroupImpl;
 import com.liferay.portal.model.impl.ClusterGroupModelImpl;
-import com.liferay.portal.service.persistence.ClusterGroupPersistence;
 
 import java.io.Serializable;
 
@@ -54,7 +55,7 @@ import java.util.Set;
  *
  * @author Brian Wing Shun Chan
  * @see ClusterGroupPersistence
- * @see com.liferay.portal.service.persistence.ClusterGroupUtil
+ * @see com.liferay.portal.kernel.service.persistence.ClusterGroupUtil
  * @generated
  */
 @ProviderType
@@ -91,7 +92,7 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	 */
 	@Override
 	public void cacheResult(ClusterGroup clusterGroup) {
-		EntityCacheUtil.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 			ClusterGroupImpl.class, clusterGroup.getPrimaryKey(), clusterGroup);
 
 		clusterGroup.resetOriginalValues();
@@ -105,7 +106,7 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	@Override
 	public void cacheResult(List<ClusterGroup> clusterGroups) {
 		for (ClusterGroup clusterGroup : clusterGroups) {
-			if (EntityCacheUtil.getResult(
+			if (entityCache.getResult(
 						ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 						ClusterGroupImpl.class, clusterGroup.getPrimaryKey()) == null) {
 				cacheResult(clusterGroup);
@@ -120,41 +121,41 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	 * Clears the cache for all cluster groups.
 	 *
 	 * <p>
-	 * The {@link com.liferay.portal.kernel.dao.orm.EntityCache} and {@link com.liferay.portal.kernel.dao.orm.FinderCache} are both cleared by this method.
+	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
 	 * </p>
 	 */
 	@Override
 	public void clearCache() {
-		EntityCacheUtil.clearCache(ClusterGroupImpl.class);
+		entityCache.clearCache(ClusterGroupImpl.class);
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_ENTITY);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
 	 * Clears the cache for the cluster group.
 	 *
 	 * <p>
-	 * The {@link com.liferay.portal.kernel.dao.orm.EntityCache} and {@link com.liferay.portal.kernel.dao.orm.FinderCache} are both cleared by this method.
+	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
 	 * </p>
 	 */
 	@Override
 	public void clearCache(ClusterGroup clusterGroup) {
-		EntityCacheUtil.removeResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.removeResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 			ClusterGroupImpl.class, clusterGroup.getPrimaryKey());
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	@Override
 	public void clearCache(List<ClusterGroup> clusterGroups) {
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		for (ClusterGroup clusterGroup : clusterGroups) {
-			EntityCacheUtil.removeResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+			entityCache.removeResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 				ClusterGroupImpl.class, clusterGroup.getPrimaryKey());
 		}
 	}
@@ -207,8 +208,8 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 					primaryKey);
 
 			if (clusterGroup == null) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
+				if (_log.isDebugEnabled()) {
+					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
 				}
 
 				throw new NoSuchClusterGroupException(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY +
@@ -277,7 +278,7 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 				clusterGroup.setNew(false);
 			}
 			else {
-				session.merge(clusterGroup);
+				clusterGroup = (ClusterGroup)session.merge(clusterGroup);
 			}
 		}
 		catch (Exception e) {
@@ -287,13 +288,13 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
 		if (isNew) {
-			FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 		}
 
-		EntityCacheUtil.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+		entityCache.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 			ClusterGroupImpl.class, clusterGroup.getPrimaryKey(), clusterGroup,
 			false);
 
@@ -322,7 +323,7 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	}
 
 	/**
-	 * Returns the cluster group with the primary key or throws a {@link com.liferay.portal.NoSuchModelException} if it could not be found.
+	 * Returns the cluster group with the primary key or throws a {@link com.liferay.portal.kernel.exception.NoSuchModelException} if it could not be found.
 	 *
 	 * @param primaryKey the primary key of the cluster group
 	 * @return the cluster group
@@ -334,8 +335,8 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 		ClusterGroup clusterGroup = fetchByPrimaryKey(primaryKey);
 
 		if (clusterGroup == null) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
+			if (_log.isDebugEnabled()) {
+				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
 			}
 
 			throw new NoSuchClusterGroupException(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY +
@@ -366,12 +367,14 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	 */
 	@Override
 	public ClusterGroup fetchByPrimaryKey(Serializable primaryKey) {
-		ClusterGroup clusterGroup = (ClusterGroup)EntityCacheUtil.getResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+		Serializable serializable = entityCache.getResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 				ClusterGroupImpl.class, primaryKey);
 
-		if (clusterGroup == _nullClusterGroup) {
+		if (serializable == nullModel) {
 			return null;
 		}
+
+		ClusterGroup clusterGroup = (ClusterGroup)serializable;
 
 		if (clusterGroup == null) {
 			Session session = null;
@@ -386,12 +389,12 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 					cacheResult(clusterGroup);
 				}
 				else {
-					EntityCacheUtil.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
-						ClusterGroupImpl.class, primaryKey, _nullClusterGroup);
+					entityCache.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+						ClusterGroupImpl.class, primaryKey, nullModel);
 				}
 			}
 			catch (Exception e) {
-				EntityCacheUtil.removeResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+				entityCache.removeResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 					ClusterGroupImpl.class, primaryKey);
 
 				throw processException(e);
@@ -441,18 +444,20 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 		Set<Serializable> uncachedPrimaryKeys = null;
 
 		for (Serializable primaryKey : primaryKeys) {
-			ClusterGroup clusterGroup = (ClusterGroup)EntityCacheUtil.getResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+			Serializable serializable = entityCache.getResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
 					ClusterGroupImpl.class, primaryKey);
 
-			if (clusterGroup == null) {
-				if (uncachedPrimaryKeys == null) {
-					uncachedPrimaryKeys = new HashSet<Serializable>();
-				}
+			if (serializable != nullModel) {
+				if (serializable == null) {
+					if (uncachedPrimaryKeys == null) {
+						uncachedPrimaryKeys = new HashSet<Serializable>();
+					}
 
-				uncachedPrimaryKeys.add(primaryKey);
-			}
-			else {
-				map.put(primaryKey, clusterGroup);
+					uncachedPrimaryKeys.add(primaryKey);
+				}
+				else {
+					map.put(primaryKey, (ClusterGroup)serializable);
+				}
 			}
 		}
 
@@ -493,8 +498,8 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 			}
 
 			for (Serializable primaryKey : uncachedPrimaryKeys) {
-				EntityCacheUtil.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
-					ClusterGroupImpl.class, primaryKey, _nullClusterGroup);
+				entityCache.putResult(ClusterGroupModelImpl.ENTITY_CACHE_ENABLED,
+					ClusterGroupImpl.class, primaryKey, nullModel);
 			}
 		}
 		catch (Exception e) {
@@ -548,6 +553,26 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	@Override
 	public List<ClusterGroup> findAll(int start, int end,
 		OrderByComparator<ClusterGroup> orderByComparator) {
+		return findAll(start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the cluster groups.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link ClusterGroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param start the lower bound of the range of cluster groups
+	 * @param end the upper bound of the range of cluster groups (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of cluster groups
+	 */
+	@Override
+	public List<ClusterGroup> findAll(int start, int end,
+		OrderByComparator<ClusterGroup> orderByComparator,
+		boolean retrieveFromCache) {
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
@@ -563,8 +588,12 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 			finderArgs = new Object[] { start, end, orderByComparator };
 		}
 
-		List<ClusterGroup> list = (List<ClusterGroup>)FinderCacheUtil.getResult(finderPath,
-				finderArgs, this);
+		List<ClusterGroup> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<ClusterGroup>)finderCache.getResult(finderPath,
+					finderArgs, this);
+		}
 
 		if (list == null) {
 			StringBundler query = null;
@@ -572,7 +601,7 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 
 			if (orderByComparator != null) {
 				query = new StringBundler(2 +
-						(orderByComparator.getOrderByFields().length * 3));
+						(orderByComparator.getOrderByFields().length * 2));
 
 				query.append(_SQL_SELECT_CLUSTERGROUP);
 
@@ -611,10 +640,10 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 
 				cacheResult(list);
 
-				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+				finderCache.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(finderPath, finderArgs);
+				finderCache.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -644,7 +673,7 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
+		Long count = (Long)finderCache.getResult(FINDER_PATH_COUNT_ALL,
 				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
@@ -657,11 +686,11 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 
 				count = (Long)q.uniqueResult();
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
-					FINDER_ARGS_EMPTY, count);
+				finderCache.putResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY,
+					count);
 			}
 			catch (Exception e) {
-				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_ALL,
+				finderCache.removeResult(FINDER_PATH_COUNT_ALL,
 					FINDER_ARGS_EMPTY);
 
 				throw processException(e);
@@ -686,46 +715,18 @@ public class ClusterGroupPersistenceImpl extends BasePersistenceImpl<ClusterGrou
 	}
 
 	public void destroy() {
-		EntityCacheUtil.removeCache(ClusterGroupImpl.class.getName());
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		entityCache.removeCache(ClusterGroupImpl.class.getName());
+		finderCache.removeCache(FINDER_CLASS_NAME_ENTITY);
+		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
+	protected EntityCache entityCache = EntityCacheUtil.getEntityCache();
+	protected FinderCache finderCache = FinderCacheUtil.getFinderCache();
 	private static final String _SQL_SELECT_CLUSTERGROUP = "SELECT clusterGroup FROM ClusterGroup clusterGroup";
 	private static final String _SQL_SELECT_CLUSTERGROUP_WHERE_PKS_IN = "SELECT clusterGroup FROM ClusterGroup clusterGroup WHERE clusterGroupId IN (";
 	private static final String _SQL_COUNT_CLUSTERGROUP = "SELECT COUNT(clusterGroup) FROM ClusterGroup clusterGroup";
 	private static final String _ORDER_BY_ENTITY_ALIAS = "clusterGroup.";
 	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY = "No ClusterGroup exists with the primary key ";
 	private static final Log _log = LogFactoryUtil.getLog(ClusterGroupPersistenceImpl.class);
-	private static final ClusterGroup _nullClusterGroup = new ClusterGroupImpl() {
-			@Override
-			public Object clone() {
-				return this;
-			}
-
-			@Override
-			public CacheModel<ClusterGroup> toCacheModel() {
-				return _nullClusterGroupCacheModel;
-			}
-		};
-
-	private static final CacheModel<ClusterGroup> _nullClusterGroupCacheModel = new NullCacheModel();
-
-	private static class NullCacheModel implements CacheModel<ClusterGroup>,
-		MVCCModel {
-		@Override
-		public long getMvccVersion() {
-			return -1;
-		}
-
-		@Override
-		public void setMvccVersion(long mvccVersion) {
-		}
-
-		@Override
-		public ClusterGroup toEntityModel() {
-			return _nullClusterGroup;
-		}
-	}
 }

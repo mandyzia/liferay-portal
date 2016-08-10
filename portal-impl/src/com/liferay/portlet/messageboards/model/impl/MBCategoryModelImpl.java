@@ -16,35 +16,38 @@ package com.liferay.portlet.messageboards.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.NoSuchModelException;
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
+import com.liferay.message.boards.kernel.model.MBCategory;
+import com.liferay.message.boards.kernel.model.MBCategoryModel;
+import com.liferay.message.boards.kernel.model.MBCategorySoap;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
+import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.ContainerModel;
+import com.liferay.portal.kernel.model.TrashedModel;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.ContainerModel;
-import com.liferay.portal.model.TrashedModel;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.impl.BaseModelImpl;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
 
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
-import com.liferay.portlet.messageboards.model.MBCategory;
-import com.liferay.portlet.messageboards.model.MBCategoryModel;
-import com.liferay.portlet.messageboards.model.MBCategorySoap;
-import com.liferay.portlet.trash.model.TrashEntry;
-import com.liferay.portlet.trash.service.TrashEntryLocalServiceUtil;
+import com.liferay.trash.kernel.model.TrashEntry;
+import com.liferay.trash.kernel.service.TrashEntryLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -95,6 +98,7 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 			{ "threadCount", Types.INTEGER },
 			{ "messageCount", Types.INTEGER },
 			{ "lastPostDate", Types.TIMESTAMP },
+			{ "lastPublishDate", Types.TIMESTAMP },
 			{ "status", Types.INTEGER },
 			{ "statusByUserId", Types.BIGINT },
 			{ "statusByUserName", Types.VARCHAR },
@@ -118,13 +122,14 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 		TABLE_COLUMNS_MAP.put("threadCount", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("messageCount", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("lastPostDate", Types.TIMESTAMP);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("statusByUserId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("statusByUserName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("statusDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table MBCategory (uuid_ VARCHAR(75) null,categoryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,parentCategoryId LONG,name VARCHAR(75) null,description STRING null,displayStyle VARCHAR(75) null,threadCount INTEGER,messageCount INTEGER,lastPostDate DATE null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+	public static final String TABLE_SQL_CREATE = "create table MBCategory (uuid_ VARCHAR(75) null,categoryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,parentCategoryId LONG,name VARCHAR(75) null,description STRING null,displayStyle VARCHAR(75) null,threadCount INTEGER,messageCount INTEGER,lastPostDate DATE null,lastPublishDate DATE null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table MBCategory";
 	public static final String ORDER_BY_JPQL = " ORDER BY mbCategory.parentCategoryId ASC, mbCategory.name ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY MBCategory.parentCategoryId ASC, MBCategory.name ASC";
@@ -132,13 +137,13 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portlet.messageboards.model.MBCategory"),
+				"value.object.entity.cache.enabled.com.liferay.message.boards.kernel.model.MBCategory"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portlet.messageboards.model.MBCategory"),
+				"value.object.finder.cache.enabled.com.liferay.message.boards.kernel.model.MBCategory"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portlet.messageboards.model.MBCategory"),
+				"value.object.column.bitmask.enabled.com.liferay.message.boards.kernel.model.MBCategory"),
 			true);
 	public static final long CATEGORYID_COLUMN_BITMASK = 1L;
 	public static final long COMPANYID_COLUMN_BITMASK = 2L;
@@ -176,6 +181,7 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 		model.setThreadCount(soapModel.getThreadCount());
 		model.setMessageCount(soapModel.getMessageCount());
 		model.setLastPostDate(soapModel.getLastPostDate());
+		model.setLastPublishDate(soapModel.getLastPublishDate());
 		model.setStatus(soapModel.getStatus());
 		model.setStatusByUserId(soapModel.getStatusByUserId());
 		model.setStatusByUserName(soapModel.getStatusByUserName());
@@ -205,7 +211,7 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portlet.messageboards.model.MBCategory"));
+				"lock.expiration.time.com.liferay.message.boards.kernel.model.MBCategory"));
 
 	public MBCategoryModelImpl() {
 	}
@@ -259,6 +265,7 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 		attributes.put("threadCount", getThreadCount());
 		attributes.put("messageCount", getMessageCount());
 		attributes.put("lastPostDate", getLastPostDate());
+		attributes.put("lastPublishDate", getLastPublishDate());
 		attributes.put("status", getStatus());
 		attributes.put("statusByUserId", getStatusByUserId());
 		attributes.put("statusByUserName", getStatusByUserName());
@@ -360,6 +367,12 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 
 		if (lastPostDate != null) {
 			setLastPostDate(lastPostDate);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 
 		Integer status = (Integer)attributes.get("status");
@@ -659,6 +672,17 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 
 	@JSON
 	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
+	}
+
+	@JSON
+	@Override
 	public int getStatus() {
 		return _status;
 	}
@@ -891,15 +915,6 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 		return true;
 	}
 
-	/**
-	 * @deprecated As of 6.1.0, replaced by {@link #isApproved}
-	 */
-	@Deprecated
-	@Override
-	public boolean getApproved() {
-		return isApproved();
-	}
-
 	@Override
 	public boolean isApproved() {
 		if (getStatus() == WorkflowConstants.STATUS_APPROVED) {
@@ -1026,6 +1041,7 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 		mbCategoryImpl.setThreadCount(getThreadCount());
 		mbCategoryImpl.setMessageCount(getMessageCount());
 		mbCategoryImpl.setLastPostDate(getLastPostDate());
+		mbCategoryImpl.setLastPublishDate(getLastPublishDate());
 		mbCategoryImpl.setStatus(getStatus());
 		mbCategoryImpl.setStatusByUserId(getStatusByUserId());
 		mbCategoryImpl.setStatusByUserName(getStatusByUserName());
@@ -1216,6 +1232,15 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 			mbCategoryCacheModel.lastPostDate = Long.MIN_VALUE;
 		}
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			mbCategoryCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			mbCategoryCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		mbCategoryCacheModel.status = getStatus();
 
 		mbCategoryCacheModel.statusByUserId = getStatusByUserId();
@@ -1242,7 +1267,7 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(39);
+		StringBundler sb = new StringBundler(41);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -1274,6 +1299,8 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 		sb.append(getMessageCount());
 		sb.append(", lastPostDate=");
 		sb.append(getLastPostDate());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append(", status=");
 		sb.append(getStatus());
 		sb.append(", statusByUserId=");
@@ -1289,10 +1316,10 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(61);
+		StringBundler sb = new StringBundler(64);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portlet.messageboards.model.MBCategory");
+		sb.append("com.liferay.message.boards.kernel.model.MBCategory");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -1356,6 +1383,10 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 		sb.append(getLastPostDate());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>status</column-name><column-value><![CDATA[");
 		sb.append(getStatus());
 		sb.append("]]></column-value></column>");
@@ -1406,6 +1437,7 @@ public class MBCategoryModelImpl extends BaseModelImpl<MBCategory>
 	private int _threadCount;
 	private int _messageCount;
 	private Date _lastPostDate;
+	private Date _lastPublishDate;
 	private int _status;
 	private int _originalStatus;
 	private boolean _setOriginalStatus;

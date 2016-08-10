@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.announcements.service.persistence.test;
 
+import com.liferay.announcements.kernel.exception.NoSuchEntryException;
+import com.liferay.announcements.kernel.model.AnnouncementsEntry;
+import com.liferay.announcements.kernel.service.AnnouncementsEntryLocalServiceUtil;
+import com.liferay.announcements.kernel.service.persistence.AnnouncementsEntryPersistence;
+import com.liferay.announcements.kernel.service.persistence.AnnouncementsEntryUtil;
+
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -32,15 +38,10 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
-import com.liferay.portlet.announcements.NoSuchEntryException;
-import com.liferay.portlet.announcements.model.AnnouncementsEntry;
-import com.liferay.portlet.announcements.service.AnnouncementsEntryLocalServiceUtil;
-import com.liferay.portlet.announcements.service.persistence.AnnouncementsEntryPersistence;
-import com.liferay.portlet.announcements.service.persistence.AnnouncementsEntryUtil;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,8 +58,9 @@ import java.util.Set;
  * @generated
  */
 public class AnnouncementsEntryPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -258,9 +260,9 @@ public class AnnouncementsEntryPersistenceTest {
 		return OrderByComparatorFactoryUtil.create("AnnouncementsEntry",
 			"uuid", true, "entryId", true, "companyId", true, "userId", true,
 			"userName", true, "createDate", true, "modifiedDate", true,
-			"classNameId", true, "classPK", true, "title", true, "content",
-			true, "url", true, "type", true, "displayDate", true,
-			"expirationDate", true, "priority", true, "alert", true);
+			"classNameId", true, "classPK", true, "title", true, "url", true,
+			"type", true, "displayDate", true, "expirationDate", true,
+			"priority", true, "alert", true);
 	}
 
 	@Test
@@ -369,11 +371,9 @@ public class AnnouncementsEntryPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = AnnouncementsEntryLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<AnnouncementsEntry>() {
 				@Override
-				public void performAction(Object object) {
-					AnnouncementsEntry announcementsEntry = (AnnouncementsEntry)object;
-
+				public void performAction(AnnouncementsEntry announcementsEntry) {
 					Assert.assertNotNull(announcementsEntry);
 
 					count.increment();

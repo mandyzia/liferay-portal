@@ -19,33 +19,36 @@
 <%
 String randomNamespace = StringUtil.randomId() + StringPool.UNDERLINE;
 
+boolean skipEditorLoading = ParamUtil.getBoolean(request, "skipEditorLoading");
+
 DiscussionRequestHelper discussionRequestHelper = new DiscussionRequestHelper(request);
 DiscussionTaglibHelper discussionTaglibHelper = new DiscussionTaglibHelper(request);
 
 DiscussionPermission discussionPermission = CommentManagerUtil.getDiscussionPermission(discussionRequestHelper.getPermissionChecker());
 Discussion discussion = CommentManagerUtil.getDiscussion(discussionTaglibHelper.getUserId(), discussionRequestHelper.getScopeGroupId(), discussionTaglibHelper.getClassName(), discussionTaglibHelper.getClassPK(), new ServiceContextFunction(renderRequest));
 
-DiscussionComment rootDiscussionComment = discussion.getRootDiscussionComment();
+DiscussionComment rootDiscussionComment = (discussion == null) ? null : discussion.getRootDiscussionComment();
 
 CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContextProviderUtil.getCommentSectionDisplayContext(request, response, discussionPermission, discussion);
 %>
 
 <section>
-	<div class="hide lfr-message-response" id="<portlet:namespace />discussionStatusMessages"></div>
+	<div class="lfr-message-response" id="<%= randomNamespace %>discussionStatusMessages"></div>
 
-	<c:if test="<%= discussion.isMaxCommentsLimitExceeded() %>">
+	<c:if test="<%= (discussion != null) && discussion.isMaxCommentsLimitExceeded() %>">
 		<div class="alert alert-warning">
 			<liferay-ui:message key="maximum-number-of-comments-has-been-reached" />
 		</div>
 	</c:if>
 
 	<c:if test="<%= commentSectionDisplayContext.isDiscussionVisible() %>">
-		<div class="taglib-discussion" id="<portlet:namespace />discussionContainer">
+		<div class="taglib-discussion" id="<%= namespace %>discussionContainer">
 			<aui:form action="<%= discussionTaglibHelper.getFormAction() %>" method="post" name="<%= discussionTaglibHelper.getFormName() %>">
+				<input name="namespace" type="hidden" value="<%= namespace %>" />
+				<input name="contentURL" type="hidden" value="<%= PortalUtil.getCanonicalURL(discussionTaglibHelper.getRedirect(), themeDisplay, layout) %>" />
 				<aui:input name="randomNamespace" type="hidden" value="<%= randomNamespace %>" />
 				<aui:input id="<%= randomNamespace + Constants.CMD %>" name="<%= Constants.CMD %>" type="hidden" />
 				<aui:input name="redirect" type="hidden" value="<%= discussionTaglibHelper.getRedirect() %>" />
-				<aui:input name="contentURL" type="hidden" value="<%= PortalUtil.getCanonicalURL(discussionTaglibHelper.getRedirect(), themeDisplay, layout) %>" />
 				<aui:input name="assetEntryVisible" type="hidden" value="<%= discussionTaglibHelper.isAssetEntryVisible() %>" />
 				<aui:input name="className" type="hidden" value="<%= discussionTaglibHelper.getClassName() %>" />
 				<aui:input name="classPK" type="hidden" value="<%= discussionTaglibHelper.getClassPK() %>" />
@@ -102,25 +105,26 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 
 							<c:choose>
 								<c:when test="<%= commentSectionDisplayContext.isReplyButtonVisible() %>">
-									<aui:row fluid="<%= true %>">
-										<div class="lfr-discussion-details">
-											<liferay-ui:user-display
-												displayStyle="2"
-												showUserName="<%= false %>"
-												userId="<%= discussionTaglibHelper.getUserId() %>"
-											/>
+									<div class="card panel">
+										<div class="panel-body">
+											<div class="lfr-discussion-details">
+												<liferay-ui:user-portrait
+													cssClass="user-icon-lg"
+													userId="<%= user.getUserId() %>"
+												/>
+											</div>
+
+											<div class="lfr-discussion-body">
+												<liferay-ui:input-editor configKey="commentEditor" contents="" editorName='<%= PropsUtil.get("editor.wysiwyg.portal-web.docroot.html.taglib.ui.discussion.jsp") %>' name='<%= randomNamespace + "postReplyBody0" %>' onChangeMethod='<%= randomNamespace + "0ReplyOnChange" %>' placeholder="type-your-comment-here" showSource="<%= false %>" skipEditorLoading="<%= skipEditorLoading %>" />
+
+												<aui:input name="postReplyBody0" type="hidden" />
+
+												<aui:button-row>
+													<aui:button cssClass="btn-comment btn-lg btn-primary" disabled="<%= true %>" id='<%= randomNamespace + "postReplyButton0" %>' onClick='<%= randomNamespace + "postReply(0);" %>' value='<%= themeDisplay.isSignedIn() ? "reply" : "reply-as" %>' />
+												</aui:button-row>
+											</div>
 										</div>
-
-										<div class="lfr-discussion-body">
-											<liferay-ui:input-editor configKey="commentsEditor" contents="" editorName='<%= PropsUtil.get("editor.wysiwyg.portal-web.docroot.html.taglib.ui.discussion.jsp") %>' name='<%= randomNamespace + "postReplyBody0" %>' onChangeMethod='<%= randomNamespace + "0ReplyOnChange" %>' placeholder="type-your-comment-here" showSource="<%= false %>" />
-
-											<aui:input name="postReplyBody0" type="hidden" />
-
-											<aui:button-row>
-												<aui:button cssClass="btn-comment btn-primary" disabled="<%= true %>" id='<%= randomNamespace + "postReplyButton0" %>' onClick='<%= randomNamespace + "postReply(0);" %>' value='<%= themeDisplay.isSignedIn() ? "reply" : "reply-as" %>' />
-											</aui:button-row>
-										</div>
-									</aui:row>
+									</div>
 								</c:when>
 								<c:otherwise>
 									<liferay-ui:icon
@@ -138,7 +142,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 				<c:if test="<%= commentSectionDisplayContext.isMessageThreadVisible() %>">
 					<a name="<%= randomNamespace %>messages_top"></a>
 
-					<aui:row>
+					<div>
 
 						<%
 						int index = 0;
@@ -158,6 +162,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 								break;
 							}
 
+							request.setAttribute("liferay-ui:discussion:depth", 0);
 							request.setAttribute("liferay-ui:discussion:discussion", discussion);
 							request.setAttribute("liferay-ui:discussion:discussionComment", discussionCommentIterator.next());
 							request.setAttribute("liferay-ui:discussion:randomNamespace", randomNamespace);
@@ -177,16 +182,16 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 							<aui:input name="rootIndexPage" type="hidden" value="<%= String.valueOf(rootIndexPage) %>" />
 							<aui:input name="index" type="hidden" value="<%= String.valueOf(index) %>" />
 						</c:if>
-					</aui:row>
+					</div>
 				</c:if>
 			</aui:form>
 		</div>
 
 		<%
-		PortletURL loginURL = PortletURLFactoryUtil.create(request, PortletKeys.FAST_LOGIN, themeDisplay.getPlid(), PortletRequest.RENDER_PHASE);
+		PortletURL loginURL = PortletURLFactoryUtil.create(request, PortletKeys.FAST_LOGIN, PortletRequest.RENDER_PHASE);
 
 		loginURL.setParameter("saveLastPath", Boolean.FALSE.toString());
-		loginURL.setParameter("struts_action", "/login/login");
+		loginURL.setParameter("mvcRenderCommandName", "/login/login");
 		loginURL.setPortletMode(PortletMode.VIEW);
 		loginURL.setWindowState(LiferayWindowState.POP_UP);
 		%>
@@ -201,7 +206,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 
 				form.fm('emailAddress').val(emailAddress);
 
-				<portlet:namespace />sendMessage(form, !anonymousAccount);
+				<%= namespace %>sendMessage(form, !anonymousAccount);
 			}
 
 			function <%= randomNamespace %>deleteMessage(i) {
@@ -212,7 +217,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 				form.fm('<%= randomNamespace %><%= Constants.CMD %>').val('<%= Constants.DELETE %>');
 				form.fm('commentId').val(commentId);
 
-				<portlet:namespace />sendMessage(form);
+				<%= namespace %>sendMessage(form);
 			}
 
 			function <%= randomNamespace %>hideEl(elId) {
@@ -227,13 +232,35 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 				<%= randomNamespace %>hideEl(formId);
 			}
 
-			function <portlet:namespace />onMessagePosted(response, refreshPage) {
-				Liferay.after(
+			function <%= randomNamespace %>onMessagePosted(response, refreshPage) {
+				Liferay.onceAfter(
 					'<%= portletDisplay.getId() %>:portletRefreshed',
 					function(event) {
-						<portlet:namespace />showStatusMessage('success', '<%= UnicodeLanguageUtil.get(request, "your-request-processed-successfully") %>');
+						var randomNamespaceNodes = AUI.$('input[id^="<%= namespace %>randomNamespace"]');
 
-						location.hash = '#' + AUI.$('#<portlet:namespace />randomNamespace').val() + 'message_' + response.commentId;
+						randomNamespaceNodes.each(
+							function(index, item) {
+								var randomId = item.value;
+
+								if (index === 0) {
+									<%= randomNamespace %>showStatusMessage(
+										{
+											id: randomId,
+											message: '<%= UnicodeLanguageUtil.get(resourceBundle, "your-request-completed-successfully") %>',
+											type: 'success'
+										}
+									);
+								}
+
+								var currentMessageSelector = '#' + randomId + 'message_' + response.commentId;
+
+								var targetNode = AUI.$(currentMessageSelector);
+
+								if (targetNode.length) {
+									location.hash = currentMessageSelector;
+								}
+							}
+						);
 					}
 				);
 
@@ -241,7 +268,15 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 					window.location.reload();
 				}
 				else {
-					Liferay.Portlet.refresh('#p_p_id_<%= portletDisplay.getId() %>_');
+					Liferay.Portlet.refresh(
+						'#p_p_id_<%= portletDisplay.getId() %>_',
+						Liferay.Util.ns(
+							'<%= namespace %>',
+							{
+								skipEditorLoading: true
+							}
+						)
+					);
 				}
 			}
 
@@ -267,13 +302,13 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 								width: 770
 							},
 							id: '<%= namespace %>signInDialog',
-							title: '<%= UnicodeLanguageUtil.get(request, "sign-in") %>',
+							title: '<%= UnicodeLanguageUtil.get(resourceBundle, "sign-in") %>',
 							uri: '<%= loginURL.toString() %>'
 						}
 					);
 				}
 				else {
-					<portlet:namespace />sendMessage(form);
+					<%= namespace %>sendMessage(form);
 
 					editorInstance.dispose();
 				}
@@ -283,57 +318,74 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 				document.getElementById('<%= randomNamespace %>messageScroll' + commentId).scrollIntoView();
 			}
 
-			function <portlet:namespace />sendMessage(form, refreshPage) {
+			function <%= namespace %>sendMessage(form, refreshPage) {
 				var Util = Liferay.Util;
 
 				form = AUI.$(form);
 
 				var commentButtonList = form.find('.btn-comment');
 
+				var cmd = form.fm('<%= randomNamespace %><%= Constants.CMD %>').val();
+
+				var dataType = cmd === '<%= Constants.ADD %>' || cmd === '<%= Constants.UPDATE %>' ? 'json' : null;
+
 				form.ajaxSubmit(
 					{
 						beforeSubmit: function() {
 							Util.toggleDisabled(commentButtonList, true);
 						},
+						dataType: dataType,
 						complete: function() {
 							Util.toggleDisabled(commentButtonList, false);
 						},
 						error: function() {
-							<portlet:namespace />showStatusMessage('error', '<%= UnicodeLanguageUtil.get(request, "your-request-failed-to-complete") %>');
+							<%= randomNamespace %>showStatusMessage(
+								{
+									id: '<%= randomNamespace %>',
+									message: '<%= UnicodeLanguageUtil.get(resourceBundle, "your-request-failed-to-complete") %>',
+									type: 'danger'
+								}
+							);
 						},
 						success: function(response) {
 							var exception = response.exception;
 
 							if (!exception) {
-								Liferay.after(
+								Liferay.onceAfter(
 									'<%= portletDisplay.getId() %>:messagePosted',
 									function(event) {
-										<portlet:namespace />onMessagePosted(response, refreshPage);
+										<%= randomNamespace %>onMessagePosted(response, refreshPage);
 									}
 								);
 
 								Liferay.fire('<%= portletDisplay.getId() %>:messagePosted', response);
 							}
 							else {
-								var errorKey = '<%= UnicodeLanguageUtil.get(request, "your-request-failed-to-complete") %>';
+								var errorKey = '<%= UnicodeLanguageUtil.get(resourceBundle, "your-request-failed-to-complete") %>';
 
 								if (exception.indexOf('DiscussionMaxCommentsException') > -1) {
-									errorKey = '<%= UnicodeLanguageUtil.get(request, "maximum-number-of-comments-has-been-reached") %>';
+									errorKey = '<%= UnicodeLanguageUtil.get(resourceBundle, "maximum-number-of-comments-has-been-reached") %>';
 								}
 								else if (exception.indexOf('MessageBodyException') > -1) {
-									errorKey = '<%= UnicodeLanguageUtil.get(request, "please-enter-a-valid-message") %>';
+									errorKey = '<%= UnicodeLanguageUtil.get(resourceBundle, "please-enter-a-valid-message") %>';
 								}
 								else if (exception.indexOf('NoSuchMessageException') > -1) {
-									errorKey = '<%= UnicodeLanguageUtil.get(request, "the-message-could-not-be-found") %>';
+									errorKey = '<%= UnicodeLanguageUtil.get(resourceBundle, "the-message-could-not-be-found") %>';
 								}
 								else if (exception.indexOf('PrincipalException') > -1) {
-									errorKey = '<%= UnicodeLanguageUtil.get(request, "you-do-not-have-the-required-permissions") %>';
+									errorKey = '<%= UnicodeLanguageUtil.get(resourceBundle, "you-do-not-have-the-required-permissions") %>';
 								}
 								else if (exception.indexOf('RequiredMessageException') > -1) {
-									errorKey = '<%= UnicodeLanguageUtil.get(request, "you-cannot-delete-a-root-message-that-has-more-than-one-immediate-reply") %>';
+									errorKey = '<%= UnicodeLanguageUtil.get(resourceBundle, "you-cannot-delete-a-root-message-that-has-more-than-one-immediate-reply") %>';
 								}
 
-								<portlet:namespace />showStatusMessage('error', errorKey);
+								<%= randomNamespace %>showStatusMessage(
+									{
+										id: '<%= randomNamespace %>',
+										message: errorKey,
+										type: 'danger'
+									}
+								);
 							}
 						}
 					}
@@ -349,22 +401,25 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 
 				var html = window[editorName].getHTML();
 
-				Liferay.Util.toggleDisabled('#' + editorName.replace('Body', 'Button'), (html === ''));
+				Liferay.Util.toggleDisabled('#' + editorName.replace('Body', 'Button'), html === '');
 
 				<%= randomNamespace %>showEl(formId);
 			}
 
-			function <portlet:namespace />showStatusMessage(type, message) {
-				var messageContainer = AUI.$('#<portlet:namespace />discussionStatusMessages');
-
-				messageContainer.removeClass('alert-danger alert-success');
-
-				messageContainer.addClass('alert alert-' + type);
-
-				messageContainer.html(message);
-
-				messageContainer.removeClass('hide');
-			}
+			Liferay.provide(
+				window,
+				'<%= randomNamespace %>showStatusMessage',
+				function(data) {
+					new Liferay.Alert(
+						{
+							'delay.hide': 5000,
+							message: data.message,
+							type: data.type
+						}
+					).render('#' + data.id + 'discussionStatusMessages');
+				},
+				['liferay-alert']
+			);
 
 			function <%= randomNamespace %>subscribeToComments(subscribe) {
 				var form = AUI.$('#<%= namespace %><%= HtmlUtil.escapeJS(discussionTaglibHelper.getFormName()) %>');
@@ -377,7 +432,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 
 				form.fm('<%= randomNamespace %><%= Constants.CMD %>').val(cmd);
 
-				<portlet:namespace />sendMessage(form);
+				<%= namespace %>sendMessage(form);
 			}
 
 			function <%= randomNamespace %>updateMessage(i, pending) {
@@ -395,7 +450,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 				form.fm('commentId').val(commentId);
 				form.fm('body').val(editorInstance.getHTML());
 
-				<portlet:namespace />sendMessage(form);
+				<%= namespace %>sendMessage(form);
 
 				editorInstance.dispose();
 			}
@@ -408,7 +463,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 					var form = $('#<%= namespace %><%= HtmlUtil.escapeJS(discussionTaglibHelper.getFormName()) %>');
 
 					var data = Liferay.Util.ns(
-						'<portlet:namespace />',
+						'<%= namespace %>',
 						{
 							className: '<%= discussionTaglibHelper.getClassName() %>',
 							classPK: <%= discussionTaglibHelper.getClassPK() %>,
@@ -421,12 +476,24 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 						}
 					);
 
+					<%
+					String paginationURL = HttpUtil.addParameter(discussionTaglibHelper.getPaginationURL(), "namespace", namespace);
+
+					paginationURL = HttpUtil.addParameter(paginationURL, "skipEditorLoading", "true");
+					%>
+
 					$.ajax(
-						'<%= discussionTaglibHelper.getPaginationURL() %>',
+						'<%= paginationURL %>',
 						{
 							data: data,
 							error: function() {
-								<portlet:namespace />showStatusMessage('danger', '<%= UnicodeLanguageUtil.get(request, "your-request-failed-to-complete") %>');
+								<%= randomNamespace %>showStatusMessage(
+									{
+										id: <%= randomNamespace %>,
+										message: '<%= UnicodeLanguageUtil.get(resourceBundle, "your-request-failed-to-complete") %>',
+										type: 'danger'
+									}
+								);
 							},
 							success: function(data) {
 								$('#<%= namespace %>moreCommentsPage').append(data);
@@ -438,7 +505,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 		</aui:script>
 
 		<aui:script use="aui-popover,event-outside">
-			var discussionContainer = A.one('#<portlet:namespace />discussionContainer');
+			var discussionContainer = A.one('#<%= namespace %>discussionContainer');
 
 			var popover = new A.Popover(
 				{
@@ -447,7 +514,7 @@ CommentSectionDisplayContext commentSectionDisplayContext = CommentDisplayContex
 					position: 'top',
 					visible: false,
 					width: 400,
-					zIndex: Liferay.zIndex.TOOLTIP
+					zIndex: Liferay.zIndex.OVERLAY
 				}
 			).render(discussionContainer);
 

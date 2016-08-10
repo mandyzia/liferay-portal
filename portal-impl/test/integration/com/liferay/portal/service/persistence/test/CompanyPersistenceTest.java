@@ -14,13 +14,17 @@
 
 package com.liferay.portal.service.persistence.test;
 
-import com.liferay.portal.NoSuchCompanyException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.exception.NoSuchCompanyException;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
+import com.liferay.portal.kernel.service.persistence.CompanyPersistence;
+import com.liferay.portal.kernel.service.persistence.CompanyUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.TransactionalTestRule;
@@ -30,17 +34,13 @@ import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Company;
-import com.liferay.portal.service.CompanyLocalServiceUtil;
-import com.liferay.portal.service.persistence.CompanyPersistence;
-import com.liferay.portal.service.persistence.CompanyUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,14 +51,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class CompanyPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -213,9 +215,9 @@ public class CompanyPersistenceTest {
 
 	protected OrderByComparator<Company> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("Company", "mvccVersion",
-			true, "companyId", true, "accountId", true, "webId", true, "key",
-			true, "mx", true, "homeURL", true, "logoId", true, "system", true,
-			"maxUsers", true, "active", true);
+			true, "companyId", true, "accountId", true, "webId", true, "mx",
+			true, "homeURL", true, "logoId", true, "system", true, "maxUsers",
+			true, "active", true);
 	}
 
 	@Test
@@ -324,11 +326,9 @@ public class CompanyPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = CompanyLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<Company>() {
 				@Override
-				public void performAction(Object object) {
-					Company company = (Company)object;
-
+				public void performAction(Company company) {
 					Assert.assertNotNull(company);
 
 					count.increment();
@@ -420,17 +420,17 @@ public class CompanyPersistenceTest {
 
 		Company existingCompany = _persistence.findByPrimaryKey(newCompany.getPrimaryKey());
 
-		Assert.assertTrue(Validator.equals(existingCompany.getWebId(),
+		Assert.assertTrue(Objects.equals(existingCompany.getWebId(),
 				ReflectionTestUtil.invoke(existingCompany, "getOriginalWebId",
 					new Class<?>[0])));
 
-		Assert.assertTrue(Validator.equals(existingCompany.getMx(),
+		Assert.assertTrue(Objects.equals(existingCompany.getMx(),
 				ReflectionTestUtil.invoke(existingCompany, "getOriginalMx",
 					new Class<?>[0])));
 
-		Assert.assertEquals(existingCompany.getLogoId(),
-			ReflectionTestUtil.invoke(existingCompany, "getOriginalLogoId",
-				new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingCompany.getLogoId()),
+			ReflectionTestUtil.<Long>invoke(existingCompany,
+				"getOriginalLogoId", new Class<?>[0]));
 	}
 
 	protected Company addCompany() throws Exception {

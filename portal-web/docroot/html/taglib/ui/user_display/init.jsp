@@ -25,7 +25,8 @@ boolean showUserDetails = GetterUtil.getBoolean((String)request.getAttribute("li
 boolean showUserName = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:user-display:showUserName"));
 String url = (String)request.getAttribute("liferay-ui:user-display:url");
 User userDisplay = (User)request.getAttribute("liferay-ui:user-display:user");
-String userName = GetterUtil.getString((String)request.getAttribute("liferay-ui:user-display:user-name"));
+String userIconCssClass = (String)request.getAttribute("liferay-ui:user-display:userIconCssClass");
+String userName = GetterUtil.getString((String)request.getAttribute("liferay-ui:user-display:userName"));
 
 if (author) {
 	imageCssClass += " author";
@@ -33,14 +34,5 @@ if (author) {
 
 if (Validator.isNull(url) && (userDisplay != null)) {
 	url = userDisplay.getDisplayURL(themeDisplay);
-}
-
-String taglibSrc = null;
-
-if (userDisplay != null) {
-	taglibSrc = userDisplay.getPortraitURL(themeDisplay);
-}
-else {
-	taglibSrc = UserConstants.getPortraitURL(themeDisplay.getPathImage(), true, 0, null);
 }
 %>

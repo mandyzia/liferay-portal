@@ -1,28 +1,24 @@
 buildscript {
+	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.xml.formatter", version: "latest.release"
+	}
+
 	repositories {
 		mavenLocal()
 
 		maven {
-			url "http://cdn.repository.liferay.com/nexus/content/groups/public"
+			url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
 		}
 	}
-
-	dependencies {
-		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.xml.formatter", version: "latest.release"
-	}
 }
+
+apply plugin: "com.liferay.xml.formatter"
+apply plugin: "java"
 
 repositories {
 	mavenLocal()
 
 	maven {
-		url "http://cdn.repository.liferay.com/nexus/content/groups/public"
+		url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
 	}
-}
-
-apply plugin: "com.liferay.xml.formatter"
-
-formatXML {
-	include "**/*.xml"
-	source projectDir
 }

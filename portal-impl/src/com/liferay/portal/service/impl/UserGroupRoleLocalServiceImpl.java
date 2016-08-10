@@ -14,16 +14,16 @@
 
 package com.liferay.portal.service.impl;
 
-import com.liferay.portal.NoSuchUserGroupRoleException;
+import com.liferay.portal.kernel.exception.NoSuchUserGroupRoleException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserGroupRole;
+import com.liferay.portal.kernel.service.persistence.UserGroupRolePK;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Role;
-import com.liferay.portal.model.User;
-import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.security.permission.PermissionCacheUtil;
 import com.liferay.portal.service.base.UserGroupRoleLocalServiceBaseImpl;
-import com.liferay.portal.service.persistence.UserGroupRolePK;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +89,19 @@ public class UserGroupRoleLocalServiceImpl
 		PermissionCacheUtil.clearCache(userGroupRole.getUserId());
 
 		return userGroupRole;
+	}
+
+	@Override
+	public void deleteUserGroupRoles(long groupId, int roleType) {
+		List<UserGroupRole> userGroupRoles =
+			userGroupRoleFinder.findByGroupRoleType(groupId, roleType);
+
+		for (UserGroupRole userGroupRole : userGroupRoles) {
+			userGroupRolePersistence.removeByG_R(
+				groupId, userGroupRole.getRoleId());
+		}
+
+		PermissionCacheUtil.clearCache();
 	}
 
 	@Override

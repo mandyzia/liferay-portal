@@ -1,5 +1,5 @@
 <definition component-name="portal-workflow">
-	<property name="web.plugins.includes" value="kaleo-web" />
+	<property name="portal.release" value="true" />
 	<property name="testray.main.component.name" value="Workflow" />
 
 	<var name="pageName" value="Web Content Display Page" />
@@ -7,21 +7,25 @@
 	<var name="workflowAssetType" value="Web Content Article" />
 
 	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="Page#gotoContentCP">
-			<var name="portletName" value="Web Content" />
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Web Content" />
 		</execute>
 
-		<execute macro="Workflow#configureWebContentWorkflow">
+		<execute macro="Workflow#configureWorkflowViaFolderInfo">
 			<var name="workflowDefinition" value="Single Approver (Version 1)" />
 		</execute>
 
-		<execute macro="Page#addPG">
+		<execute macro="Page#add">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -31,30 +35,39 @@
 	</set-up>
 
 	<tear-down>
-		<execute macro="WebContent#tearDownCP" />
+		<var method="TestPropsUtil#get('test.portal.instance')" name="testPortalInstance" />
 
-		<execute macro="Page#tearDownPG" />
+		<if>
+			<equals arg1="${testPortalInstance}" arg2="true" />
+			<then>
+				<execute macro="PortalInstances#tearDownCP" />
+			</then>
+			<else>
+				<execute macro="WebContent#tearDownCP" />
 
-		<execute macro="Workflow#tearDownPortalWorkflow" />
+				<execute macro="Page#tearDownPG" />
 
-		<execute macro="Workflow#tearDownSiteWorkflow" />
+				<execute macro="Workflow#tearDownPortalWorkflow" />
+
+				<execute macro="Workflow#tearDownSiteWorkflow" />
+			</else>
+		</if>
 	</tear-down>
 
-	<command known-issues="LPS-56092" name="ApproveWebContentViaWebContentDisplayPG" priority="4">
+	<command name="ApproveWebContentViaWebContentDisplayPG" priority="4">
 		<var name="webContentContent" value="WC WebContent Content" />
 		<var name="webContentTitle" value="WC WebContent Title" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<execute macro="WebContent#addWithWorkflowPGViaWCD">
-			<var name="selectStructureName" value="Basic Web Content" />
 			<var name="webContentContent" value="${webContentContent}" />
 			<var name="webContentTitle" value="${webContentTitle}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -74,7 +87,7 @@
 			<var name="workflowTask" value="Review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -94,7 +107,7 @@
 			<var name="workflowTask" value="Review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -104,16 +117,15 @@
 		</execute>
 	</command>
 
-	<command known-issues="LPS-56092" name="RejectWebContentViaWebContentDisplayPG" priority="4">
+	<command name="RejectWebContentViaWebContentDisplayPG" priority="4">
 		<var name="webContentContent" value="WC WebContent Content" />
 		<var name="webContentTitle" value="WC WebContent Title" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
 		<execute macro="WebContent#addWithWorkflowPGViaWCD">
-			<var name="selectStructureName" value="Basic Web Content" />
 			<var name="webContentContent" value="${webContentContent}" />
 			<var name="webContentTitle" value="${webContentTitle}" />
 		</execute>
@@ -147,7 +159,7 @@
 			<var name="workflowAssetType" value="${workflowAssetType}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 

@@ -9,6 +9,11 @@
 </thead>
 <tbody>
 <tr>
+	<td>MENTIONS_COMMENT_TAG_LINK</td>
+	<td>//div[contains(@id,'discussionMessage')]//a[contains(.,'${key_mentionsUserScreenName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>MENTIONS_HEADER</td>
 	<td>//h3[contains(.,'Mentions')]</td>
 	<td></td>
@@ -40,7 +45,7 @@
 </tr>
 <tr>
 	<td>MENTIONS_TAG_LINK</td>
-	<td>//span[@class='lfr-ac-content']/a[contains(.,'${key_mentionsUserScreenName}')]</td>
+	<td>//a[contains(.,'${key_mentionsUserScreenName}')]</td>
 	<td></td>
 </tr>
 </tbody>

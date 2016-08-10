@@ -70,6 +70,10 @@ public class AppViewSearchEntryTag extends IncludeTag {
 		_description = description;
 	}
 
+	public void setEscape(boolean escape) {
+		_escape = escape;
+	}
+
 	public void setFileEntryRelatedSearchResults(
 		List<RelatedSearchResult<FileEntry>> fileEntryRelatedSearchResults) {
 
@@ -128,6 +132,7 @@ public class AppViewSearchEntryTag extends IncludeTag {
 		_containerType = null;
 		_cssClass = null;
 		_description = null;
+		_escape = true;
 		_fileEntryRelatedSearchResults = null;
 		_highlightEnabled = _HIGHLIGHT_ENABLED;
 		_locked = false;
@@ -163,10 +168,10 @@ public class AppViewSearchEntryTag extends IncludeTag {
 	@Override
 	protected void setAttributes(HttpServletRequest request) {
 		request.setAttribute(
-			"liferay-ui:app-view-search-entry:actionJsp", _actionJsp);
-		request.setAttribute(
 			"liferay-ui:app-view-entry:actionJspServletContext",
 			getActionJspServletContext());
+		request.setAttribute(
+			"liferay-ui:app-view-search-entry:actionJsp", _actionJsp);
 		request.setAttribute(
 			"liferay-ui:app-view-search-entry:commentRelatedSearchResults",
 			_commentRelatedSearchResults);
@@ -178,6 +183,8 @@ public class AppViewSearchEntryTag extends IncludeTag {
 			"liferay-ui:app-view-search-entry:cssClass", _cssClass);
 		request.setAttribute(
 			"liferay-ui:app-view-search-entry:description", _description);
+		request.setAttribute(
+			"liferay-ui:app-view-search-entry:escape", _escape);
 		request.setAttribute(
 			"liferay-ui:app-view-search-entry:fileEntryRelatedSearchResults",
 			_fileEntryRelatedSearchResults);
@@ -219,14 +226,15 @@ public class AppViewSearchEntryTag extends IncludeTag {
 	private String _containerType;
 	private String _cssClass;
 	private String _description;
+	private boolean _escape = true;
 	private List<RelatedSearchResult<FileEntry>> _fileEntryRelatedSearchResults;
 	private boolean _highlightEnabled = _HIGHLIGHT_ENABLED;
 	private boolean _locked;
 	private String[] _queryTerms;
 	private String _rowCheckerId;
 	private String _rowCheckerName;
-	private boolean _showCheckbox = false;
-	private int _status = 0;
+	private boolean _showCheckbox;
+	private int _status;
 	private String _thumbnailSrc;
 	private String _title;
 	private String _url;

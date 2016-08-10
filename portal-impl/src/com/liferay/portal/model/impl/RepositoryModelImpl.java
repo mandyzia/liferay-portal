@@ -16,26 +16,28 @@ package com.liferay.portal.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
+
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSON;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.Repository;
+import com.liferay.portal.kernel.model.RepositoryModel;
+import com.liferay.portal.kernel.model.RepositorySoap;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.impl.BaseModelImpl;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.Repository;
-import com.liferay.portal.model.RepositoryModel;
-import com.liferay.portal.model.RepositorySoap;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
-
-import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
-import com.liferay.portlet.exportimport.lar.StagedModelType;
 
 import java.io.Serializable;
 
@@ -85,7 +87,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 			{ "description", Types.VARCHAR },
 			{ "portletId", Types.VARCHAR },
 			{ "typeSettings", Types.CLOB },
-			{ "dlFolderId", Types.BIGINT }
+			{ "dlFolderId", Types.BIGINT },
+			{ "lastPublishDate", Types.TIMESTAMP }
 		};
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
 
@@ -105,9 +108,10 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		TABLE_COLUMNS_MAP.put("portletId", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("typeSettings", Types.CLOB);
 		TABLE_COLUMNS_MAP.put("dlFolderId", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table Repository (mvccVersion LONG default 0,uuid_ VARCHAR(75) null,repositoryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,name VARCHAR(75) null,description STRING null,portletId VARCHAR(200) null,typeSettings TEXT null,dlFolderId LONG)";
+	public static final String TABLE_SQL_CREATE = "create table Repository (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,repositoryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,name VARCHAR(75) null,description STRING null,portletId VARCHAR(200) null,typeSettings TEXT null,dlFolderId LONG,lastPublishDate DATE null)";
 	public static final String TABLE_SQL_DROP = "drop table Repository";
 	public static final String ORDER_BY_JPQL = " ORDER BY repository.repositoryId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Repository.repositoryId ASC";
@@ -115,13 +119,13 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
 	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.entity.cache.enabled.com.liferay.portal.model.Repository"),
+				"value.object.entity.cache.enabled.com.liferay.portal.kernel.model.Repository"),
 			true);
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.finder.cache.enabled.com.liferay.portal.model.Repository"),
+				"value.object.finder.cache.enabled.com.liferay.portal.kernel.model.Repository"),
 			true);
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
-				"value.object.column.bitmask.enabled.com.liferay.portal.model.Repository"),
+				"value.object.column.bitmask.enabled.com.liferay.portal.kernel.model.Repository"),
 			true);
 	public static final long COMPANYID_COLUMN_BITMASK = 1L;
 	public static final long GROUPID_COLUMN_BITMASK = 2L;
@@ -158,6 +162,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		model.setPortletId(soapModel.getPortletId());
 		model.setTypeSettings(soapModel.getTypeSettings());
 		model.setDlFolderId(soapModel.getDlFolderId());
+		model.setLastPublishDate(soapModel.getLastPublishDate());
 
 		return model;
 	}
@@ -183,7 +188,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
-				"lock.expiration.time.com.liferay.portal.model.Repository"));
+				"lock.expiration.time.com.liferay.portal.kernel.model.Repository"));
 
 	public RepositoryModelImpl() {
 	}
@@ -237,6 +242,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		attributes.put("portletId", getPortletId());
 		attributes.put("typeSettings", getTypeSettings());
 		attributes.put("dlFolderId", getDlFolderId());
+		attributes.put("lastPublishDate", getLastPublishDate());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -334,6 +340,12 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 
 		if (dlFolderId != null) {
 			setDlFolderId(dlFolderId);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 	}
 
@@ -626,6 +638,17 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		_dlFolderId = dlFolderId;
 	}
 
+	@JSON
+	@Override
+	public Date getLastPublishDate() {
+		return _lastPublishDate;
+	}
+
+	@Override
+	public void setLastPublishDate(Date lastPublishDate) {
+		_lastPublishDate = lastPublishDate;
+	}
+
 	@Override
 	public StagedModelType getStagedModelType() {
 		return new StagedModelType(PortalUtil.getClassNameId(
@@ -678,6 +701,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		repositoryImpl.setPortletId(getPortletId());
 		repositoryImpl.setTypeSettings(getTypeSettings());
 		repositoryImpl.setDlFolderId(getDlFolderId());
+		repositoryImpl.setLastPublishDate(getLastPublishDate());
 
 		repositoryImpl.resetOriginalValues();
 
@@ -843,12 +867,21 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 
 		repositoryCacheModel.dlFolderId = getDlFolderId();
 
+		Date lastPublishDate = getLastPublishDate();
+
+		if (lastPublishDate != null) {
+			repositoryCacheModel.lastPublishDate = lastPublishDate.getTime();
+		}
+		else {
+			repositoryCacheModel.lastPublishDate = Long.MIN_VALUE;
+		}
+
 		return repositoryCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(31);
+		StringBundler sb = new StringBundler(33);
 
 		sb.append("{mvccVersion=");
 		sb.append(getMvccVersion());
@@ -880,6 +913,8 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 		sb.append(getTypeSettings());
 		sb.append(", dlFolderId=");
 		sb.append(getDlFolderId());
+		sb.append(", lastPublishDate=");
+		sb.append(getLastPublishDate());
 		sb.append("}");
 
 		return sb.toString();
@@ -887,10 +922,10 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(49);
+		StringBundler sb = new StringBundler(52);
 
 		sb.append("<model><model-name>");
-		sb.append("com.liferay.portal.model.Repository");
+		sb.append("com.liferay.portal.kernel.model.Repository");
 		sb.append("</model-name>");
 
 		sb.append(
@@ -953,6 +988,10 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 			"<column><column-name>dlFolderId</column-name><column-value><![CDATA[");
 		sb.append(getDlFolderId());
 		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>lastPublishDate</column-name><column-value><![CDATA[");
+		sb.append(getLastPublishDate());
+		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
 
@@ -986,6 +1025,7 @@ public class RepositoryModelImpl extends BaseModelImpl<Repository>
 	private String _originalPortletId;
 	private String _typeSettings;
 	private long _dlFolderId;
+	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private Repository _escapedModel;
 }

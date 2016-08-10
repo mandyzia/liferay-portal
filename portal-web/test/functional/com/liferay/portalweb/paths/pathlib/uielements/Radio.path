@@ -29,8 +29,33 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CUSTOM_ABSTRACT</td>
+	<td>//label[contains(.,'Custom Abstract')]/input[contains(@id,'customAbstract')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FIRST_400_ABSTRACT</td>
+	<td>//label[contains(.,'first 400 characters')]/input[contains(@id,'customAbstract')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>KEEP</td>
+	<td>//label[contains(.,'Keep')]/input[@type='radio']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>LOCAL_LIVE</td>
 	<td>//label[contains(.,'Local Live')]/input[@type='radio']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>MAJOR_VERSION</td>
+	<td>//input[contains(@id,'MajorVersion_1')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>MINOR_VERSION</td>
+	<td>//input[contains(@id,'MajorVersion_3')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -39,8 +64,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>OVERWRITE</td>
+	<td>//label[contains(.,'Overwrite')]/input[@type='radio']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PRIMARY</td>
 	<td>//label[contains(.,'Primary')]/input[@type='radio']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>RANGE_ALL</td>
+	<td>//label[contains(.,'All')]/input[contains(@id,'rangeAll')]</td>
 	<td></td>
 </tr>
 <tr>

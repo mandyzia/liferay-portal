@@ -14,15 +14,15 @@
 
 package com.liferay.portlet.layoutsadmin.util.test;
 
+import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactory;
+import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
+import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalServiceUtil;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portlet.exportimport.configuration.ExportImportConfigurationSettingsMapFactory;
-import com.liferay.portlet.exportimport.model.ExportImportConfiguration;
-import com.liferay.portlet.exportimport.service.ExportImportConfigurationLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -63,9 +63,9 @@ public class ExportImportConfigurationTestUtil {
 
 		User user = UserLocalServiceUtil.getUser(userId);
 
-		return ExportImportConfigurationSettingsMapFactory.buildSettingsMap(
-			userId, groupId, groupId, false, null, null, user.getLocale(),
-			user.getTimeZone());
+		return ExportImportConfigurationSettingsMapFactory.
+			buildPublishLayoutLocalSettingsMap(
+				user, groupId, groupId, false, null, null);
 	}
 
 }

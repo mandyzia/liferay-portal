@@ -14,6 +14,12 @@
 
 package com.liferay.portlet.documentlibrary.service.persistence.test;
 
+import com.liferay.document.library.kernel.exception.NoSuchContentException;
+import com.liferay.document.library.kernel.model.DLContent;
+import com.liferay.document.library.kernel.service.DLContentLocalServiceUtil;
+import com.liferay.document.library.kernel.service.persistence.DLContentPersistence;
+import com.liferay.document.library.kernel.service.persistence.DLContentUtil;
+
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
@@ -31,19 +37,13 @@ import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
-
-import com.liferay.portlet.documentlibrary.NoSuchContentException;
-import com.liferay.portlet.documentlibrary.model.DLContent;
-import com.liferay.portlet.documentlibrary.service.DLContentLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.service.persistence.DLContentPersistence;
-import com.liferay.portlet.documentlibrary.service.persistence.DLContentUtil;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -57,14 +57,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * @generated
  */
 public class DLContentPersistenceTest {
+	@ClassRule
 	@Rule
-	public final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
+	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
 			new TransactionalTestRule(Propagation.REQUIRED));
 
@@ -337,11 +339,9 @@ public class DLContentPersistenceTest {
 
 		ActionableDynamicQuery actionableDynamicQuery = DLContentLocalServiceUtil.getActionableDynamicQuery();
 
-		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod() {
+		actionableDynamicQuery.setPerformActionMethod(new ActionableDynamicQuery.PerformActionMethod<DLContent>() {
 				@Override
-				public void performAction(Object object) {
-					DLContent dlContent = (DLContent)object;
-
+				public void performAction(DLContent dlContent) {
 					Assert.assertNotNull(dlContent);
 
 					count.increment();
@@ -433,16 +433,16 @@ public class DLContentPersistenceTest {
 
 		DLContent existingDLContent = _persistence.findByPrimaryKey(newDLContent.getPrimaryKey());
 
-		Assert.assertEquals(existingDLContent.getCompanyId(),
-			ReflectionTestUtil.invoke(existingDLContent,
+		Assert.assertEquals(Long.valueOf(existingDLContent.getCompanyId()),
+			ReflectionTestUtil.<Long>invoke(existingDLContent,
 				"getOriginalCompanyId", new Class<?>[0]));
-		Assert.assertEquals(existingDLContent.getRepositoryId(),
-			ReflectionTestUtil.invoke(existingDLContent,
+		Assert.assertEquals(Long.valueOf(existingDLContent.getRepositoryId()),
+			ReflectionTestUtil.<Long>invoke(existingDLContent,
 				"getOriginalRepositoryId", new Class<?>[0]));
-		Assert.assertTrue(Validator.equals(existingDLContent.getPath(),
+		Assert.assertTrue(Objects.equals(existingDLContent.getPath(),
 				ReflectionTestUtil.invoke(existingDLContent, "getOriginalPath",
 					new Class<?>[0])));
-		Assert.assertTrue(Validator.equals(existingDLContent.getVersion(),
+		Assert.assertTrue(Objects.equals(existingDLContent.getVersion(),
 				ReflectionTestUtil.invoke(existingDLContent,
 					"getOriginalVersion", new Class<?>[0])));
 	}

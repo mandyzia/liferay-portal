@@ -17,13 +17,14 @@ package com.liferay.portal.security.access.control;
 import com.liferay.portal.kernel.security.access.control.AccessControlUtil;
 import com.liferay.portal.kernel.security.access.control.AccessControlled;
 import com.liferay.portal.kernel.security.access.control.BaseAccessControlPolicy;
+import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.security.auth.AccessControlContext;
 
 import java.lang.reflect.Method;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +51,15 @@ public class AllowedHostsAccessControlPolicy extends BaseAccessControlPolicy {
 			AccessControlUtil.getAccessControlContext();
 
 		if (accessControlContext == null) {
+			return;
+		}
+
+		Map<String, Object> settings = accessControlContext.getSettings();
+
+		int serviceDepth = (Integer)settings.get(
+			AccessControlContext.Settings.SERVICE_DEPTH.toString());
+
+		if (serviceDepth > 1) {
 			return;
 		}
 

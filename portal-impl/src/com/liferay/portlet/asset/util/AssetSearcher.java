@@ -14,6 +14,9 @@
 
 package com.liferay.portlet.asset.util;
 
+import com.liferay.asset.kernel.model.AssetCategory;
+import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
+import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
 import com.liferay.portal.kernel.search.BaseSearcher;
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
 import com.liferay.portal.kernel.search.BooleanQuery;
@@ -24,15 +27,13 @@ import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.search.filter.TermsFilter;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.PermissionThreadLocal;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.asset.model.AssetCategory;
-import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
-import com.liferay.portlet.asset.service.persistence.AssetEntryQuery;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,9 +143,6 @@ public class AssetSearcher extends BaseSearcher {
 	protected void addSearchAllTags(BooleanFilter queryBooleanFilter)
 		throws Exception {
 
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
 		long[][] allTagIdsArray = _assetEntryQuery.getAllTagIdsArray();
 
 		if (allTagIdsArray.length == 0) {
@@ -156,15 +154,6 @@ public class AssetSearcher extends BaseSearcher {
 		for (long[] allTagIds : allTagIdsArray) {
 			if (allTagIds.length == 0) {
 				continue;
-			}
-
-			long[] filteredAllTagIds = AssetUtil.filterTagIds(
-				permissionChecker, allTagIds);
-
-			if (allTagIds.length != filteredAllTagIds.length) {
-				addImpossibleTerm(queryBooleanFilter, Field.ASSET_TAG_IDS);
-
-				return;
 			}
 
 			TermsFilter tagIdsTermsFilter = new TermsFilter(
@@ -235,21 +224,9 @@ public class AssetSearcher extends BaseSearcher {
 	protected void addSearchAnyTags(BooleanFilter queryBooleanFilter)
 		throws Exception {
 
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
 		long[] anyTagIds = _assetEntryQuery.getAnyTagIds();
 
 		if (anyTagIds.length == 0) {
-			return;
-		}
-
-		long[] filteredAnyTagIds = AssetUtil.filterTagIds(
-			permissionChecker, anyTagIds);
-
-		if (filteredAnyTagIds.length == 0) {
-			addImpossibleTerm(queryBooleanFilter, Field.ASSET_TAG_IDS);
-
 			return;
 		}
 
@@ -458,6 +435,13 @@ public class AssetSearcher extends BaseSearcher {
 			BooleanQuery fullQuery, SearchContext searchContext)
 		throws Exception {
 
+		boolean showInvisible = GetterUtil.getBoolean(
+			_assetEntryQuery.getAttribute("showInvisible"));
+
+		if (showInvisible) {
+			return;
+		}
+
 		BooleanFilter booleanFilter = fullQuery.getPreBooleanFilter();
 
 		if (booleanFilter == null) {
@@ -466,7 +450,7 @@ public class AssetSearcher extends BaseSearcher {
 
 		booleanFilter.addRequiredTerm("visible", true);
 
-		if (booleanFilter.hasClauses()) {
+		if (booleanFilter.hasClauses() && !showInvisible) {
 			fullQuery.setPreBooleanFilter(booleanFilter);
 		}
 	}

@@ -16,9 +16,9 @@ package com.liferay.portal.template;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.PortletConstants;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
-import com.liferay.portal.model.PortletConstants;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletPreferencesImpl;
 
 import javax.portlet.ReadOnlyException;
@@ -75,11 +75,11 @@ public class TemplatePortletPreferences {
 			new AutoResetThreadLocal<PortletPreferencesImpl>(
 				TemplatePortletPreferences.class.getName()) {
 
-			@Override
-			protected PortletPreferencesImpl initialValue() {
-				return new PortletPreferencesImpl();
-			}
+				@Override
+				protected PortletPreferencesImpl initialValue() {
+					return new PortletPreferencesImpl();
+				}
 
-		};
+			};
 
 }

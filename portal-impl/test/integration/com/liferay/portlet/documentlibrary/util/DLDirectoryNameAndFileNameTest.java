@@ -14,8 +14,16 @@
 
 package com.liferay.portlet.documentlibrary.util;
 
+import com.liferay.document.library.kernel.exception.FileNameException;
+import com.liferay.document.library.kernel.exception.FolderNameException;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLAppServiceUtil;
+import com.liferay.document.library.kernel.util.DLValidatorUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -25,17 +33,9 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.MainServletTestRule;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.documentlibrary.FileNameException;
-import com.liferay.portlet.documentlibrary.FolderNameException;
-import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
-import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
-import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,8 +51,7 @@ public class DLDirectoryNameAndFileNameTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new AggregateTestRule(
-			new LiferayIntegrationTestRule(), MainServletTestRule.INSTANCE);
+		new LiferayIntegrationTestRule();
 
 	@Before
 	public void setUp() throws Exception {
@@ -82,12 +81,101 @@ public class DLDirectoryNameAndFileNameTest {
 	}
 
 	@Test
+	public void testFixNameBackSlash() {
+		String random1 = StringUtil.randomString(10);
+		String random2 = StringUtil.randomString(10);
+
+		String name = random1 + StringPool.BACK_SLASH + random2;
+
+		Assert.assertEquals(
+			random1 + StringPool.UNDERLINE + random2,
+			DLValidatorUtil.fixName(name));
+	}
+
+	@Test
+	public void testFixNameBlacklist() throws Exception {
+		for (String blacklistName : PropsValues.DL_NAME_BLACKLIST) {
+			String name = blacklistName;
+
+			Assert.assertEquals(
+				blacklistName + StringPool.UNDERLINE,
+				DLValidatorUtil.fixName(name));
+
+			name = blacklistName + ".txt";
+
+			Assert.assertEquals(
+				blacklistName + StringPool.UNDERLINE + ".txt",
+				DLValidatorUtil.fixName(name));
+
+			name = blacklistName + StringUtil.randomString(10);
+
+			Assert.assertEquals(name, DLValidatorUtil.fixName(name));
+
+			name = blacklistName + StringUtil.randomString(10) + " .txt";
+
+			Assert.assertEquals(name, DLValidatorUtil.fixName(name));
+		}
+	}
+
+	@Test
+	public void testFixNameBlacklistLastCharacter() throws Exception {
+		for (String blacklistLastChar : _DL_CHAR_LAST_BLACKLIST) {
+			String name = StringUtil.randomString(20);
+
+			Assert.assertEquals(
+				name, DLValidatorUtil.fixName(name + blacklistLastChar));
+		}
+	}
+
+	@Test
+	public void testFixNameEmptyString() {
+		Assert.assertEquals(
+			StringPool.UNDERLINE, DLValidatorUtil.fixName(StringPool.BLANK));
+	}
+
+	@Test
+	public void testFixNameHiddenOSX() throws Exception {
+		String name = "._" + StringUtil.randomString(20) + ".tmp";
+
+		Assert.assertEquals(name, DLValidatorUtil.fixName(name));
+	}
+
+	@Test
+	public void testFixNameNull() {
+		Assert.assertEquals(
+			StringPool.UNDERLINE, DLValidatorUtil.fixName(null));
+	}
+
+	@Test
+	public void testFixNameRandom() throws Exception {
+		for (String blacklistChar : PropsValues.DL_CHAR_BLACKLIST) {
+			StringBuilder sb = new StringBuilder(4);
+
+			sb.append(StringUtil.randomString(10));
+			sb.append(blacklistChar);
+			sb.append(StringUtil.randomString(10));
+
+			String name = sb.toString();
+
+			Assert.assertEquals(
+				name.replace(blacklistChar, StringPool.UNDERLINE),
+				DLValidatorUtil.fixName(sb.toString()));
+
+			sb.append(".txt");
+
+			Assert.assertEquals(
+				sb.toString().replace(blacklistChar, StringPool.UNDERLINE),
+				DLValidatorUtil.fixName(sb.toString()));
+		}
+	}
+
+	@Test
 	public void testIsValidNameBackSlash() {
 		String name =
 			StringUtil.randomString(10) + StringPool.BACK_SLASH +
 				StringUtil.randomString(10);
 
-		Assert.assertFalse(name, DLStoreUtil.isValidName(name));
+		Assert.assertFalse(name, DLValidatorUtil.isValidName(name));
 	}
 
 	@Test
@@ -95,19 +183,19 @@ public class DLDirectoryNameAndFileNameTest {
 		for (String blacklistName : PropsValues.DL_NAME_BLACKLIST) {
 			String name = blacklistName;
 
-			Assert.assertFalse(name, DLStoreUtil.isValidName(name));
+			Assert.assertFalse(name, DLValidatorUtil.isValidName(name));
 
 			name = blacklistName + ".txt";
 
-			Assert.assertFalse(name, DLStoreUtil.isValidName(name));
+			Assert.assertFalse(name, DLValidatorUtil.isValidName(name));
 
 			name = blacklistName + StringUtil.randomString(10);
 
-			Assert.assertTrue(name, DLStoreUtil.isValidName(name));
+			Assert.assertTrue(name, DLValidatorUtil.isValidName(name));
 
 			name = blacklistName + StringUtil.randomString(10) + " .txt";
 
-			Assert.assertTrue(name, DLStoreUtil.isValidName(name));
+			Assert.assertTrue(name, DLValidatorUtil.isValidName(name));
 		}
 	}
 
@@ -116,25 +204,25 @@ public class DLDirectoryNameAndFileNameTest {
 		for (String blacklistLastChar : _DL_CHAR_LAST_BLACKLIST) {
 			String name = StringUtil.randomString(20) + blacklistLastChar;
 
-			Assert.assertFalse(name, DLStoreUtil.isValidName(name));
+			Assert.assertFalse(name, DLValidatorUtil.isValidName(name));
 		}
 	}
 
 	@Test
 	public void testIsValidNameEmptyString() {
-		Assert.assertFalse(DLStoreUtil.isValidName(StringPool.BLANK));
+		Assert.assertFalse(DLValidatorUtil.isValidName(StringPool.BLANK));
 	}
 
 	@Test
 	public void testIsValidNameHiddenOSX() throws Exception {
 		String name = "._" + StringUtil.randomString(20) + ".tmp";
 
-		Assert.assertTrue(name, DLStoreUtil.isValidName(name));
+		Assert.assertTrue(name, DLValidatorUtil.isValidName(name));
 	}
 
 	@Test
 	public void testIsValidNameNull() {
-		Assert.assertFalse(DLStoreUtil.isValidName(null));
+		Assert.assertFalse(DLValidatorUtil.isValidName(null));
 	}
 
 	@Test
@@ -142,7 +230,7 @@ public class DLDirectoryNameAndFileNameTest {
 		for (int i = 0; i < 100; i++) {
 			String name = StringUtil.randomString(20);
 
-			Assert.assertTrue(name, DLStoreUtil.isValidName(name));
+			Assert.assertTrue(name, DLValidatorUtil.isValidName(name));
 		}
 
 		for (String blacklistChar : PropsValues.DL_CHAR_BLACKLIST) {
@@ -153,12 +241,12 @@ public class DLDirectoryNameAndFileNameTest {
 			sb.append(StringUtil.randomString(10));
 
 			Assert.assertFalse(
-				sb.toString(), DLStoreUtil.isValidName(sb.toString()));
+				sb.toString(), DLValidatorUtil.isValidName(sb.toString()));
 
 			sb.append(".txt");
 
 			Assert.assertFalse(
-				sb.toString(), DLStoreUtil.isValidName(sb.toString()));
+				sb.toString(), DLValidatorUtil.isValidName(sb.toString()));
 		}
 	}
 
@@ -176,7 +264,8 @@ public class DLDirectoryNameAndFileNameTest {
 		DLAppServiceUtil.updateFileEntry(
 			fileEntry.getFileEntryId(), name, ContentTypes.TEXT_PLAIN, name,
 			StringPool.BLANK, StringPool.BLANK, false,
-			RandomTestUtil.randomBytes(), serviceContext);
+			RandomTestUtil.randomBytes(TikaSafeRandomizerBumper.INSTANCE),
+			serviceContext);
 	}
 
 	@Test(expected = FolderNameException.class)
@@ -206,11 +295,12 @@ public class DLDirectoryNameAndFileNameTest {
 		return DLAppLocalServiceUtil.addFileEntry(
 			TestPropsValues.getUserId(), _group.getGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, sourceFileName,
-			ContentTypes.TEXT_PLAIN, RandomTestUtil.randomBytes(),
+			ContentTypes.TEXT_PLAIN,
+			RandomTestUtil.randomBytes(TikaSafeRandomizerBumper.INSTANCE),
 			serviceContext);
 	}
 
-	private final String[] _DL_CHAR_LAST_BLACKLIST =
+	private static final String[] _DL_CHAR_LAST_BLACKLIST =
 		{StringPool.SPACE, StringPool.PERIOD};
 
 	@DeleteAfterTestRun

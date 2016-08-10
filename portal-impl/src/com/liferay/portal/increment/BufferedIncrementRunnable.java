@@ -14,14 +14,14 @@
 
 package com.liferay.portal.increment;
 
-import com.liferay.portal.kernel.cache.Lifecycle;
-import com.liferay.portal.kernel.cache.ThreadLocalCacheManager;
+import com.liferay.portal.kernel.cache.thread.local.Lifecycle;
+import com.liferay.portal.kernel.cache.thread.local.ThreadLocalCacheManager;
 import com.liferay.portal.kernel.concurrent.BatchablePipe;
 import com.liferay.portal.kernel.increment.Increment;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.util.CentralizedThreadLocal;
-import com.liferay.portal.security.auth.CompanyThreadLocal;
 
 import java.io.Serializable;
 
